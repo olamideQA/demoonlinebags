@@ -14,6 +14,7 @@ import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../common/product_card.dart';
+import '../../core/utils/fast_image.dart';
 import 'widgets/hero_carousel.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -155,7 +156,7 @@ class HomeScreen extends ConsumerWidget {
                         if (cat.imageUrl != null)
                           Positioned.fill(
                             child: CachedNetworkImage(
-                              imageUrl: cat.imageUrl!,
+                              imageUrl: fastImg(cat.imageUrl!, w: 400, q: 60),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -611,7 +612,7 @@ class HomeScreen extends ConsumerWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: CachedNetworkImage(
-          imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1000&q=80',
+          imageUrl: fastImg('https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1000&q=80', w: 800, q: 60),
           fit: BoxFit.cover,
         ),
       ),

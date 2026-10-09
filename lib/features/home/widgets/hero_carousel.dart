@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/site_settings.dart';
 import '../../../core/providers/products_provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/fast_image.dart';
 
 class HeroCarousel extends ConsumerStatefulWidget {
   final HeroSettings heroSettings;
@@ -38,6 +39,15 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     super.initState();
     _pageController = PageController();
     _startAutoPlay();
+    // Preload first hero so slide 1 never appears blank on slow networks.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final slides = _slides;
+      if (slides.isNotEmpty) {
+        final first = fastImg(slides.first.imageUrl, w: widget.isMobile ? 800 : 1200, q: 60);
+        precacheImage(CachedNetworkImageProvider(first), context);
+      }
+    });
   }
 
   void _startAutoPlay() {
@@ -187,25 +197,31 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Background Image with CachedNetworkImage
+        // Background Image - optimized for Naija networks (WebP, small file)
         CachedNetworkImage(
-          imageUrl: slide.imageUrl,
+          imageUrl: fastImg(slide.imageUrl, w: isMobile ? 800 : 1200, q: 60),
           fit: BoxFit.cover,
-          fadeInDuration: const Duration(milliseconds: 400),
+          memCacheWidth: isMobile ? 800 : 1200,
+          maxWidthDiskCache: isMobile ? 800 : 1200,
+          fadeInDuration: const Duration(milliseconds: 200),
+          fadeOutDuration: const Duration(milliseconds: 150),
           placeholder: (ctx, url) => Container(
             color: AppTheme.obsidianNoir,
             child: const Center(
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryGold),
-              ),
+              child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 40),
             ),
           ),
           errorWidget: (ctx, url, err) => Container(
             color: AppTheme.obsidianNoir,
             child: const Center(
-              child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 48),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 48),
+                  SizedBox(height: 8),
+                  Text('LUXE LAGOS', style: TextStyle(color: Colors.white54, fontSize: 10, letterSpacing: 2)),
+                ],
+              ),
             ),
           ),
         ),

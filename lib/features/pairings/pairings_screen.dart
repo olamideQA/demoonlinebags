@@ -12,6 +12,7 @@ import '../common/cart_drawer.dart';
 import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
+import '../../core/utils/fast_image.dart';
 
 class PairingsScreen extends ConsumerWidget {
   const PairingsScreen({super.key});
@@ -141,7 +142,7 @@ class PairingsScreen extends ConsumerWidget {
               child: Container(
                 color: AppTheme.surfaceGrey,
                 child: CachedNetworkImage(
-                  imageUrl: pairing.bagProduct!.primaryImage,
+                  imageUrl: fastImg(pairing.bagProduct!.primaryImage, w: 600, q: 60),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -155,7 +156,7 @@ class PairingsScreen extends ConsumerWidget {
               child: Container(
                 color: AppTheme.surfaceGrey,
                 child: CachedNetworkImage(
-                  imageUrl: pairing.shoeProduct!.primaryImage,
+                  imageUrl: fastImg(pairing.shoeProduct!.primaryImage, w: 600, q: 60),
                   fit: BoxFit.cover,
                 ),
               ),

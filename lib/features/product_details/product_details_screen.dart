@@ -14,6 +14,7 @@ import '../common/cart_drawer.dart';
 import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
+import '../../core/utils/fast_image.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String slug;
@@ -205,7 +206,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             ),
             clipBehavior: Clip.antiAlias,
             child: CachedNetworkImage(
-              imageUrl: currentImage,
+              imageUrl: fastImg(currentImage, w: 1000, q: 65),
               fit: BoxFit.cover,
             ),
           ),
@@ -234,7 +235,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: CachedNetworkImage(
-                      imageUrl: images[index],
+                      imageUrl: fastImg(images[index], w: 200, q: 60),
                       fit: BoxFit.cover,
                     ),
                   ),

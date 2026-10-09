@@ -7,6 +7,7 @@ import '../../core/models/models.dart';
 import '../../core/providers/cart_provider.dart';
 import '../../core/providers/wishlist_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/fast_image.dart';
 
 class ProductCard extends ConsumerStatefulWidget {
   final Product product;
@@ -50,21 +51,22 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
                       child: CachedNetworkImage(
-                        imageUrl: p.primaryImage,
+                        imageUrl: fastImg(p.primaryImage, w: 600, q: 60),
                         fit: BoxFit.cover,
+                        memCacheWidth: 600,
+                        maxWidthDiskCache: 600,
+                        fadeInDuration: const Duration(milliseconds: 200),
                         placeholder: (context, url) => Container(
                           color: AppTheme.surfaceGrey,
                           child: const Center(
-                            child: SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryGold),
-                            ),
+                            child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 28),
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: AppTheme.surfaceGrey,
-                          child: const Icon(Icons.shopping_bag_outlined, color: AppTheme.textMuted),
+                          child: const Center(
+                            child: Icon(Icons.shopping_bag_outlined, color: AppTheme.textMuted, size: 32),
+                          ),
                         ),
                       ),
                     ),

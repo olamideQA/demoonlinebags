@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../core/providers/cart_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/fast_image.dart';
 
 class CartDrawer extends ConsumerStatefulWidget {
   const CartDrawer({super.key});
@@ -157,7 +158,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                                     ),
                                     clipBehavior: Clip.antiAlias,
                                     child: CachedNetworkImage(
-                                      imageUrl: item.product.primaryImage,
+                                      imageUrl: fastImg(item.product.primaryImage, w: 200, q: 60),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
