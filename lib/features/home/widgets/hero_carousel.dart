@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,25 +38,45 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     super.initState();
     _pageController = PageController();
     _startAutoPlay();
-    // Preload first hero so slide 1 never appears blank on slow networks.
+    // Preload ALL heroes upfront so swiping never shows blank on slow networks.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final slides = _slides;
-      if (slides.isNotEmpty) {
-        final first = fastImg(slides.first.imageUrl, w: widget.isMobile ? 800 : 1200, q: 60);
-        precacheImage(CachedNetworkImageProvider(first), context);
+      for (final s in _slides) {
+        precacheImage(
+          NetworkImage(fastImg(s.imageUrl, w: widget.isMobile ? 800 : 1200, q: 60)),
+          context,
+        );
       }
     });
   }
 
+  @override
+  void didUpdateWidget(covariant HeroCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.heroSettings != widget.heroSettings ||
+        oldWidget.isMobile != widget.isMobile) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        for (final s in _slides) {
+          precacheImage(
+            NetworkImage(fastImg(s.imageUrl, w: widget.isMobile ? 800 : 1200, q: 60)),
+            context,
+          );
+        }
+      });
+    }
+  }
+
   void _startAutoPlay() {
     _autoTimer?.cancel();
-    _autoTimer = Timer.periodic(const Duration(milliseconds: 5500), (timer) {
+    // Auto-slide every 4s. Pauses only while mouse hovers (desktop) or user drags.
+    _autoTimer = Timer.periodic(const Duration(milliseconds: 4000), (timer) {
       if (!mounted || _isPaused || _slides.length <= 1) return;
+      if (!_pageController.hasClients) return;
       final nextIndex = (_currentPage + 1) % _slides.length;
       _pageController.animateToPage(
         nextIndex,
-        duration: const Duration(milliseconds: 750),
+        duration: const Duration(milliseconds: 700),
         curve: Curves.easeInOutCubic,
       );
     });
@@ -70,6 +89,8 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
         duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOutCubic,
       );
+      // Restart auto timer so auto-slide continues after manual tap.
+      _startAutoPlay();
     }
   }
 
@@ -98,18 +119,19 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
         width: double.infinity,
         child: Stack(
           children: [
-            // PageView Slider
-            PageView.builder(
+            // PageView Slider - prebuilt children (4 only) so neighbours stay alive,
+            // no blank when swiping. allowImplicitScrolling keeps next/prev cached.
+            PageView(
               controller: _pageController,
-              itemCount: slides.length,
+              allowImplicitScrolling: true,
               physics: const BouncingScrollPhysics(),
               onPageChanged: (idx) {
                 setState(() => _currentPage = idx);
               },
-              itemBuilder: (ctx, index) {
-                final slide = slides[index];
-                return _buildSlideItem(context, slide, isMobile);
-              },
+              children: [
+                for (final slide in slides)
+                  _buildSlideItem(context, slide, isMobile),
+              ],
             ),
 
             // Left Navigation Chevron Arrow
@@ -197,21 +219,22 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Background Image - optimized for Naija networks (WebP, small file)
-        CachedNetworkImage(
-          imageUrl: fastImg(slide.imageUrl, w: isMobile ? 800 : 1200, q: 60),
+        // Background Image - Image.network (browser-cached, fastest on web)
+        // gaplessPlayback keeps it from flashing blank while next slide loads.
+        Image.network(
+          fastImg(slide.imageUrl, w: isMobile ? 800 : 1200, q: 60),
           fit: BoxFit.cover,
-          memCacheWidth: isMobile ? 800 : 1200,
-          maxWidthDiskCache: isMobile ? 800 : 1200,
-          fadeInDuration: const Duration(milliseconds: 200),
-          fadeOutDuration: const Duration(milliseconds: 150),
-          placeholder: (ctx, url) => Container(
-            color: AppTheme.obsidianNoir,
-            child: const Center(
-              child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 40),
-            ),
-          ),
-          errorWidget: (ctx, url, err) => Container(
+          gaplessPlayback: true,
+          loadingBuilder: (ctx, child, progress) {
+            if (progress == null) return child;
+            return Container(
+              color: AppTheme.obsidianNoir,
+              child: const Center(
+                child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 40),
+              ),
+            );
+          },
+          errorBuilder: (ctx, err, stack) => Container(
             color: AppTheme.obsidianNoir,
             child: const Center(
               child: Column(
