@@ -1409,7 +1409,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                         const Icon(Icons.admin_panel_settings, color: AppTheme.primaryGold, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          'EXECUTIVE ADMINISTRATOR CONTROLS',
+                          'STORE OWNER CONTROLS',
                           style: GoogleFonts.plusJakartaSans(
                             color: AppTheme.primaryGold,
                             fontSize: 11,
@@ -1421,7 +1421,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'You are authenticated as an Atelier Administrator. You have full privileges to edit site copy, manage products, configure pairings, and update orders.',
+                      'You are signed in as the store owner. Manage products, orders and website text here.',
                       style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 11.5, height: 1.5),
                     ),
                     const SizedBox(height: 14),
@@ -1432,7 +1432,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                       ),
                       onPressed: () => context.go('/admin'),
-                      child: const Text('OPEN ATELIER CMS & ADMIN PORTAL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      child: const Text('MANAGE STORE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),

@@ -305,7 +305,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'ATELIER EXECUTIVE PORTAL',
+                    'STORE OWNER ACCESS',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
