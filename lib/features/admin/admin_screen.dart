@@ -180,7 +180,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Logged in as: ${authState.profile?.fullName ?? authState.user?.email ?? 'Administrator'} (Admin)',
+                        'Hello ${authState.profile?.fullName ?? authState.user?.email ?? 'Owner'} • ${_ordersList.length} orders today • Tap a tab below to manage your shop',
                         style: GoogleFonts.plusJakartaSans(
                           color: Colors.white60,
                           fontSize: 11,
@@ -237,11 +237,11 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                 labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
                 unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 1.2),
                 tabs: const [
-                  Tab(icon: Icon(Icons.brush_outlined, size: 18), text: '1. WEBSITE CMS & COPY'),
-                  Tab(icon: Icon(Icons.shopping_bag_outlined, size: 18), text: '2. PRODUCTS MANAGER'),
-                  Tab(icon: Icon(Icons.auto_awesome_outlined, size: 18), text: '3. COMPLETE THE LOOK PAIRINGS'),
-                  Tab(icon: Icon(Icons.receipt_long_outlined, size: 18), text: '4. ORDERS & FULFILLMENT'),
-                  Tab(icon: Icon(Icons.cloud_done_outlined, size: 18), text: '5. SYSTEM HEALTH'),
+                  Tab(icon: Icon(Icons.text_fields_outlined, size: 18), text: 'WEBSITE TEXT'),
+                  Tab(icon: Icon(Icons.shopping_bag_outlined, size: 18), text: 'PRODUCTS'),
+                  Tab(icon: Icon(Icons.auto_awesome_outlined, size: 18), text: 'MATCHING SETS'),
+                  Tab(icon: Icon(Icons.receipt_long_outlined, size: 18), text: 'ORDERS'),
+                  Tab(icon: Icon(Icons.favorite_border, size: 18), text: 'STORE HEALTH'),
                 ],
               ),
             ),
@@ -511,8 +511,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
           // 1. Announcement Bar
           _sectionCard(
-            title: 'Top Announcement Bar Strip',
-            subtitle: 'Highlighted VIP notice banner at the very top of all pages',
+            title: 'Top Notice Bar',
+            subtitle: 'Small message at very top — e.g. free delivery news',
             children: [
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
@@ -533,15 +533,15 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
           // 2. Header & Branding
           _sectionCard(
-            title: 'Header Navigation & Brand Identity',
-            subtitle: 'The primary brand logo text and sub-tagline shown on every screen',
+            title: 'Shop Name & Tagline',
+            subtitle: 'Your store name shown at top on every page',
             children: [
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _headerBrandCtrl,
-                      decoration: const InputDecoration(labelText: 'Brand Logo Title (e.g. DEMO ONLINE BAGS)'),
+                      decoration: const InputDecoration(labelText: 'Shop Name (e.g. LUXE LAGOS)'),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -557,17 +557,17 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
           ),
           const SizedBox(height: 24),
 
-          // 3. Hero Atelier Section
+          // 3. Hero Section
           _sectionCard(
-            title: 'Homepage Hero Showcase (Main Welcome Banner)',
-            subtitle: 'High-impact editorial image, headline, and calls to action',
+            title: 'Top Welcome Banner',
+            subtitle: 'Main photo, headline and shop buttons on homepage',
             children: [
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _heroBadgeCtrl,
-                      decoration: const InputDecoration(labelText: 'Eyebrow Tag (e.g. NEW CAPSULE 2026)'),
+                      decoration: const InputDecoration(labelText: 'Small Top Text (e.g. LAGOS BESTSELLER)'),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -584,13 +584,13 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
               TextField(
                 controller: _heroTitleCtrl,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Main Hero Headline (Use \\n for line breaks)'),
+                decoration: const InputDecoration(labelText: 'Big Headline (e.g. Pepper Them at Every Owambe)'),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _heroSubtitleCtrl,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Hero Descriptive Story Paragraph'),
+                decoration: const InputDecoration(labelText: 'Short Description Under Headline'),
               ),
               const SizedBox(height: 16),
               Row(
@@ -598,7 +598,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   Expanded(
                     child: TextField(
                       controller: _heroCtaTextCtrl,
-                      decoration: const InputDecoration(labelText: 'Primary Button Text (e.g. DISCOVER HANDBAGS)'),
+                      decoration: const InputDecoration(labelText: 'Main Button Text (e.g. SHOP BAGS)'),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -616,7 +616,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   Expanded(
                     child: TextField(
                       controller: _heroSecondaryTextCtrl,
-                      decoration: const InputDecoration(labelText: 'Secondary Button Text (e.g. COMPLETE THE LOOK)'),
+                      decoration: const InputDecoration(labelText: 'Second Button Text (e.g. SHOP MATCHING SETS)'),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -634,13 +634,13 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
           // 4. Footer & Contact Details
           _sectionCard(
-            title: 'Footer, VIP Concierge & Contact Details',
-            subtitle: 'Client support information, physical showroom location, and copyright notice',
+            title: 'Contact & WhatsApp Details',
+            subtitle: 'Phone, WhatsApp, shop address shown at bottom of site',
             children: [
               TextField(
                 controller: _footerBioCtrl,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Brand Bio / Atelier Story'),
+                decoration: const InputDecoration(labelText: 'About Your Shop (short story)'),
               ),
               const SizedBox(height: 16),
               Row(
@@ -648,7 +648,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   Expanded(
                     child: TextField(
                       controller: _footerEmailCtrl,
-                      decoration: const InputDecoration(labelText: 'Concierge Email'),
+                      decoration: const InputDecoration(labelText: 'Email'),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -662,7 +662,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   Expanded(
                     child: TextField(
                       controller: _footerWhatsappCtrl,
-                      decoration: const InputDecoration(labelText: 'WhatsApp VIP Support Number'),
+                      decoration: const InputDecoration(labelText: 'WhatsApp Number'),
                     ),
                   ),
                 ],
@@ -674,7 +674,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     flex: 2,
                     child: TextField(
                       controller: _footerAddressCtrl,
-                      decoration: const InputDecoration(labelText: 'Showroom Location / Address'),
+                      decoration: const InputDecoration(labelText: 'Shop Address'),
                     ),
                   ),
                   const SizedBox(width: 16),

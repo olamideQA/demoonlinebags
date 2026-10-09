@@ -148,7 +148,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'ATELIER PRIVÉ',
+                  'WELCOME TO LUXE LAGOS',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -159,7 +159,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Client Suite Access',
+                  'Your Account, One Place',
                   style: GoogleFonts.cormorantGaramond(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -169,7 +169,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Sign in to access your order fulfillment records, bespoke monogramming requests, saved creations, and VIP client privileges.',
+                  'Track your orders, save fine bags you love, add delivery addresses and chat with us on WhatsApp anytime.',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     color: AppTheme.textMuted,
@@ -188,7 +188,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                   ),
                   onPressed: () => AuthModal.show(context),
                   child: Text(
-                    'SIGN IN / CREATE CLIENT ACCOUNT',
+                    'SIGN IN / CREATE ACCOUNT',
                     style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2.0),
                   ),
                 ),
@@ -202,7 +202,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                   ),
                   onPressed: () => context.go('/shop'),
                   child: Text(
-                    'EXPLORE ATELIER CREATIONS',
+                    'SHOP BESTSELLERS',
                     style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.5),
                   ),
                 ),
@@ -278,7 +278,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                                   border: Border.all(color: AppTheme.primaryGold),
                                 ),
                                 child: Text(
-                                  isAdmin ? '👑 ATELIER EXECUTIVE ADMINISTRATOR' : '✨ VIP ATELIER PRIVÉ PATRON',
+                                  isAdmin ? 'STORE OWNER' : 'VIP MEMBER',
                                   style: GoogleFonts.plusJakartaSans(
                                     color: AppTheme.primaryGold,
                                     fontSize: 9.5,
@@ -326,7 +326,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                           ),
                           icon: const Icon(Icons.admin_panel_settings, size: 18),
                           label: Text(
-                            'ENTER ATELIER CMS & ADMIN PORTAL',
+                            'MANAGE STORE (OWNER ONLY)',
                             style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 1.4),
                           ),
                           onPressed: () => context.go('/admin'),
@@ -340,7 +340,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                         ),
                         icon: const Icon(Icons.shopping_bag_outlined, size: 16),
                         label: Text(
-                          'BROWSE BOUTIQUE',
+                          'SHOP BESTSELLERS',
                           style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2),
                         ),
                         onPressed: () => context.go('/shop'),
@@ -422,24 +422,24 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
             unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 1.2),
             tabs: [
               Tab(
-                icon: const Icon(Icons.shopping_basket_outlined, size: 18),
-                text: '1. MY ORDERS (${_userOrders.length})',
+                icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                text: 'MY ORDERS (${_userOrders.length})',
               ),
               Tab(
                 icon: const Icon(Icons.favorite_border, size: 18),
-                text: '2. WISHLIST (${wishlist.length})',
+                text: 'SAVED ITEMS (${wishlist.length})',
               ),
               const Tab(
                 icon: Icon(Icons.location_on_outlined, size: 18),
-                text: '3. DELIVERY ADDRESSES',
+                text: 'MY ADDRESSES',
               ),
               const Tab(
-                icon: Icon(Icons.auto_awesome_outlined, size: 18),
-                text: '4. BESPOKE & CONCIERGE',
+                icon: Icon(Icons.chat_outlined, size: 18),
+                text: 'HELP & WHATSAPP',
               ),
               const Tab(
-                icon: Icon(Icons.manage_accounts_outlined, size: 18),
-                text: '5. PROFILE & SETTINGS',
+                icon: Icon(Icons.settings_outlined, size: 18),
+                text: 'SETTINGS',
               ),
             ],
           ),
@@ -1227,7 +1227,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
     setState(() => _isAddingAddress = false);
   }
 
-  // --- TAB 4: BESPOKE & CONCIERGE ---
+  // --- TAB 4: HELP & WHATSAPP ---
   Widget _buildBespokeTab(BuildContext context, bool isMobile) {
     return Container(
       padding: const EdgeInsets.all(32),
@@ -1237,35 +1237,35 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: AppTheme.primaryGold, size: 24),
+              const Icon(Icons.chat, color: AppTheme.primaryGold, size: 24),
               const SizedBox(width: 12),
               Text(
-                'Atelier Bespoke & White-Glove Concierge',
+                'Need Help? Chat on WhatsApp',
                 style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
-            'As an Atelier Privé member, you receive dedicated access to our master leather artisans and personal styling advisors.',
+            'As a LUXE LAGOS customer, you can chat with us anytime — size help, delivery update, or matching bag + shoe advice. We reply within 30 mins, 8am–9pm.',
             style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted, height: 1.6),
           ),
           const SizedBox(height: 24),
 
           // Features
           _buildConciergeFeature(
-            title: '1. Complimentary 24K Gold Foil Monogramming',
-            desc: 'Personalize your leather clochette, luggage tag, or interior pocket with your initials hot-stamped in Italian 24k foil or blind debossed.',
+            title: 'Free size & style help',
+            desc: 'Not sure if EU 40 will fit? Send us your normal shoe size on WhatsApp and we will guide you. Wide feet? We will tell you to size up.',
           ),
           const SizedBox(height: 16),
           _buildConciergeFeature(
-            title: '2. Complete the Look Styling Consultations',
-            desc: 'Planning an Owambe, executive retreat, or black-tie gala? Connect directly with our lead leather curator for customized bag and footwear pairings.',
+            title: 'See your bag on live video before you pay',
+            desc: 'Planning Owambe or wedding? Ask for a live video of the exact bag and shoe. Pay on delivery in Lagos & Abuja.',
           ),
           const SizedBox(height: 16),
           _buildConciergeFeature(
-            title: '3. Lifetime Stitch & Hardware Guarantee',
-            desc: 'Every genuine Demo Online Bags creation includes lifetime care, edge-paint restoration, and complimentary hardware polishing.',
+            title: 'Easy 7-day return',
+            desc: 'Every LUXE LAGOS bag has real leather that will not peel. If anything is wrong, chat with us and we will sort it out fast.',
           ),
           const SizedBox(height: 28),
 
@@ -1279,7 +1279,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
             ),
             icon: const Icon(Icons.chat, size: 18),
             label: Text(
-              'CHAT DIRECTLY WITH VIP CONCIERGE',
+              'CHAT ON WHATSAPP NOW',
               style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
             ),
             onPressed: () => context.go('/contact'),
