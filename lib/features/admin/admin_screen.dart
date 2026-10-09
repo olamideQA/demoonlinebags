@@ -326,7 +326,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'This back-office suite is strictly exclusive to Atelier Administrators. Unverified users cannot view store controls or modify website copy.',
+                    'This back-office suite is strictly exclusive to store owners. Unverified users cannot view store controls or modify website copy.',
                     style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
@@ -769,7 +769,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('All website content & copy published successfully to live Atelier!'),
+          content: const Text('All website content & copy published successfully to live store!'),
           backgroundColor: AppTheme.obsidianNoir,
           behavior: SnackBarBehavior.floating,
         ),
@@ -791,7 +791,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ATELIER CATALOG & INVENTORY',
+                  'PRODUCTS & STOCK',
                   style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
                 ),
                 const SizedBox(height: 4),
@@ -897,7 +897,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
               backgroundColor: Colors.white,
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               title: Text(
-                isEditing ? 'Edit Creation: ${existing.title}' : 'Add New Atelier Creation',
+                isEditing ? 'Edit Product: ${existing.title}' : 'Add New Product',
                 style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
@@ -1192,7 +1192,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
     String selectedBagId = bags.first.id;
     String selectedShoeId = shoes.first.id;
-    final titleCtrl = TextEditingController(text: 'The Atelier Pairing');
+    final titleCtrl = TextEditingController(text: 'New Matching Set');
     final descCtrl = TextEditingController(text: 'Curated handbag and footwear matching suite with exclusive bundle pricing.');
     final discountCtrl = TextEditingController(text: '10');
 
@@ -1393,7 +1393,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ATELIER SYSTEM ARCHITECTURE',
+            'STORE SYSTEM STATUS',
             style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
           ),
           const SizedBox(height: 4),

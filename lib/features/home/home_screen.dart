@@ -56,7 +56,7 @@ class HomeScreen extends ConsumerWidget {
                 // 5. The Shoe Salon Section
                 _buildShoeSalonSection(context, ref, shoeProducts, isMobile),
 
-                // 6. Brand Craftsmanship & Atelier Heritage
+                // 6. Why Lagos trusts us
                 _buildCraftsmanshipBanner(context, isMobile),
 
                 // 7. Verified Client Reviews

@@ -168,11 +168,11 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppTheme.surfaceGrey,
-                        border: Border.all(color: AppTheme.borderSubtle),
+                        color: isAdmin ? AppTheme.primaryGold.withValues(alpha: 0.15) : AppTheme.surfaceGrey,
+                        border: Border.all(color: isAdmin ? AppTheme.primaryGold : AppTheme.borderSubtle),
                       ),
                       child: Text(
-                        'VIP ATELIER MEMBER',
+                        isAdmin ? 'STORE OWNER' : 'VIP MEMBER',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,

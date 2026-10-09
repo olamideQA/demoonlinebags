@@ -538,7 +538,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
               ),
               const SizedBox(height: 20),
               Text(
-                'No Atelier Acquisitions Yet',
+                'No Orders Yet',
                 style: GoogleFonts.cormorantGaramond(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -547,7 +547,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
               ),
               const SizedBox(height: 8),
               Text(
-                'Your signature collection begins with your first bespoke handbag or sculpted footwear selection.',
+                'Your fine bags will show here after your first order. Start with our bestsellers.',
                 style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted),
                 textAlign: TextAlign.center,
               ),
@@ -561,7 +561,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                 ),
                 onPressed: () => context.go('/shop'),
                 child: Text(
-                  'DISCOVER ATELIER CREATIONS',
+                  'SHOP BESTSELLERS',
                   style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 1.8),
                 ),
               ),
@@ -580,7 +580,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Your Acquisition History (${_userOrders.length})',
+              'Your Orders (${_userOrders.length})',
               style: GoogleFonts.cormorantGaramond(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -605,7 +605,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
             final items = (order['order_items'] as List?) ?? [];
             final total = (order['total'] as num?)?.toDouble() ?? 0.0;
             final status = order['status']?.toString() ?? 'pending';
-            final orderNumber = order['order_number']?.toString() ?? 'ATELIER-ORDER';
+            final orderNumber = order['order_number']?.toString() ?? 'LUXE-ORDER';
             final dateStr = order['created_at'] != null
                 ? DateFormat('MMMM d, yyyy • h:mm a').format(DateTime.tryParse(order['created_at'].toString()) ?? DateTime.now())
                 : 'Recent';
@@ -625,7 +625,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                 break;
               case 'processing':
                 statusColor = AppTheme.primaryGoldDark;
-                statusLabel = 'PREPARING IN ATELIER';
+                statusLabel = 'PREPARING YOUR ORDER';
                 break;
               case 'cancelled':
                 statusColor = AppTheme.errorRed;
@@ -766,7 +766,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         ...items.map((item) {
-                          final itemTitle = item['product_title']?.toString() ?? 'Luxury Atelier Creation';
+                          final itemTitle = item['product_title']?.toString() ?? 'LUXE LAGOS Bag';
                           final itemImage = item['product_image']?.toString() ?? '';
                           final itemColor = item['selected_color']?.toString() ?? '';
                           final itemSize = item['selected_size']?.toString() ?? '';
@@ -898,7 +898,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
     final currencyFmt = NumberFormat('#,###');
     final items = (order['order_items'] as List?) ?? [];
     final total = (order['total'] as num?)?.toDouble() ?? 0.0;
-    final orderNumber = order['order_number']?.toString() ?? 'ATELIER-ORDER';
+    final orderNumber = order['order_number']?.toString() ?? 'LUXE-ORDER';
 
     showDialog(
       context: context,
@@ -912,7 +912,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ATELIER PRIVÉ INVOICE',
+                  'LUXE LAGOS RECEIPTÉ INVOICE',
                   style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
                 ),
                 Text(
@@ -1006,7 +1006,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                 ),
                 onPressed: () => context.go('/shop'),
-                child: const Text('BROWSE CREATIONS', style: TextStyle(fontSize: 11, letterSpacing: 1.5)),
+                child: const Text('SHOP BESTSELLERS', style: TextStyle(fontSize: 11, letterSpacing: 1.5)),
               ),
             ],
           ),
@@ -1018,7 +1018,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Saved Creations (${savedProducts.length})',
+          'Saved Bags (${savedProducts.length})',
           style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),

@@ -245,7 +245,7 @@ class FooterSettings {
   factory FooterSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const FooterSettings(
-        bio: 'Demo Online Bags is Nigeria\'s premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.',
+        bio: 'LUXE LAGOS is made for Nigerian women who do it all — boardroom by day, Owambe by night. Real leather bags and comfy matching shoes that will not peel. Chat on WhatsApp, pay on delivery.',
         email: 'hello@luxelagos.ng',
         phone: '+234 906 791 4511',
         whatsapp: '+234 906 791 4511',

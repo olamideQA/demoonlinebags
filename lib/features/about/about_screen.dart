@@ -34,7 +34,7 @@ class AboutScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'THE ATELIER HERITAGE',
+                        'WHY LAGOS WOMEN TRUST US',
                         style: GoogleFonts.plusJakartaSans(
                           color: AppTheme.primaryGold,
                           fontSize: 11,
@@ -122,11 +122,11 @@ class AboutScreen extends StatelessWidget {
                     children: [
                       Text('Experience the Collection', style: GoogleFonts.cormorantGaramond(fontSize: 32, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 12),
-                      Text('Explore our limited run of hand-assembled creations.', style: GoogleFonts.plusJakartaSans(color: AppTheme.textMuted, fontSize: 13)),
+                      Text('Chat on WhatsApp, see live video, pay on delivery in Lagos & Abuja.', style: GoogleFonts.plusJakartaSans(color: AppTheme.textMuted, fontSize: 13)),
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: () => context.go('/shop'),
-                        child: const Text('DISCOVER CREATIONS'),
+                        child: const Text('SHOP BESTSELLERS'),
                       ),
                     ],
                   ),
@@ -158,12 +158,12 @@ class AboutScreen extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         Text(
-          'DEMO ONLINE BAGS was established with a clear mandate: to deliver high-calibre leather goods and sculpted footwear for the modern woman who refuses to compromise between architectural strength and refined femininity.',
+          'LUXE LAGOS was started for the Nigerian woman who runs her business by day and peppers them at Owambe by night. Fine things, no fake, no story.',
           style: GoogleFonts.plusJakartaSans(fontSize: 14, height: 1.7),
         ),
         const SizedBox(height: 14),
         Text(
-          'From structured executive totes that hold laptops without losing their sculpted form, to hand-set crystal evening minaudières and matching party stilettos, each piece represents tens of hours of artisanal patience.',
+          'From strong office totes that carry your 14-inch laptop without bending, to hand-set crystal evening minaudières and matching party stilettos, each piece represents tens of hours of artisanal patience.',
           style: GoogleFonts.plusJakartaSans(fontSize: 13, height: 1.6, color: AppTheme.textMuted),
         ),
       ],
