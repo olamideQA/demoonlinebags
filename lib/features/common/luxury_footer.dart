@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/providers/site_settings_provider.dart';
 import '../../core/theme/app_theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LuxuryFooter extends ConsumerWidget {
   const LuxuryFooter({super.key});
@@ -70,6 +71,8 @@ class LuxuryFooter extends ConsumerWidget {
                 ]),
                 const SizedBox(height: 24),
                 _buildConciergeGroup(context, siteSettings),
+                const SizedBox(height: 32),
+                _buildNewsletterBox(context),
               ],
             )
           else
@@ -136,12 +139,12 @@ class LuxuryFooter extends ConsumerWidget {
                 ],
               ),
               Text(
-                'LEKKI  •  VICTORIA ISLAND  •  ABUJA  •  NATIONWIDE',
+                'Lekki  •  Victoria Island  •  Abuja  •  Nationwide',
                 style: GoogleFonts.plusJakartaSans(
                   color: AppTheme.primaryGold,
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 1.5,
+                  letterSpacing: 1.0,
                 ),
               ),
             ],
@@ -198,6 +201,24 @@ class LuxuryFooter extends ConsumerWidget {
         _contactRow(Icons.phone_outlined, footer.phone),
         const SizedBox(height: 8),
         _contactRow(Icons.chat_bubble_outline, 'WhatsApp: ${footer.whatsapp}'),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.primaryGold,
+              side: const BorderSide(color: AppTheme.primaryGold),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            icon: const Icon(Icons.chat, size: 16),
+            label: const Text('CHAT NOW ON WHATSAPP', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+            onPressed: () => launchUrl(
+              Uri.parse('https://wa.me/2349067914511?text=Hello%20LUXE%20LAGOS%2C%20I%20need%20help'),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         _contactRow(Icons.location_on_outlined, footer.address),
       ],
@@ -283,7 +304,7 @@ class LuxuryFooter extends ConsumerWidget {
               child: TextField(
                 style: const TextStyle(color: Colors.white, fontSize: 12),
                 decoration: InputDecoration(
-                  hintText: 'Enter your email address...',
+                  hintText: 'Your email address',
                   hintStyle: const TextStyle(color: Colors.white38, fontSize: 12),
                   filled: true,
                   fillColor: Colors.white.withValues(alpha: 0.05),
@@ -299,21 +320,27 @@ class LuxuryFooter extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(width: 8),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryGold,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Welcome! Your 10% code is on its way to your email & WhatsApp.')),
+                  const SnackBar(content: Text('Welcome! Your 10% code is on its way.')),
                 );
               },
-              child: const Text('GET 10% OFF', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+              child: const Text('JOIN', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Prefer WhatsApp? Tap CHAT NOW above and we will send it there.',
+          style: GoogleFonts.plusJakartaSans(color: AppTheme.textMuted, fontSize: 11),
         ),
       ],
     );

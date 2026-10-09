@@ -226,12 +226,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
     bool isMobile,
   ) {
     final profile = authState.profile;
-    final fullName = profile?.fullName?.isNotEmpty == true
-        ? profile!.fullName!
-        : (authState.user?.email ?? 'Valued Client');
     final email = profile?.email ?? authState.user?.email ?? '';
     final phone = profile?.phone ?? '';
     final isAdmin = authState.isAdmin;
+    // Never headline an email address. Prefer profile name, else friendly fallback.
+    final rawName = profile?.fullName?.trim() ?? '';
+    final isEmailName = rawName.contains('@');
+    String displayName;
+    if (rawName.isNotEmpty && !isEmailName) {
+      displayName = rawName.split(' ').first;
+      // Capitalize first letter.
+      displayName = displayName[0].toUpperCase() + displayName.substring(1);
+    } else if (isAdmin) {
+      displayName = 'Store Owner';
+    } else {
+      displayName = 'there';
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -261,7 +271,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                         ),
                         child: Center(
                           child: Text(
-                            fullName.isNotEmpty ? fullName[0].toUpperCase() : 'C',
+                            displayName.isNotEmpty ? displayName[0].toUpperCase() : 'C',
                             style: GoogleFonts.cormorantGaramond(
                               fontSize: isMobile ? 28 : 36,
                               fontWeight: FontWeight.bold,
@@ -296,7 +306,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Hello, $fullName',
+                            'Hello, $displayName',
                             style: GoogleFonts.cormorantGaramond(
                               color: Colors.white,
                               fontSize: isMobile ? 24 : 32,
@@ -345,13 +355,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                       ),
                       TextButton.icon(
                         style: TextButton.styleFrom(
-                          foregroundColor: AppTheme.errorRed,
+                          foregroundColor: Colors.white54,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                         ),
-                        icon: const Icon(Icons.logout, size: 16),
+                        icon: const Icon(Icons.logout, size: 15, color: Colors.white54),
                         label: Text(
-                          'SIGN OUT',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                          'Sign out',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.5, color: Colors.white54),
                         ),
                         onPressed: () async {
                           await ref.read(authProvider.notifier).signOut();
@@ -389,12 +399,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                   _buildMetricPill(
                     icon: Icons.local_shipping_outlined,
                     label: 'DELIVERY',
-                    value: 'Free in Lagos over ₦150,000',
+                    value: 'Free Lagos delivery over ₦150k',
                   ),
                   _buildMetricPill(
                     icon: Icons.chat_outlined,
                     label: 'NEED HELP?',
-                    value: 'WhatsApp: +234 906 791 4511',
+                    value: 'Tap to WhatsApp us',
+                    onTap: () => launchUrl(
+                      Uri.parse('https://wa.me/2349067914511?text=Hello%20LUXE%20LAGOS%2C%20I%20need%20help%20with%20my%20order'),
+                      mode: LaunchMode.externalApplication,
+                    ),
                   ),
                 ],
               ),
@@ -468,12 +482,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
     required IconData icon,
     required String label,
     required String value,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    final inner = Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(
+          color: onTap != null ? AppTheme.primaryGold.withValues(alpha: 0.5) : Colors.white12,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -505,6 +522,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
           ),
         ],
       ),
+    );
+    if (onTap == null) return inner;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(onTap: onTap, child: inner),
     );
   }
 
