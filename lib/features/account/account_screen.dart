@@ -329,21 +329,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                     spacing: 12,
                     runSpacing: 10,
                     children: [
-                      if (isAdmin)
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryGold,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                          ),
-                          icon: const Icon(Icons.admin_panel_settings, size: 18),
-                          label: Text(
-                            'MANAGE STORE (OWNER ONLY)',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 1.4),
-                          ),
-                          onPressed: () => context.go('/admin'),
-                        ),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
@@ -1390,54 +1375,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                   ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : Text('SAVE PROFILE CHANGES', style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
             ),
-
-            if (authState.isAdmin) ...[
-              const SizedBox(height: 36),
-              const Divider(),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: AppTheme.obsidianNoir,
-                  border: Border.all(color: AppTheme.primaryGold),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.admin_panel_settings, color: AppTheme.primaryGold, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'STORE OWNER CONTROLS',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: AppTheme.primaryGold,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'You are signed in as the store owner. Manage products, orders and website text here.',
-                      style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 11.5, height: 1.5),
-                    ),
-                    const SizedBox(height: 14),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryGold,
-                        foregroundColor: Colors.white,
-                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                      ),
-                      onPressed: () => context.go('/admin'),
-                      child: const Text('MANAGE STORE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
         ),
       ),

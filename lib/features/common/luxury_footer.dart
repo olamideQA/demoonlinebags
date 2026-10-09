@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/providers/auth_provider.dart';
 import '../../core/providers/site_settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -12,7 +11,6 @@ class LuxuryFooter extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final siteSettings = ref.watch(siteSettingsProvider);
-    final isAdmin = ref.watch(authProvider).isAdmin;
     final isMobile = MediaQuery.of(context).size.width < 900;
 
     return Container(
@@ -135,20 +133,6 @@ class LuxuryFooter extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  // Owner-only. Never visible to shoppers.
-                  if (isAdmin)
-                    InkWell(
-                      onTap: () => context.go('/admin'),
-                      child: Text(
-                        'MANAGE STORE',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: AppTheme.primaryGold,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
                 ],
               ),
               Text(

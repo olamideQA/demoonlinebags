@@ -248,14 +248,7 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
             gaplessPlayback: true,
             loadingBuilder: (ctx, child, progress) {
               if (progress == null) return child;
-              // Show branded placeholder while loading - never empty black.
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset('assets/images/placeholder.jpg', fit: BoxFit.cover),
-                  Container(color: Colors.black.withValues(alpha: 0.55)),
-                ],
-              );
+              return Container(color: AppTheme.surfaceGrey);
             },
             errorBuilder: (ctx, err, stack) => Image.asset(
               'assets/images/placeholder.jpg',
@@ -263,17 +256,17 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
             ),
           ),
 
-        // Gradient Overlay: light at top to showcase product, dark at bottom for crisp text readability
+        // Gradient Overlay: 100% transparent at top to showcase bags & shoes, soft dark at bottom for text
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              stops: const [0.0, 0.45, 1.0],
+              stops: const [0.0, 0.55, 1.0],
               colors: [
-                Colors.black.withValues(alpha: 0.15),
-                Colors.black.withValues(alpha: 0.45),
-                Colors.black.withValues(alpha: 0.88),
+                Colors.transparent,
+                Colors.black.withValues(alpha: 0.25),
+                Colors.black.withValues(alpha: 0.75),
               ],
             ),
           ),

@@ -8,7 +8,8 @@ String fastImg(String url, {int w = 600, int q = 60}) {
     if (!url.contains('images.unsplash.com')) return url;
     final uri = Uri.parse(url);
     final params = Map<String, String>.from(uri.queryParameters);
-    params['auto'] = 'format';
+    params.remove('auto');
+    params['fm'] = 'jpg';
     params['fit'] = 'crop';
     params['w'] = '$w';
     params['q'] = '$q';

@@ -168,16 +168,16 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isAdmin ? AppTheme.primaryGold.withValues(alpha: 0.15) : AppTheme.surfaceGrey,
-                        border: Border.all(color: isAdmin ? AppTheme.primaryGold : AppTheme.borderSubtle),
+                        color: AppTheme.surfaceGrey,
+                        border: Border.all(color: AppTheme.borderSubtle),
                       ),
                       child: Text(
-                        isAdmin ? 'STORE ADMIN' : 'VIP MEMBER',
+                        'VIP ATELIER MEMBER',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
-                          color: isAdmin ? AppTheme.primaryGoldDark : AppTheme.obsidianNoir,
+                          color: AppTheme.obsidianNoir,
                         ),
                       ),
                     ),
@@ -221,46 +221,6 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
             },
           ),
           const SizedBox(height: 12),
-
-          // 2. Manage Store - admin only, clearly separated. Never shown to shoppers.
-          if (isAdmin) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryGold.withValues(alpha: 0.08),
-                border: Border.all(color: AppTheme.primaryGold.withValues(alpha: 0.4)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'STORE OWNER ONLY',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: AppTheme.primaryGoldDark),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryGold,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                    ),
-                    icon: const Icon(Icons.admin_panel_settings_outlined, size: 18),
-                    label: Text(
-                      'MANAGE STORE',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      context.go('/admin');
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
 
           // 3. Shop Now / Concierge
           OutlinedButton.icon(

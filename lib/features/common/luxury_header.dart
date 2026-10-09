@@ -143,36 +143,6 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
           else
             const Spacer(),
 
-          // Admin Direct Access Badge (If Admin)
-          if (authState.isAdmin && !isMobile) ...[
-            InkWell(
-              onTap: () => context.go('/admin'),
-              child: Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: AppTheme.obsidianNoir,
-                  border: Border.all(color: AppTheme.primaryGold, width: 1.5),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.admin_panel_settings, size: 15, color: AppTheme.primaryGold),
-                    const SizedBox(width: 6),
-                    Text(
-                      'ADMIN CMS',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: AppTheme.primaryGold,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
 
           // Search Button
           IconButton(
@@ -382,31 +352,6 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                         context.go('/account');
                       },
                     ),
-                    if (authState.isAdmin)
-                      Container(
-                        color: AppTheme.obsidianNoir,
-                        margin: const EdgeInsets.only(top: 4, bottom: 4),
-                        child: ListTile(
-                          title: Text(
-                            'ADMIN DASHBOARD',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              letterSpacing: 1.2,
-                              color: AppTheme.primaryGold,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Website copy, products & order fulfillment',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 9.5, color: Colors.white70),
-                          ),
-                          leading: const Icon(Icons.admin_panel_settings, color: AppTheme.primaryGold),
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            context.go('/admin');
-                          },
-                        ),
-                      ),
                   ] else ...[
                     ListTile(
                       title: Text(
