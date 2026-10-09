@@ -426,21 +426,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                         AuthModal.show(context);
                       },
                     ),
-                    ListTile(
-                      title: Text(
-                        'ADMIN BACK-OFFICE ACCESS',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11.5,
-                          color: AppTheme.primaryGoldDark,
-                        ),
-                      ),
-                      leading: const Icon(Icons.lock_outline, size: 18, color: AppTheme.primaryGoldDark),
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        context.go('/admin');
-                      },
-                    ),
+                    // Admin entry removed for shoppers - owner uses direct /admin link only.
                   ],
 
                   const Divider(height: 16),

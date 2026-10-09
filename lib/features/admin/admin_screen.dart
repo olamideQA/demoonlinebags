@@ -23,7 +23,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
   late TabController _tabController;
 
   // Security Gate Controllers
-  final _adminEmailController = TextEditingController(text: 'admin@demoonlinebags.com');
+  final _adminEmailController = TextEditingController();
   final _adminPasswordController = TextEditingController();
   bool _obscureAdminPassword = true;
   String? _gateError;
@@ -159,7 +159,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                           const Icon(Icons.admin_panel_settings, color: AppTheme.primaryGold, size: 18),
                           const SizedBox(width: 8),
                           Text(
-                            'ATELIER EXECUTIVE CMS & BACK-OFFICE',
+                            'STORE MANAGER',
                             style: GoogleFonts.plusJakartaSans(
                               color: AppTheme.primaryGold,
                               fontSize: 11,
@@ -171,7 +171,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Total Website Customization Suite',
+                        'Orders, Products & Website Text',
                         style: GoogleFonts.cormorantGaramond(
                           color: Colors.white,
                           fontSize: isMobile ? 24 : 32,
@@ -380,34 +380,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       suffixIcon: IconButton(
                         icon: Icon(_obscureAdminPassword ? Icons.visibility_off : Icons.visibility, size: 18),
                         onPressed: () => setState(() => _obscureAdminPassword = !_obscureAdminPassword),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        _adminEmailController.text = 'admin@demoonlinebags.com';
-                        _adminPasswordController.text = 'Admin2026!';
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryGold.withValues(alpha: 0.08),
-                        border: Border.all(color: AppTheme.primaryGold.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.key_outlined, size: 14, color: AppTheme.primaryGoldDark),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Click to Autofill Admin Login (admin@demoonlinebags.com)',
-                              style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.primaryGoldDark, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ),
