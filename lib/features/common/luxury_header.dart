@@ -160,12 +160,21 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
               IconButton(
                 padding: EdgeInsets.all(isMobile ? 5 : 8),
                 constraints: BoxConstraints(minWidth: isMobile ? 32 : 44, minHeight: isMobile ? 32 : 44),
-                icon: Icon(Icons.favorite_border, color: AppTheme.obsidianNoir, size: isMobile ? 20 : 22),
+                icon: Icon(
+                  wishlist.isNotEmpty ? Icons.favorite : Icons.favorite_border,
+                  color: wishlist.isNotEmpty ? AppTheme.errorRed : AppTheme.obsidianNoir,
+                  size: isMobile ? 20 : 22,
+                ),
                 onPressed: () {
-                  ref.read(selectedProductTypeProvider.notifier).state = null;
-                  context.go('/shop');
+                  if (wishlist.isEmpty) {
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Tap the heart on any bag or shoe to save it here.')),
+                    );
+                  }
+                  context.go('/account');
                 },
-                tooltip: 'Saved Wishlist',
+                tooltip: 'My saved items',
               ),
               if (wishlist.isNotEmpty)
                 Positioned(

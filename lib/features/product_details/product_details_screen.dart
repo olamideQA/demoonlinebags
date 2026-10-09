@@ -541,7 +541,18 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   isSaved ? Icons.favorite : Icons.favorite_border,
                   color: isSaved ? AppTheme.errorRed : AppTheme.obsidianNoir,
                 ),
-                onPressed: () => ref.read(wishlistProvider.notifier).toggleWishlist(p),
+                tooltip: isSaved ? 'Remove from wishlist' : 'Save to wishlist',
+                onPressed: () {
+                  ref.read(wishlistProvider.notifier).toggleWishlist(p);
+                  final saved = ref.read(wishlistProvider).any((item) => item.id == p.id);
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(saved ? 'Saved to your wishlist.' : 'Removed from wishlist.'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
               ),
             ),
           ],

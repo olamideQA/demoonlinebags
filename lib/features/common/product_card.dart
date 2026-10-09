@@ -26,10 +26,24 @@ class _ProductCardState extends ConsumerState<ProductCard> {
     final wishlist = ref.watch(wishlistProvider);
     final isSaved = wishlist.any((item) => item.id == p.id);
 
+    void toggleSave() {
+      ref.read(wishlistProvider.notifier).toggleWishlist(p);
+      final saved = ref.read(wishlistProvider).any((item) => item.id == p.id);
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(saved ? 'Saved "${p.title}" to your wishlist.' : 'Removed "${p.title}" from wishlist.'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: AppTheme.obsidianNoir,
+        ),
+      );
+    }
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: InkWell(
+      child: GestureDetector(
+        // Card tap goes to product. Heart/add buttons stop propagation below.
         onTap: () => context.go('/product/${p.slug}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,26 +108,54 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                     ),
                   ),
 
-                  // Wishlist Icon (Top Right)
+                  // Wishlist heart (Top Right) - IconButton wins gesture arena,
+                  // never swallowed by card tap. Always tappable on touch + web.
                   Positioned(
                     top: 8,
                     right: 8,
                     child: Material(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: Colors.white.withValues(alpha: 0.95),
                       shape: const CircleBorder(),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () {
-                          ref.read(wishlistProvider.notifier).toggleWishlist(p);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(7),
-                          child: Icon(
-                            isSaved ? Icons.favorite : Icons.favorite_border,
-                            size: 18,
-                            color: isSaved ? AppTheme.errorRed : AppTheme.obsidianNoir,
-                          ),
+                      elevation: 2,
+                      child: IconButton(
+                        iconSize: 18,
+                        padding: const EdgeInsets.all(7),
+                        constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                        icon: Icon(
+                          isSaved ? Icons.favorite : Icons.favorite_border,
+                          color: isSaved ? AppTheme.errorRed : AppTheme.obsidianNoir,
                         ),
+                        tooltip: isSaved ? 'Remove from wishlist' : 'Save to wishlist',
+                        onPressed: toggleSave,
+                      ),
+                    ),
+                  ),
+                  // Always-visible quick add (bottom-right) for touch phones
+                  // where hover never fires. Desktop keeps hover bar too.
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Material(
+                      color: AppTheme.obsidianNoir.withValues(alpha: 0.92),
+                      shape: const CircleBorder(),
+                      elevation: 2,
+                      child: IconButton(
+                        iconSize: 16,
+                        padding: const EdgeInsets.all(8),
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
+                        tooltip: 'Quick add to bag',
+                        onPressed: () {
+                          ref.read(cartProvider.notifier).addToCart(p);
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Added "${p.title}" to bag.'),
+                              duration: const Duration(seconds: 2),
+                              backgroundColor: AppTheme.obsidianNoir,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

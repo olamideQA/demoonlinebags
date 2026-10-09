@@ -989,12 +989,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
               const Icon(Icons.favorite_border, color: AppTheme.primaryGold, size: 36),
               const SizedBox(height: 16),
               Text(
-                'Your Wishlist Is Empty',
+                'No Saved Bags Yet',
                 style: GoogleFonts.cormorantGaramond(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Save your favorite handbags and sculptured shoes to revisit them any time.',
+                'Tap the heart on any bag or shoe and it will wait for you here.',
                 style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted),
               ),
               const SizedBox(height: 20),
