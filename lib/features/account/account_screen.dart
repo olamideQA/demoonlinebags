@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/models/models.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/providers/wishlist_provider.dart';
@@ -1279,10 +1280,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
             ),
             icon: const Icon(Icons.chat, size: 18),
             label: Text(
-              'CHAT ON WHATSAPP NOW',
+              'CHAT ON WHATSAPP',
               style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
             ),
-            onPressed: () => context.go('/contact'),
+            onPressed: () => launchUrl(
+              Uri.parse('https://wa.me/2349067914511?text=Hello%20LUXE%20LAGOS%2C%20I%20need%20help'),
+              mode: LaunchMode.externalApplication,
+            ),
           ),
         ],
       ),

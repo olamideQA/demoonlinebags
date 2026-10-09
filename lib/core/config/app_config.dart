@@ -19,6 +19,7 @@ class AppConfig {
   
   // Contact & Socials
   static const String conciergeEmail = 'hello@luxelagos.ng';
-  static const String conciergePhone = '+234 810 123 4567';
+  static const String conciergePhone = '+234 906 791 4511';
+  static const String whatsappUrl = 'https://wa.me/2349067914511?text=Hello%20LUXE%20LAGOS%2C%20I%20need%20help%20with%20a%20bag';
   static const String instagramUrl = 'https://instagram.com/luxelagos.ng';
 }

@@ -9,6 +9,7 @@ import '../../core/providers/site_settings_provider.dart';
 import '../../core/providers/wishlist_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../auth/auth_modal.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
   const LuxuryHeader({super.key});
@@ -502,10 +503,14 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                   ListTile(
                     title: const Text('CHAT ON WHATSAPP'),
-                    leading: const Icon(Icons.support_agent, color: AppTheme.primaryGold),
+                    subtitle: const Text('+234 906 791 4511 • replies in 30 mins'),
+                    leading: const Icon(Icons.chat, color: AppTheme.primaryGold),
                     onTap: () {
                       Navigator.pop(ctx);
-                      context.go('/contact');
+                      launchUrl(
+                        Uri.parse('https://wa.me/2349067914511?text=Hello%20LUXE%20LAGOS%2C%20I%20need%20help%20with%20a%20bag'),
+                        mode: LaunchMode.externalApplication,
+                      );
                     },
                   ),
                 ],

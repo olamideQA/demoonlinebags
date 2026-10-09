@@ -46,8 +46,8 @@ settings = [
     ('footer', {
         'bio': "LUXE LAGOS is made for Nigerian women who do it all — boardroom by day, Owambe by night. Real Italian leather bags and comfy matching shoes that will not peel. Chat on WhatsApp, pay on delivery in Lagos & Abuja.",
         'email': 'hello@luxelagos.ng',
-        'phone': '+234 810 123 4567',
-        'whatsapp': '+234 810 123 4567',
+        'phone': '+234 906 791 4511',
+        'whatsapp': '+234 906 791 4511',
         'address': '12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
         'copyright': '© 2026 LUXE LAGOS. ALL RIGHTS RESERVED.',
         'instagram': 'https://instagram.com/luxelagos.ng'

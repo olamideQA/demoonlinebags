@@ -246,18 +246,18 @@ class FooterSettings {
       return const FooterSettings(
         bio: 'Demo Online Bags is Nigeria\'s premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.',
         email: 'hello@luxelagos.ng',
-        phone: '+234 810 123 4567',
-        whatsapp: '+234 810 123 4567',
+        phone: '+234 906 791 4511',
+        whatsapp: '+234 906 791 4511',
         address: '12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
         copyright: '© 2026 LUXE LAGOS. ALL RIGHTS RESERVED.',
         instagram: 'https://instagram.com/luxelagos.ng',
       );
     }
     return FooterSettings(
-      bio: json['bio'] as String? ?? 'Demo Online Bags is Nigeria\'s premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.',
+      bio: json['bio'] as String? ?? 'LUXE LAGOS is made for Nigerian women who do it all — boardroom by day, Owambe by night. Real Italian leather bags and comfy matching shoes that will not peel. Chat on WhatsApp, pay on delivery in Lagos & Abuja.',
       email: json['email'] as String? ?? 'hello@luxelagos.ng',
-      phone: json['phone'] as String? ?? '+234 810 123 4567',
-      whatsapp: json['whatsapp'] as String? ?? '+234 810 123 4567',
+      phone: json['phone'] as String? ?? '+234 906 791 4511',
+      whatsapp: json['whatsapp'] as String? ?? '+234 906 791 4511',
       address: json['address'] as String? ?? '12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
       copyright: json['copyright'] as String? ?? '© 2026 LUXE LAGOS. ALL RIGHTS RESERVED.',
       instagram: json['instagram'] as String? ?? 'https://instagram.com/luxelagos.ng',

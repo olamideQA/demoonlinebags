@@ -149,8 +149,8 @@ class _ContactScreenState extends State<ContactScreen> {
           style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
         ),
         const SizedBox(height: 16),
-        _contactItem(Icons.chat, 'WhatsApp (Fastest)', '+234 810 123 4567', () {
-          launchUrl(Uri.parse('https://wa.me/2348101234567'));
+        _contactItem(Icons.chat, 'WhatsApp (Fastest)', '+234 906 791 4511', () {
+          launchUrl(Uri.parse('https://wa.me/2349067914511?text=Hello%20LUXE%20LAGOS%2C%20I%20need%20help%20with%20a%20bag'), mode: LaunchMode.externalApplication);
         }),
         const SizedBox(height: 16),
         _contactItem(Icons.email_outlined, 'Email Us', AppConfig.conciergeEmail, () {
