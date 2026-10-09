@@ -126,7 +126,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               child: Column(
                 children: [
                   Text(
-                    'SECURE ENCRYPTED CHECKOUT',
+                    'SAFE & SECURE • PAY ON DELIVERY AVAILABLE',
                     style: GoogleFonts.plusJakartaSans(
                       color: AppTheme.primaryGold,
                       fontSize: 11,
@@ -136,7 +136,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Client Delivery & Payment',
+                    'Where Should We Deliver?',
                     style: GoogleFonts.cormorantGaramond(
                       color: Colors.white,
                       fontSize: isMobile ? 26 : 34,
@@ -183,7 +183,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '1. CLIENT INFORMATION',
+            '1. YOUR NAME & WHATSAPP',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -194,7 +194,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Full Name (First and Last Name) *'),
+            decoration: const InputDecoration(labelText: 'Full Name * (e.g. Adaeze Okafor)'),
             validator: (val) => val == null || val.trim().isEmpty ? 'Please enter your full name' : null,
           ),
           const SizedBox(height: 14),
@@ -212,7 +212,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               Expanded(
                 child: TextFormField(
                   controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'Phone Number (WhatsApp) *'),
+                  decoration: const InputDecoration(labelText: 'WhatsApp Number *'),
                   keyboardType: TextInputType.phone,
                   validator: (val) => val == null || val.trim().length < 8 ? 'Valid phone required' : null,
                 ),
@@ -222,7 +222,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 32),
 
           Text(
-            '2. DELIVERY DESTINATION',
+            '2. WHERE DO WE DELIVER?',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -233,7 +233,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: _selectedState,
-            decoration: const InputDecoration(labelText: 'State / Region *'),
+            decoration: const InputDecoration(labelText: 'State *'),
             items: _states.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
             onChanged: (val) {
               if (val != null) setState(() => _selectedState = val);
@@ -242,24 +242,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 14),
           TextFormField(
             controller: _cityController,
-            decoration: const InputDecoration(labelText: 'City / District (e.g. Lekki Phase 1, Maitama) *'),
-            validator: (val) => val == null || val.trim().isEmpty ? 'City is required' : null,
+            decoration: const InputDecoration(labelText: 'Area * (e.g. Lekki Phase 1, Maitama, GRA PH)'),
+            validator: (val) => val == null || val.trim().isEmpty ? 'Area is required' : null,
           ),
           const SizedBox(height: 14),
           TextFormField(
             controller: _addressController,
-            decoration: const InputDecoration(labelText: 'Street Address & Apartment/House No. *'),
+            decoration: const InputDecoration(labelText: 'Street + House No. *'),
             validator: (val) => val == null || val.trim().isEmpty ? 'Address is required' : null,
           ),
           const SizedBox(height: 14),
           TextFormField(
             controller: _notesController,
-            decoration: const InputDecoration(labelText: 'Special Delivery Instructions (Optional)'),
+            decoration: const InputDecoration(labelText: 'Landmark / Bus-stop (Optional — e.g. opposite Shoprite)'),
           ),
           const SizedBox(height: 32),
 
           Text(
-            '3. SELECT PAYMENT PREFERENCE',
+            '3. HOW DO YOU WANT TO PAY?',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -270,22 +270,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 16),
           _paymentOptionTile(
             value: 'transfer',
-            title: 'Direct Bank Transfer / USSD (Recommended)',
-            subtitle: 'Instant account details generated upon checkout with zero payment fees.',
+            title: 'Bank Transfer / USSD (Fastest)',
+            subtitle: 'We send account details immediately. No extra charges.',
             icon: Icons.account_balance,
           ),
           const SizedBox(height: 10),
           _paymentOptionTile(
             value: 'card',
-            title: 'Debit / Credit Card (Visa, Mastercard, Verve)',
-            subtitle: '3D-Secure 256-bit encrypted checkout via Paystack.',
+            title: 'Card — Visa, Mastercard, Verve',
+            subtitle: 'Safe payment via Paystack. Your money is protected.',
             icon: Icons.credit_card,
           ),
           const SizedBox(height: 10),
           _paymentOptionTile(
             value: 'cash_on_delivery',
-            title: 'Payment Upon White-Glove Delivery',
-            subtitle: 'Available exclusively in Lagos & Abuja metropolitan areas.',
+            title: 'Pay When It Arrives (Lagos & Abuja)',
+            subtitle: 'See your bag first, then pay. No wahala.',
             icon: Icons.local_shipping,
           ),
           const SizedBox(height: 36),
@@ -303,7 +303,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                     )
                   : Text(
-                      'PLACE ORDER & CONFIRM DISPATCH',
+                      'CONFIRM ORDER — WE WILL WHATSAPP YOU',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -378,7 +378,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ORDER SUMMARY (${cart.totalItemCount} ITEMS)',
+            'YOUR ORDER (${cart.totalItemCount} ITEMS)',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -448,7 +448,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Insured Delivery', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted)),
+              Text('Delivery Fee', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.textMuted)),
               Text(
                 cart.qualifiesForFreeShipping ? 'FREE' : '₦${formatter.format(cart.shippingFee)}',
                 style: GoogleFonts.plusJakartaSans(

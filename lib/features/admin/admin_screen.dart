@@ -383,7 +383,35 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _adminEmailController.text = 'admin@demoonlinebags.com';
+                        _adminPasswordController.text = 'Admin2026!';
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryGold.withValues(alpha: 0.08),
+                        border: Border.all(color: AppTheme.primaryGold.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.key_outlined, size: 14, color: AppTheme.primaryGoldDark),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Click to Autofill Admin Login (admin@demoonlinebags.com)',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.primaryGoldDark, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(

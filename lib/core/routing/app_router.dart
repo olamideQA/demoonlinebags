@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/about/about_screen.dart';
+import '../../features/account/account_screen.dart';
 import '../../features/admin/admin_screen.dart';
 import '../../features/checkout/checkout_screen.dart';
 import '../../features/checkout/order_success_screen.dart';
@@ -54,6 +55,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/admin',
       builder: (context, state) => const AdminScreen(),
+    ),
+    GoRoute(
+      path: '/account',
+      builder: (context, state) => const AccountScreen(),
+    ),
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const AccountScreen(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

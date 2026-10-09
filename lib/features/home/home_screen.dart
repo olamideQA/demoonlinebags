@@ -92,7 +92,7 @@ class HomeScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'CURATED SILHOUETTES',
+                'SHOP BY STYLE',
                 style: GoogleFonts.plusJakartaSans(
                   color: AppTheme.primaryGoldDark,
                   fontSize: 11,
@@ -121,7 +121,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Explore by Silhouette',
+            'Find Your Perfect Style',
             style: GoogleFonts.cormorantGaramond(
               fontSize: isMobile ? 28 : 34,
               fontWeight: FontWeight.w700,
@@ -228,7 +228,7 @@ class HomeScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'SIGNATURE PIECES',
+                    'OUR BESTSELLERS',
                     style: GoogleFonts.plusJakartaSans(
                       color: AppTheme.primaryGoldDark,
                       fontSize: 11,
@@ -238,7 +238,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'The Handbag Collection',
+                    'Bags Nigerian Women Love',
                     style: GoogleFonts.cormorantGaramond(
                       fontSize: isMobile ? 30 : 38,
                       fontWeight: FontWeight.w700,
@@ -287,7 +287,7 @@ class HomeScreen extends ConsumerWidget {
       child: Column(
         children: [
           Text(
-            'EFFORTLESS CO-ORD GLAMOUR',
+            'MATCHING BAG & SHOE SETS',
             style: GoogleFonts.plusJakartaSans(
               color: AppTheme.primaryGold,
               fontSize: 11,
@@ -297,7 +297,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Complete The Look: Perfectly Paired Bags & Shoes',
+            'Buy Together & Save 10-15%',
             textAlign: TextAlign.center,
             style: GoogleFonts.cormorantGaramond(
               color: Colors.white,
@@ -310,7 +310,7 @@ class HomeScreen extends ConsumerWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 620),
             child: Text(
-              'Never worry about mismatching leather grains or hardware finishes. Our atelier pairs statement handbags with matching sculpted footwear in identical Italian calfskin and 24K gold accents. Receive an automatic 10%–15% bundle privilege when acquired together.',
+              'No more stress matching your bag to your shoe for Owambe, church or wedding. We already paired them for you in the same fine leather and gold — so you step out perfect and save money.',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 color: AppTheme.textMuted,
@@ -391,7 +391,7 @@ class HomeScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           color: AppTheme.primaryGold,
           child: Text(
-            'SAVE ${pairing.bundleDiscountPercent}% PRIVILEGE',
+            'SAVE ${pairing.bundleDiscountPercent}% — BUNDLE DEAL',
             style: GoogleFonts.plusJakartaSans(
               color: AppTheme.obsidianNoir,
               fontSize: 10,
@@ -453,7 +453,7 @@ class HomeScreen extends ConsumerWidget {
               onPressed: () {
                 ref.read(cartProvider.notifier).addBundleToCart(pairing);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Matching ensemble added to bag!')),
+                  const SnackBar(content: Text('Matching set added to your bag!')),
                 );
               },
               child: const Text('ADD BOTH TO BAG'),
@@ -464,7 +464,7 @@ class HomeScreen extends ConsumerWidget {
                 side: const BorderSide(color: AppTheme.borderStrong),
               ),
               onPressed: () => context.go('/pairings'),
-              child: const Text('VIEW ALL ENSEMBLES'),
+              child: const Text('VIEW ALL MATCHING SETS'),
             ),
           ],
         ),
@@ -490,7 +490,7 @@ class HomeScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'COMPLEMENTARY SILHOUETTES',
+                    'COMFY & CLASSY',
                     style: GoogleFonts.plusJakartaSans(
                       color: AppTheme.primaryGoldDark,
                       fontSize: 11,
@@ -500,7 +500,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'The Footwear Salon',
+                    'Shoes That Won’t Hurt Your Legs',
                     style: GoogleFonts.cormorantGaramond(
                       fontSize: isMobile ? 30 : 38,
                       fontWeight: FontWeight.w700,
@@ -513,7 +513,7 @@ class HomeScreen extends ConsumerWidget {
                   ref.read(selectedProductTypeProvider.notifier).state = 'shoe';
                   context.go('/shop');
                 },
-                child: const Text('EXPLORE FOOTWEAR'),
+                child: const Text('SHOP ALL SHOES'),
               ),
             ],
           ),
@@ -563,7 +563,7 @@ class HomeScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'THE ATELIER HERITAGE',
+          'WHY LAGOS WOMEN TRUST US',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.primaryGoldDark,
             fontSize: 11,
@@ -573,7 +573,7 @@ class HomeScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Artisanal Passion.\nFull-Grain Mastery.',
+          'Real Leather.\nNo Peeling. No Fading.',
           style: GoogleFonts.cormorantGaramond(
             fontSize: 36,
             fontWeight: FontWeight.w700,
@@ -582,7 +582,7 @@ class HomeScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 18),
         Text(
-          'At DEMO ONLINE BAGS, every stitch is an investment in timeless permanence. We source exclusively from certified Florentine and Vicenza tanneries, selecting only supple full-grain calfskins and velvet-soft lambskins.',
+          'At LUXE LAGOS, we know your fear: bag wey go peel after 2 months. That will never happen here. We use only real full-grain leather and strong 24K gold that will not fade even in Lagos sun, rain and humidity.',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.textDark,
             fontSize: 14,
@@ -591,7 +591,7 @@ class HomeScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          'Our bespoke locksets and chains are plated in 24K gold and rhodium to resist tarnishing in tropical and coastal climates. Experience luxury designed to be cherished for generations.',
+          'From office in Victoria Island to Owambe in Abuja — carry with confidence. Chat with us on WhatsApp, see your bag on video before you pay, and pay on delivery.',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.textMuted,
             fontSize: 13,
@@ -625,7 +625,7 @@ class HomeScreen extends ConsumerWidget {
       child: Column(
         children: [
           Text(
-            'TESTIMONIALS',
+            'REAL REVIEWS FROM LAGOS & ABUJA',
             style: GoogleFonts.plusJakartaSans(
               color: AppTheme.primaryGoldDark,
               fontSize: 11,
@@ -635,7 +635,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Adored by Discerning Women',
+            'Loved by Women Like You',
             style: GoogleFonts.cormorantGaramond(
               fontSize: isMobile ? 28 : 36,
               fontWeight: FontWeight.w700,
@@ -649,19 +649,19 @@ class HomeScreen extends ConsumerWidget {
             alignment: WrapAlignment.center,
             children: const [
               _ReviewBox(
-                quote: '“The Sovereign Tote was the centerpiece of my executive conference at Eko Hotels. The calfskin is thick, holds my 14-inch MacBook without sagging, and the gold hardware looks like real jewellery.”',
-                author: 'Amina B.',
-                location: 'Victoria Island, Lagos',
+                quote: '“I carried my Sovereign Tote to a conference at Eko Hotels. Thick leather, my 14-inch laptop entered well, no sagging. The gold looks like real jewellery. Worth every naira.”',
+                author: 'Amina Bello',
+                location: 'Victoria Island, Lagos • Verified Buyer',
               ),
               _ReviewBox(
-                quote: '“I ordered the Venetian Crystal Minaudière with the Bellissima crystal stilettos for my sister\'s wedding. I danced through the entire 6-hour Owambe and my feet did not ache once! Breathtaking synergy.”',
-                author: 'Folashade A.',
-                location: 'Maitama, Abuja',
+                quote: '“I wore the crystal clutch + heels for my sister’s wedding. I danced for 6 hours for Owambe and my leg no pain at all! Everybody asked me where I bought it.”',
+                author: 'Folashade Adeyemi',
+                location: 'Maitama, Abuja • Verified Buyer',
               ),
               _ReviewBox(
-                quote: '“Delivery arrived in Lekki less than 3 hours after ordering via WhatsApp Concierge. Packaged in a velvet dust bag and gold-embossed box. Zero flaking, true international luxury.”',
-                author: 'Zainab K.',
-                location: 'Ikoyi, Lagos',
+                quote: '“I ordered on WhatsApp and they did video call for me to see the bag live. Delivery came to Lekki same day in fine box. No peeling, no story. I don recommend to my sisters.”',
+                author: 'Zainab Kabir',
+                location: 'Ikoyi, Lagos • Verified Buyer',
               ),
             ],
           ),

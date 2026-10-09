@@ -47,8 +47,8 @@ class ShopScreen extends ConsumerWidget {
                     children: [
                       Text(
                         selectedType == 'shoe'
-                            ? 'THE FOOTWEAR SALON'
-                            : (selectedType == 'bag' ? 'THE HANDBAG COLLECTION' : 'ALL CREATIONS'),
+                            ? 'SHOES & HEELS'
+                            : (selectedType == 'bag' ? 'HANDBAGS & TOTES' : 'ALL BAGS & SHOES'),
                         style: GoogleFonts.plusJakartaSans(
                           color: AppTheme.primaryGold,
                           fontSize: 11,
@@ -59,8 +59,8 @@ class ShopScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Text(
                         selectedType == 'shoe'
-                            ? 'Sculpted Heels, Slingbacks & Mules'
-                            : (selectedType == 'bag' ? 'Artisanal Handbags, Totes & Clutches' : 'The Complete Catalogue'),
+                            ? 'Comfy Heels, Mules & Party Shoes'
+                            : (selectedType == 'bag' ? 'Fine Leather Bags for Work, Church & Owambe' : 'Shop Everything We Have'),
                         style: GoogleFonts.cormorantGaramond(
                           color: Colors.white,
                           fontSize: isMobile ? 28 : 38,
@@ -69,7 +69,7 @@ class ShopScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Refined materials, hand-finished edges, and timeless poise.',
+                        'Real leather. Pay on delivery in Lagos & Abuja. Chat on WhatsApp to see live video.',
                         style: GoogleFonts.plusJakartaSans(
                           color: AppTheme.textMuted,
                           fontSize: 12,
@@ -98,7 +98,7 @@ class ShopScreen extends ConsumerWidget {
                         child: Row(
                           children: [
                             _TypeTab(
-                              title: 'ALL CREATIONS',
+                              title: 'ALL',
                               isSelected: selectedType == null,
                               onTap: () {
                                 ref.read(selectedProductTypeProvider.notifier).state = null;
@@ -107,7 +107,7 @@ class ShopScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             _TypeTab(
-                              title: 'HANDBAGS & TOTES',
+                              title: 'BAGS',
                               isSelected: selectedType == 'bag',
                               onTap: () {
                                 ref.read(selectedProductTypeProvider.notifier).state = 'bag';
@@ -116,7 +116,7 @@ class ShopScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             _TypeTab(
-                              title: 'SCULPTED FOOTWEAR',
+                              title: 'SHOES',
                               isSelected: selectedType == 'shoe',
                               onTap: () {
                                 ref.read(selectedProductTypeProvider.notifier).state = 'shoe';
@@ -135,7 +135,7 @@ class ShopScreen extends ConsumerWidget {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           _CategoryPill(
-                            title: 'All Silhouettes',
+                            title: 'All Styles',
                             isSelected: selectedCategory == null || selectedCategory == 'all',
                             onTap: () => ref.read(selectedCategorySlugProvider.notifier).state = null,
                           ),
@@ -157,7 +157,7 @@ class ShopScreen extends ConsumerWidget {
                               height: 38,
                               child: TextField(
                                 decoration: InputDecoration(
-                                  hintText: 'Search by silhouette, material, leather...',
+                                  hintText: 'Search tote, clutch, heels, black leather...',
                                   prefixIcon: const Icon(Icons.search, size: 18),
                                   suffixIcon: searchQuery.isNotEmpty
                                       ? IconButton(
@@ -189,11 +189,11 @@ class ShopScreen extends ConsumerWidget {
                                   ),
                                   icon: const Icon(Icons.keyboard_arrow_down, size: 18),
                                   items: const [
-                                    DropdownMenuItem(value: 'featured', child: Text('Sort: Featured Creations')),
+                                    DropdownMenuItem(value: 'featured', child: Text('Sort: Bestsellers')),
                                     DropdownMenuItem(value: 'newest', child: Text('Sort: Newest First')),
                                     DropdownMenuItem(value: 'price_asc', child: Text('Price: Low to High')),
                                     DropdownMenuItem(value: 'price_desc', child: Text('Price: High to Low')),
-                                    DropdownMenuItem(value: 'rating', child: Text('Customer Rating')),
+                                    DropdownMenuItem(value: 'rating', child: Text('Top Rated')),
                                   ],
                                   onChanged: (val) {
                                     if (val != null) ref.read(sortByProvider.notifier).state = val;
@@ -211,7 +211,7 @@ class ShopScreen extends ConsumerWidget {
                                 height: 38,
                                 child: TextField(
                                   decoration: InputDecoration(
-                                    hintText: 'Search by silhouette, material, leather...',
+                                    hintText: 'Search tote, clutch, heels, black leather...',
                                     prefixIcon: const Icon(Icons.search, size: 18),
                                     suffixIcon: searchQuery.isNotEmpty
                                         ? IconButton(
@@ -271,7 +271,7 @@ class ShopScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${filteredProducts.length} CREATIONS FOUND',
+                        '${filteredProducts.length} BAGS & SHOES FOUND',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -344,12 +344,12 @@ class ShopScreen extends ConsumerWidget {
           const Icon(Icons.search_off, size: 54, color: AppTheme.textMuted),
           const SizedBox(height: 16),
           Text(
-            'No Creations Match Your Selection',
+            'No Match Found',
             style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Try adjusting your search terms or filter selection.',
+            'Try another word like “tote”, “black”, “heels” — or chat with us on WhatsApp, we will help you find it.',
             style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
           ),
           const SizedBox(height: 24),

@@ -96,7 +96,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                     const SizedBox(width: 18),
                     _NavLink(
-                      title: 'HANDBAGS',
+                      title: 'BAGS',
                       onTap: () {
                         ref.read(selectedProductTypeProvider.notifier).state = 'bag';
                         ref.read(selectedCategorySlugProvider.notifier).state = null;
@@ -114,19 +114,27 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                     const SizedBox(width: 18),
                     _NavLink(
-                      title: 'COMPLETE THE LOOK',
+                      title: 'MATCHING SETS',
                       onTap: () => context.go('/pairings'),
                     ),
                     const SizedBox(width: 18),
                     _NavLink(
-                      title: 'OUR CRAFT',
+                      title: 'OUR STORY',
                       onTap: () => context.go('/about'),
                     ),
                     const SizedBox(width: 18),
                     _NavLink(
-                      title: 'CONCIERGE',
+                      title: 'CHAT WITH US',
                       onTap: () => context.go('/contact'),
                     ),
+                    if (authState.isAuthenticated) ...[
+                      const SizedBox(width: 18),
+                      _NavLink(
+                        title: 'MY DASHBOARD',
+                        isHighlighted: true,
+                        onTap: () => context.go('/account'),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -140,23 +148,23 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
               onTap: () => context.go('/admin'),
               child: Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
                   color: AppTheme.obsidianNoir,
-                  border: Border.all(color: AppTheme.primaryGold),
+                  border: Border.all(color: AppTheme.primaryGold, width: 1.5),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.tune, size: 14, color: AppTheme.primaryGold),
+                    const Icon(Icons.admin_panel_settings, size: 15, color: AppTheme.primaryGold),
                     const SizedBox(width: 6),
                     Text(
-                      'ATELIER CMS',
+                      'ADMIN CMS',
                       style: GoogleFonts.plusJakartaSans(
                         color: AppTheme.primaryGold,
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                        letterSpacing: 1.4,
                       ),
                     ),
                   ],
@@ -171,7 +179,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
             constraints: BoxConstraints(minWidth: isMobile ? 32 : 44, minHeight: isMobile ? 32 : 44),
             icon: Icon(Icons.search, color: AppTheme.obsidianNoir, size: isMobile ? 20 : 22),
             onPressed: () => _showSearchDialog(context, ref),
-            tooltip: 'Search creations',
+            tooltip: 'Search bags & shoes',
           ),
 
           // Wishlist Icon
@@ -265,8 +273,8 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                 ),
                 onPressed: () => AuthModal.show(context),
                 tooltip: authState.isAuthenticated
-                    ? (authState.isAdmin ? 'Atelier Administrator' : 'VIP Account: ${authState.profile?.fullName ?? ''}')
-                    : 'Client Sign In / Register',
+                    ? (authState.isAdmin ? 'Store Admin' : 'Account: ${authState.profile?.fullName ?? ''}')
+                    : 'Sign In / Create Account',
               ),
               if (authState.isAuthenticated)
                 Positioned(
@@ -296,13 +304,13 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
           backgroundColor: Colors.white,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           title: Text(
-            'Search Creations',
+            'Search Bags & Shoes',
             style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           content: TextField(
             autofocus: true,
             decoration: const InputDecoration(
-              hintText: 'Type handbag style, color, or silhouette...',
+              hintText: 'Try tote, clutch, black, heels...',
               prefixIcon: Icon(Icons.search),
             ),
             onSubmitted: (query) {
@@ -351,47 +359,96 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                   const Divider(height: 24),
 
-                  // Account / Sign In
-                  ListTile(
-                    title: Text(
-                      authState.isAuthenticated
-                          ? (authState.isAdmin ? 'ADMIN: ${authState.profile?.fullName ?? 'Administrator'}' : 'VIP: ${authState.profile?.fullName ?? 'Member'}')
-                          : 'SIGN IN / JOIN ATELIER',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: authState.isAdmin ? AppTheme.primaryGoldDark : AppTheme.obsidianNoir,
-                      ),
-                    ),
-                    leading: Icon(Icons.person_outline, color: authState.isAdmin ? AppTheme.primaryGoldDark : AppTheme.obsidianNoir),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      AuthModal.show(context);
-                    },
-                  ),
-
-                  if (authState.isAdmin)
+                  // Account / Sign In / Dashboard
+                  if (authState.isAuthenticated) ...[
                     ListTile(
                       title: Text(
-                        'ATELIER CMS & ADMIN PORTAL',
+                        'MY CLIENT DASHBOARD',
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          letterSpacing: 1.0,
+                          color: AppTheme.obsidianNoir,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Orders, Wishlist & Profile (${authState.profile?.fullName ?? authState.user?.email ?? 'Member'})',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                      ),
+                      leading: const Icon(Icons.dashboard_outlined, color: AppTheme.primaryGold),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        context.go('/account');
+                      },
+                    ),
+                    if (authState.isAdmin)
+                      Container(
+                        color: AppTheme.obsidianNoir,
+                        margin: const EdgeInsets.only(top: 4, bottom: 4),
+                        child: ListTile(
+                          title: Text(
+                            'ADMIN DASHBOARD',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              letterSpacing: 1.2,
+                              color: AppTheme.primaryGold,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Website copy, products & order fulfillment',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 9.5, color: Colors.white70),
+                          ),
+                          leading: const Icon(Icons.admin_panel_settings, color: AppTheme.primaryGold),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            context.go('/admin');
+                          },
+                        ),
+                      ),
+                  ] else ...[
+                    ListTile(
+                      title: Text(
+                        'SIGN IN / JOIN US',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: AppTheme.obsidianNoir,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Track orders, save favourites & get 10% off',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                      ),
+                      leading: const Icon(Icons.person_outline, color: AppTheme.obsidianNoir),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        AuthModal.show(context);
+                      },
+                    ),
+                    ListTile(
+                      title: Text(
+                        'ADMIN BACK-OFFICE ACCESS',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11.5,
                           color: AppTheme.primaryGoldDark,
                         ),
                       ),
-                      leading: const Icon(Icons.tune, color: AppTheme.primaryGoldDark),
+                      leading: const Icon(Icons.lock_outline, size: 18, color: AppTheme.primaryGoldDark),
                       onTap: () {
                         Navigator.pop(ctx);
                         context.go('/admin');
                       },
                     ),
+                  ],
 
                   const Divider(height: 16),
                   Container(
                     color: AppTheme.surfaceGrey,
                     child: ListTile(
                       title: Text(
-                        'SHOP ALL CREATIONS',
+                        'SHOP EVERYTHING',
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
@@ -400,7 +457,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                         ),
                       ),
                       subtitle: Text(
-                        'Explore all handbags & footwear',
+                        'See all bags & shoes',
                         style: GoogleFonts.plusJakartaSans(fontSize: 10, color: AppTheme.textMuted),
                       ),
                       leading: const Icon(Icons.storefront, color: AppTheme.primaryGold),
@@ -415,7 +472,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                   const SizedBox(height: 8),
                   ListTile(
-                    title: const Text('HANDBAGS & TOTES'),
+                    title: const Text('BAGS & TOTES'),
                     leading: const Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -424,7 +481,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    title: const Text('SCULPTED FOOTWEAR'),
+                    title: const Text('SHOES & HEELS'),
                     leading: const Icon(Icons.flare_outlined, color: AppTheme.primaryGold),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -433,7 +490,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    title: const Text('COMPLETE THE LOOK (SETS)'),
+                    title: const Text('MATCHING BAG + SHOE SETS'),
                     leading: const Icon(Icons.auto_awesome, color: AppTheme.primaryGold),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -441,7 +498,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    title: const Text('ALL CREATIONS'),
+                    title: const Text('SHOP EVERYTHING'),
                     leading: const Icon(Icons.grid_view, color: AppTheme.primaryGold),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -450,7 +507,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    title: const Text('OUR CRAFT & ATELIER'),
+                    title: const Text('OUR STORY'),
                     leading: const Icon(Icons.info_outline, color: AppTheme.primaryGold),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -458,7 +515,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     },
                   ),
                   ListTile(
-                    title: const Text('VIP CONCIERGE'),
+                    title: const Text('CHAT ON WHATSAPP'),
                     leading: const Icon(Icons.support_agent, color: AppTheme.primaryGold),
                     onTap: () {
                       Navigator.pop(ctx);

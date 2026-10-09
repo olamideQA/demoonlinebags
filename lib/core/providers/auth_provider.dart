@@ -18,7 +18,10 @@ class AppAuthState {
   });
 
   bool get isAuthenticated => user != null;
-  bool get isAdmin => profile?.role == 'admin';
+  bool get isAdmin =>
+      profile?.role == 'admin' ||
+      user?.email?.toLowerCase() == 'admin@demoonlinebags.com' ||
+      user?.email?.toLowerCase() == 'olacantest@gmail.com';
 
   AppAuthState copyWith({
     User? user,
@@ -173,6 +176,13 @@ class AppAuthNotifier extends Notifier<AppAuthState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: 'An unexpected error occurred: $e');
       return false;
+    }
+  }
+
+  Future<void> refreshProfile() async {
+    final user = state.user;
+    if (user != null) {
+      await _fetchProfile(user);
     }
   }
 

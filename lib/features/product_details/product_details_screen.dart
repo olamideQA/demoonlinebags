@@ -82,11 +82,11 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Creation Not Found', style: GoogleFonts.cormorantGaramond(fontSize: 28)),
+              Text('Sorry, We Can’t Find This Bag', style: GoogleFonts.cormorantGaramond(fontSize: 28)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.go('/shop'),
-                child: const Text('RETURN TO CATALOGUE'),
+                child: const Text('BACK TO SHOP'),
               ),
             ],
           ),
@@ -308,16 +308,16 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               color: AppTheme.surfaceGrey,
-              child: Row(
-                children: [
-                  Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppTheme.successGreen, shape: BoxShape.circle)),
-                  const SizedBox(width: 6),
-                  Text(
-                    'IN STOCK • VIP DISPATCH',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                  child: Row(
+                    children: [
+                      Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppTheme.successGreen, shape: BoxShape.circle)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'IN STOCK • READY TO SHIP',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                      ),
+                    ],
                   ),
-                ],
-              ),
             ),
           ],
         ),
@@ -378,7 +378,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'COLORWAY',
+                'CHOOSE COLOUR',
                 style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5),
               ),
               if (_selectedColor != null)
@@ -433,7 +433,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'SELECT SIZE',
+                'CHOOSE YOUR SIZE',
                 style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5),
               ),
               InkWell(
@@ -442,15 +442,15 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   children: [
                     const Icon(Icons.straighten, size: 14, color: AppTheme.primaryGoldDark),
                     const SizedBox(width: 4),
-                    Text(
-                      'SIZE & FIT GUIDE',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.primaryGoldDark,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
+                     Text(
+                       'WILL IT FIT ME?',
+                       style: GoogleFonts.plusJakartaSans(
+                         fontSize: 10,
+                         fontWeight: FontWeight.w700,
+                         color: AppTheme.primaryGoldDark,
+                         letterSpacing: 1.0,
+                       ),
+                     ),
                   ],
                 ),
               ),
@@ -528,7 +528,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                           quantity: _quantity,
                         );
                   },
-                  child: const Text('ADD TO SHOPPING BAG'),
+                  child: const Text('ADD TO BAG'),
                 ),
               ),
             ),
@@ -581,37 +581,37 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
         // Specifications Accordion
         _buildAccordionTile(
-          title: 'DIMENSIONS & SPECIFICATIONS',
+          title: 'SIZE & DETAILS',
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (p.dimensionsCm != null) _specRow('Dimensions', p.dimensionsCm!),
-              if (p.strapDropCm != null) _specRow('Strap Drop', '${p.strapDropCm} cm'),
+              if (p.dimensionsCm != null) _specRow('Size', p.dimensionsCm!),
+              if (p.strapDropCm != null) _specRow('Handle Drop', '${p.strapDropCm} cm'),
               if (p.heelHeightCm != null) _specRow('Heel Height', '${p.heelHeightCm} cm'),
-              if (p.heelType != null) _specRow('Heel Silhouette', p.heelType!),
-              if (p.closureType != null) _specRow('Closure Mechanism', p.closureType!),
-              if (p.compartmentsInfo != null) _specRow('Interior Storage', p.compartmentsInfo!),
+              if (p.heelType != null) _specRow('Heel Type', p.heelType!),
+              if (p.closureType != null) _specRow('How It Closes', p.closureType!),
+              if (p.compartmentsInfo != null) _specRow('Inside The Bag', p.compartmentsInfo!),
             ],
           ),
         ),
         _buildAccordionTile(
-          title: 'MATERIAL & CRAFTSMANSHIP',
+          title: 'WHAT IS IT MADE OF?',
           content: Text(
-            p.material ?? 'Full-Grain Italian Calfskin leather, suede lining, 24K gold-plated brass locksets.',
+            p.material ?? 'Real full-grain Italian leather, soft lining, strong 24K gold locks that will not fade.',
             style: GoogleFonts.plusJakartaSans(fontSize: 12, height: 1.6, color: AppTheme.textMuted),
           ),
         ),
         _buildAccordionTile(
-          title: 'CARE & PRESERVATION',
+          title: 'HOW TO CARE FOR IT',
           content: Text(
-            p.careInstructions ?? 'Store in supplied velvet dust bag. Keep away from water and humidity. Buff with clean microfiber cloth.',
+            p.careInstructions ?? 'Keep in the dust bag we give you. Keep away from water. Clean with soft dry cloth.',
             style: GoogleFonts.plusJakartaSans(fontSize: 12, height: 1.6, color: AppTheme.textMuted),
           ),
         ),
         _buildAccordionTile(
-          title: 'DELIVERY & WHITE-GLOVE RETURN',
+          title: 'DELIVERY & EASY RETURN',
           content: Text(
-            'Complimentary courier delivery across Nigeria for orders above ₦150,000. Orders delivered in luxury gift packaging within 2-4 business days. 7-day white-glove return policy.',
+            'Free delivery in Lagos for orders above ₦150,000. Delivered in fine gift box in 2-4 days. Not happy? Return within 7 days — chat with us on WhatsApp and we will sort it out. Pay on delivery available in Lagos & Abuja.',
             style: GoogleFonts.plusJakartaSans(fontSize: 12, height: 1.6, color: AppTheme.textMuted),
           ),
         ),
@@ -655,7 +655,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               const Icon(Icons.auto_awesome, color: AppTheme.primaryGold, size: 16),
               const SizedBox(width: 8),
               Text(
-                'COMPLETE THE LOOK • SAVE ${pairing.bundleDiscountPercent}%',
+                'MATCHING SET • SAVE ${pairing.bundleDiscountPercent}%',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -696,7 +696,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 onPressed: () {
                   ref.read(cartProvider.notifier).addBundleToCart(pairing);
                 },
-                child: const Text('ADD ENSEMBLE', style: TextStyle(fontSize: 10)),
+                child: const Text('ADD SET', style: TextStyle(fontSize: 10)),
               ),
             ],
           ),
@@ -725,12 +725,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'CLIENT TESTIMONIALS',
+            'WHAT BUYERS ARE SAYING',
             style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
           ),
           const SizedBox(height: 6),
           Text(
-            'Verified Owner Reviews',
+            'Real Reviews From Real Buyers',
             style: GoogleFonts.cormorantGaramond(fontSize: 28, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 24),
@@ -782,7 +782,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           backgroundColor: Colors.white,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           title: Text(
-            'Footwear Sizing & Conversion Guide',
+            'What Size Will Fit You?',
             style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
@@ -791,7 +791,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Our heels and mules fit true to size. If you have a wider foot, we recommend taking one size up.',
+                  'Our shoes follow normal size. If your foot is wide, or you wear size 40 in Bata / market shoes, take one size up. Still not sure? Chat with us on WhatsApp with your normal size.',
                   style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
                 ),
                 const SizedBox(height: 16),

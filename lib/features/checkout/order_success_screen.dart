@@ -46,7 +46,7 @@ class OrderSuccessScreen extends StatelessWidget {
                       const SizedBox(height: 28),
 
                       Text(
-                        'ORDER CONFIRMED',
+                        'ORDER RECEIVED — THANK YOU!',
                         style: GoogleFonts.plusJakartaSans(
                           color: AppTheme.primaryGoldDark,
                           fontSize: 11,
@@ -57,7 +57,7 @@ class OrderSuccessScreen extends StatelessWidget {
                       const SizedBox(height: 8),
 
                       Text(
-                        'Thank You for Your Order',
+                        'We Don Receive Your Order',
                         style: GoogleFonts.cormorantGaramond(
                           fontSize: isMobile ? 32 : 44,
                           fontWeight: FontWeight.w700,
@@ -67,7 +67,7 @@ class OrderSuccessScreen extends StatelessWidget {
                       const SizedBox(height: 16),
 
                       Text(
-                        'Your order #$orderNumber has been placed successfully with our atelier. A confirmation receipt and live courier tracking code have been dispatched to your email and phone.',
+                        'Your order #$orderNumber is confirmed. We will WhatsApp you within 2 hours to confirm delivery. Receipt and tracking have been sent to your email and phone.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
@@ -89,7 +89,7 @@ class OrderSuccessScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Order Reference:', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                                Text('Order Number:', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
                                 Text(orderNumber, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold)),
                               ],
                             ),
@@ -97,7 +97,7 @@ class OrderSuccessScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Estimated Dispatch:', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                                Text('We go ship:', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
                                 Text('Within 24 Hours', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.successGreen)),
                               ],
                             ),
@@ -105,8 +105,8 @@ class OrderSuccessScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Delivery Service:', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
-                                Text('White-Glove VIP Courier', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold)),
+                                Text('Delivery:', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                                Text('Fast VIP Courier + Tracking', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ],
@@ -119,7 +119,7 @@ class OrderSuccessScreen extends StatelessWidget {
                         height: 52,
                         child: ElevatedButton(
                           onPressed: () => context.go('/shop'),
-                          child: const Text('CONTINUE EXPLORING CREATIONS'),
+                          child: const Text('CONTINUE SHOPPING'),
                         ),
                       ),
                     ],

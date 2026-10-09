@@ -93,7 +93,7 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ATELIER PRIVÉ',
+                    'WELCOME BACK',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -103,7 +103,7 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Client Profile',
+                    'Your Account',
                     style: GoogleFonts.cormorantGaramond(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -172,7 +172,7 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
                         border: Border.all(color: isAdmin ? AppTheme.primaryGold : AppTheme.borderSubtle),
                       ),
                       child: Text(
-                        isAdmin ? 'ATELIER ADMINISTRATOR' : 'VIP ATELIER MEMBER',
+                        isAdmin ? 'STORE ADMIN' : 'VIP MEMBER',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
@@ -202,19 +202,38 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
 
           const SizedBox(height: 28),
 
-          // Admin Button (If Admin)
+          // 1. Client Dashboard Button (Always available for logged-in users)
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.obsidianNoir,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            icon: const Icon(Icons.dashboard_outlined, size: 18, color: AppTheme.primaryGold),
+            label: Text(
+              'OPEN CLIENT DASHBOARD & ORDERS',
+              style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.go('/account');
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // 2. Admin Button (If Admin)
           if (isAdmin) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.obsidianNoir,
-                foregroundColor: AppTheme.primaryGold,
+                backgroundColor: AppTheme.primaryGold,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                side: const BorderSide(color: AppTheme.primaryGold, width: 1.5),
               ),
               icon: const Icon(Icons.admin_panel_settings_outlined, size: 18),
               label: Text(
-                'ENTER ATELIER CMS & ADMIN PORTAL',
+                'OPEN ADMIN DASHBOARD',
                 style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
               ),
               onPressed: () {
@@ -223,9 +242,27 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
               },
             ),
             const SizedBox(height: 12),
+          ] else ...[
+            // Quick Admin Access Link for Store Managers
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.textMuted,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+              ),
+              icon: const Icon(Icons.lock_outline, size: 14),
+              label: Text(
+                'Store Administrator? Access Back-Office Portal',
+                style: GoogleFonts.plusJakartaSans(fontSize: 11, fontStyle: FontStyle.italic),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go('/admin');
+              },
+            ),
+            const SizedBox(height: 8),
           ],
 
-          // Shop Now / Concierge
+          // 3. Shop Now / Concierge
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -234,7 +271,7 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
             ),
             icon: const Icon(Icons.shopping_bag_outlined, size: 16, color: AppTheme.obsidianNoir),
             label: Text(
-              'BROWSE ATELIER CREATIONS',
+              'SHOP BESTSELLERS',
               style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: AppTheme.obsidianNoir),
             ),
             onPressed: () {
@@ -283,7 +320,7 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ATELIER PRIVÉ',
+                    'JOIN LUXE LAGOS',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -293,7 +330,7 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Client Services',
+                    'Sign In / Create Account',
                     style: GoogleFonts.cormorantGaramond(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -410,14 +447,14 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
             child: authState.isLoading
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : Text(
-                    'SIGN IN TO ATELIER',
+                    'SIGN IN',
                     style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2.0),
                   ),
           ),
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'Administrator? Use your admin email to access the CMS.',
+              'Fast checkout with saved details + 10% off your first order when you join.',
               style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textMuted, fontStyle: FontStyle.italic),
               textAlign: TextAlign.center,
             ),
@@ -443,12 +480,12 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
               children: [
                 const Icon(Icons.verified, size: 16, color: AppTheme.successGreen),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Instant VIP Access • No email verification required',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppTheme.successGreen),
-                  ),
+              Expanded(
+                child: Text(
+                  'Instant access • No long wahala • Get 10% off',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppTheme.successGreen),
                 ),
+              ),
               ],
             ),
           ),
@@ -503,7 +540,7 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
             child: authState.isLoading
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : Text(
-                    'CREATE VIP ACCOUNT',
+                    'CREATE MY ACCOUNT',
                     style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2.0),
                   ),
           ),

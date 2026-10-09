@@ -20,13 +20,13 @@ class _ContactScreenState extends State<ContactScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _msgController = TextEditingController();
-  String _inquiryType = 'Bespoke Sizing & Styling';
+  String _inquiryType = 'Help me choose size / style';
 
   final List<String> _types = [
-    'Bespoke Sizing & Styling',
-    'Custom Colorway / Leather Request',
-    'Order Status & Tracking',
-    'Corporate & Bridal Gifting',
+    'Help me choose size / style',
+    'I want another colour',
+    'Where is my order?',
+    'Wedding / Aso-ebi / Bulk order',
   ];
 
   @override
@@ -47,7 +47,7 @@ class _ContactScreenState extends State<ContactScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Your inquiry has been received. Our VIP stylist will reach out within 2 hours.'),
+        content: Text('Thank you! We have received your message. We will WhatsApp or call you within 2 hours.'),
         backgroundColor: AppTheme.obsidianNoir,
       ),
     );
@@ -78,7 +78,7 @@ class _ContactScreenState extends State<ContactScreen> {
                   child: Column(
                     children: [
                       Text(
-                        'VIP CLIENT SERVICES',
+                        'TALK TO US — WE REPLY FAST',
                         style: GoogleFonts.plusJakartaSans(
                           color: AppTheme.primaryGold,
                           fontSize: 11,
@@ -88,7 +88,7 @@ class _ContactScreenState extends State<ContactScreen> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'The Concierge Salon',
+                        'Chat With Us on WhatsApp',
                         style: GoogleFonts.cormorantGaramond(
                           color: Colors.white,
                           fontSize: isMobile ? 32 : 44,
@@ -99,7 +99,7 @@ class _ContactScreenState extends State<ContactScreen> {
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 580),
                         child: Text(
-                          'Our dedicated styling advisors are available to assist you with sizing recommendations, leather care questions, or matching ensemble guidance.',
+                          'Not sure of your size? Want to see the bag on live video before you pay? Message us — we help with size, colour, matching bag + shoe, and delivery.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(color: AppTheme.textMuted, fontSize: 13, height: 1.6),
                         ),
@@ -145,19 +145,19 @@ class _ContactScreenState extends State<ContactScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'DIRECT CONCIERGE ACCESS',
+          'CALL OR WHATSAPP US DIRECTLY',
           style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
         ),
         const SizedBox(height: 16),
-        _contactItem(Icons.chat, 'WhatsApp VIP Concierge', '+234 810 000 BAGS', () {
-          launchUrl(Uri.parse('https://wa.me/2348100000000'));
+        _contactItem(Icons.chat, 'WhatsApp (Fastest)', '+234 810 123 4567', () {
+          launchUrl(Uri.parse('https://wa.me/2348101234567'));
         }),
         const SizedBox(height: 16),
-        _contactItem(Icons.email_outlined, 'Private Client Email', AppConfig.conciergeEmail, () {
+        _contactItem(Icons.email_outlined, 'Email Us', AppConfig.conciergeEmail, () {
           launchUrl(Uri.parse('mailto:${AppConfig.conciergeEmail}'));
         }),
         const SizedBox(height: 16),
-        _contactItem(Icons.location_on_outlined, 'Private Atelier Showroom', 'Victoria Island, Lagos, Nigeria', null),
+        _contactItem(Icons.location_on_outlined, 'Visit Our Store', '12 Admiralty Way, Lekki Phase 1, Lagos', null),
         const SizedBox(height: 32),
         Container(
           padding: const EdgeInsets.all(20),
@@ -165,10 +165,11 @@ class _ContactScreenState extends State<ContactScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('CONCIERGE HOURS', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+              Text('WE ARE OPEN', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
               const SizedBox(height: 8),
-              Text('Monday - Saturday: 8:00 AM - 9:00 PM WAT', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
-              Text('Sunday: 12:00 PM - 6:00 PM WAT', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+              Text('Mon - Sat: 8am - 9pm (Lagos time)', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+              Text('Sunday: 12pm - 6pm (Lagos time)', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+              Text('We reply on WhatsApp within 30 mins.', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
             ],
           ),
         ),
@@ -208,13 +209,13 @@ class _ContactScreenState extends State<ContactScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'SEND A MESSAGE TO OUR STYLISTS',
+            'SEND US A MESSAGE',
             style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: AppTheme.obsidianNoir),
           ),
           const SizedBox(height: 20),
           DropdownButtonFormField<String>(
             initialValue: _inquiryType,
-            decoration: const InputDecoration(labelText: 'Nature of Inquiry *'),
+            decoration: const InputDecoration(labelText: 'What do you need? *'),
             items: _types.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
             onChanged: (val) {
               if (val != null) setState(() => _inquiryType = val);
@@ -228,12 +229,12 @@ class _ContactScreenState extends State<ContactScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Your Email Address *'),
+            decoration: const InputDecoration(labelText: 'Your Email or WhatsApp Number *'),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _msgController,
-            decoration: const InputDecoration(labelText: 'Message / Sizing Inquiries *'),
+            decoration: const InputDecoration(labelText: 'Your Message * (e.g. I wear size 40, will this heel fit?)'),
             maxLines: 4,
           ),
           const SizedBox(height: 24),
@@ -242,7 +243,7 @@ class _ContactScreenState extends State<ContactScreen> {
             height: 50,
             child: ElevatedButton(
               onPressed: _handleSubmit,
-              child: const Text('TRANSMIT INQUIRY'),
+              child: const Text('SEND MESSAGE'),
             ),
           ),
         ],

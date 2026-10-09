@@ -43,7 +43,7 @@ class PairingsScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       Text(
-                        'THE ART OF THE ENSEMBLE',
+                        'MATCHING BAG & SHOE SETS',
                         style: GoogleFonts.plusJakartaSans(
                           color: AppTheme.primaryGold,
                           fontSize: 11,
@@ -53,7 +53,7 @@ class PairingsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Complete The Look: Bags & Footwear',
+                        'Perfect Match for Owambe & Weddings',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.cormorantGaramond(
                           color: Colors.white,
@@ -65,7 +65,7 @@ class PairingsScreen extends ConsumerWidget {
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 640),
                         child: Text(
-                          'Carefully coordinated accessories crafted in matching leather finishes, tones, and hardware. Enjoy an exclusive 10% to 15% privilege when purchasing matching sets.',
+                          'We don already match your bag to your shoe — same colour, same leather. Buy together and save 10% to 15%. Perfect for brides, wedding guests and Owambe slayers.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
                             color: AppTheme.textMuted,
@@ -173,7 +173,7 @@ class PairingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           color: AppTheme.primaryGold,
           child: Text(
-            'SAVE ${pairing.bundleDiscountPercent}% BUNDLE PRIVILEGE',
+            'SAVE ${pairing.bundleDiscountPercent}% — BUY TOGETHER DEAL',
             style: GoogleFonts.plusJakartaSans(
               color: AppTheme.obsidianNoir,
               fontSize: 10,
@@ -205,14 +205,14 @@ class PairingsScreen extends ConsumerWidget {
         // Products breakdown list
         if (pairing.bagProduct != null)
           _itemLine(
-            'Handbag',
+            'Bag',
             pairing.bagProduct!.title,
             pairing.bagProduct!.formattedEffectivePrice,
             () => context.go('/product/${pairing.bagProduct!.slug}'),
           ),
         if (pairing.shoeProduct != null)
           _itemLine(
-            'Footwear',
+            'Shoe',
             pairing.shoeProduct!.title,
             pairing.shoeProduct!.formattedEffectivePrice,
             () => context.go('/product/${pairing.shoeProduct!.slug}'),
@@ -228,7 +228,7 @@ class PairingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ENSEMBLE PRICE',
+                  'PRICE FOR BOTH',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -270,7 +270,7 @@ class PairingsScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(cartProvider.notifier).addBundleToCart(pairing);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ensemble added to shopping bag!')),
+                const SnackBar(content: Text('Matching set added to your bag!')),
               );
             },
             child: const Text('ADD BOTH TO BAG'),

@@ -30,23 +30,23 @@ class LuxuryFooter extends ConsumerWidget {
             children: const [
               _TrustItem(
                 icon: Icons.verified_outlined,
-                title: '100% GENUINE LEATHER GUARANTEE',
-                subtitle: 'Pure Italian full-grain hides • Zero flaking or peeling',
+                title: '100% REAL LEATHER',
+                subtitle: 'No fake, no peeling. If it peels, we refund you.',
               ),
               _TrustItem(
                 icon: Icons.local_shipping_outlined,
-                title: 'PRIORITY VIP DISPATCH',
-                subtitle: 'Same-day in Lagos • 24–48hrs to Abuja, PH & Nationwide',
+                title: 'FAST DELIVERY + PAY ON DELIVERY',
+                subtitle: 'Same-day in Lagos • 24–48hrs to Abuja, PH & everywhere',
               ),
               _TrustItem(
                 icon: Icons.shield_outlined,
-                title: '24K NON-TARNISH HARDWARE',
-                subtitle: 'Weather-tested to preserve gold luster in coastal humidity',
+                title: 'GOLD THAT WILL NOT FADE',
+                subtitle: 'Rain and sun will not change the colour. 7-day easy return.',
               ),
               _TrustItem(
                 icon: Icons.chat_outlined,
-                title: 'DIRECT WHATSAPP CONCIERGE',
-                subtitle: 'Real-time video viewing & personal styling consultants',
+                title: 'CHAT ON WHATSAPP ANYTIME',
+                subtitle: 'See your bag on live video before you pay. We reply fast.',
               ),
             ],
           ),
@@ -61,12 +61,12 @@ class LuxuryFooter extends ConsumerWidget {
               children: [
                 _buildBrandBio(context, siteSettings),
                 const SizedBox(height: 32),
-                _buildLinksGroup(context, 'COLLECTIONS', [
+                _buildLinksGroup(context, 'SHOP', [
                   'Tote Bags',
                   'Crossbody Bags',
-                  'Evening Clutches',
-                  'Sculpted Footwear',
-                  'Complete The Look',
+                  'Party Clutches',
+                  'Comfy Heels',
+                  'Matching Bag + Shoe Sets',
                 ]),
                 const SizedBox(height: 24),
                 _buildConciergeGroup(context, siteSettings),
@@ -80,12 +80,12 @@ class LuxuryFooter extends ConsumerWidget {
                 const SizedBox(width: 48),
                 Expanded(
                   flex: 2,
-                  child: _buildLinksGroup(context, 'CREATIONS', [
+                  child: _buildLinksGroup(context, 'SHOP', [
                     'Tote Bags',
                     'Crossbody Bags',
-                    'Evening Clutches',
-                    'Luxury Heels',
-                    'Complete The Look',
+                    'Party Clutches',
+                    'Comfy Heels',
+                    'Matching Bag + Shoe Sets',
                   ]),
                 ),
                 Expanded(
@@ -117,8 +117,38 @@ class LuxuryFooter extends ConsumerWidget {
                   letterSpacing: 1.2,
                 ),
               ),
+              Wrap(
+                spacing: 20,
+                runSpacing: 8,
+                children: [
+                  InkWell(
+                    onTap: () => context.go('/account'),
+                    child: Text(
+                      'CLIENT SUITE (MY ACCOUNT)',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white70,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => context.go('/admin'),
+                    child: Text(
+                      'ATELIER CMS & ADMIN',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: AppTheme.primaryGold,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               Text(
-                'LAGOS  •  LONDON  •  MILAN',
+                'LEKKI  •  VICTORIA ISLAND  •  ABUJA  •  NATIONWIDE',
                 style: GoogleFonts.plusJakartaSans(
                   color: AppTheme.primaryGold,
                   fontSize: 10,
@@ -166,7 +196,7 @@ class LuxuryFooter extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'VIP CONCIERGE & ATELIER',
+          'TALK TO US',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.primaryGold,
             fontSize: 11,
@@ -241,7 +271,7 @@ class LuxuryFooter extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'THE ATELIER PRIVATE CIRCLE',
+          'GET 10% OFF YOUR FIRST ORDER',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.primaryGold,
             fontSize: 11,
@@ -251,7 +281,7 @@ class LuxuryFooter extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Receive invitation-only preview access to limited production runs.',
+          'Join 5,000+ Lagos women. First access to new Owambe sets + WhatsApp deals.',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.textMuted,
             fontSize: 12,
@@ -290,10 +320,10 @@ class LuxuryFooter extends ConsumerWidget {
               ),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Thank you for subscribing to the Private Circle.')),
+                  const SnackBar(content: Text('Welcome! Your 10% code is on its way to your email & WhatsApp.')),
                 );
               },
-              child: const Text('JOIN', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+              child: const Text('GET 10% OFF', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
             ),
           ],
         ),

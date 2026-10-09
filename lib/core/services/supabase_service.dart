@@ -17,7 +17,7 @@ class SupabaseService {
       name: 'Tote Bags',
       slug: 'tote-bags',
       type: 'bags',
-      description: 'Architectural executive totes engineered for high-flying women. Holds your laptop, planner, and vanity pouch with zero sagging.',
+      description: 'Strong office totes for working women. Carries your 14-inch laptop, planner and purse — no sagging, no peeling.',
       imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80',
       sortOrder: 1,
     ),
@@ -26,7 +26,7 @@ class SupabaseService {
       name: 'Crossbody Bags',
       slug: 'crossbody-bags',
       type: 'bags',
-      description: 'Chic hands-free luxury for effortless airport travel, weekend brunches, and high-street shopping in Victoria Island.',
+      description: 'Hands-free bags for market runs, travel, brunch in VI and everyday slay. Light, fine and easy to carry.',
       imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
       sortOrder: 2,
     ),
@@ -35,16 +35,16 @@ class SupabaseService {
       name: 'Shoulder Bags',
       slug: 'shoulder-bags',
       type: 'bags',
-      description: 'Sleek under-the-arm baguettes and chain carriers crafted to transition seamlessly from desk to dinner.',
+      description: 'Fine under-arm bags that go from office in the morning to dinner at night. One bag, many occasions.',
       imageUrl: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80',
       sortOrder: 3,
     ),
     const Category(
       id: 'c4444444-4444-4444-4444-444444444444',
-      name: 'Evening Clutches',
+      name: 'Party Clutches',
       slug: 'evening-clutches',
       type: 'bags',
-      description: 'Show-stopping crystal minaudières and gilded clutches designed for red carpets, wedding guest glam, and grand evening receptions.',
+      description: 'Shining crystal clutches for weddings, Owambe, church anniversary and red-carpet nights. Pepper them well.',
       imageUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=800&q=80',
       sortOrder: 4,
     ),
@@ -53,16 +53,16 @@ class SupabaseService {
       name: 'Mini & Bucket Bags',
       slug: 'mini-bucket-bags',
       type: 'bags',
-      description: 'Petite structured vanity silhouettes in rich pebble leather—holds your iPhone Pro Max, lip gloss, and cards in pure style.',
+      description: 'Small fine bags for phone, lip gloss and cards. Perfect for quick outings and Detty December parties.',
       imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80',
       sortOrder: 5,
     ),
     const Category(
       id: 'c6666666-6666-6666-6666-666666666666',
-      name: 'Luxury Heels',
+      name: 'Comfy Heels',
       slug: 'luxury-heels',
       type: 'shoes',
-      description: 'Architectural stilettos and party pumps engineered with triple-layer memory-foam arch support to dance all night at Owambes without foot fatigue.',
+      description: 'Fine party heels with soft padding. Dance for hours at Owambe with no leg pain. Brides love them.',
       imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80',
       sortOrder: 6,
     ),
@@ -71,7 +71,7 @@ class SupabaseService {
       name: 'Mules & Slides',
       slug: 'mules-slides',
       type: 'shoes',
-      description: 'Slip-on block mules with cushioned glove-leather insoles for effortless boardroom poise and luxury brunch dates.',
+      description: 'Easy slip-on mules for office, church and brunch. Soft inside, classy outside.',
       imageUrl: 'https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=800&q=80',
       sortOrder: 7,
     ),
@@ -89,8 +89,8 @@ class SupabaseService {
       basePrice: 185000.0,
       salePrice: 165000.0,
       currency: 'NGN',
-      shortDescription: 'Sculpted architecture in full-grain calfskin leather with protective brass feet and dual top handles.',
-      description: 'The Sovereign Tote is the definitive hallmark of modern feminine leadership. Handcrafted from top-tier full-grain calfskin, it features a structured silhouette that maintains its refined profile whether lightly packed or holding your daily essentials. Accommodates up to a 14-inch MacBook Pro with ease.',
+      shortDescription: 'Strong office tote in real leather. Carries your 14-inch laptop without bending or peeling.',
+      description: 'The Sovereign Tote is for women who mean business. Made with real thick leather, it stands well whether empty or full. Your 14-inch laptop, files and purse enter with ease. Perfect for Lekki to Abuja executives.',
       images: [
         'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1000&q=80',
         'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1000&q=80',
@@ -126,8 +126,8 @@ class SupabaseService {
       subCategory: 'Crossbody',
       basePrice: 145000.0,
       currency: 'NGN',
-      shortDescription: 'Diamond-quilted supple lambskin leather elevated with our 24K gold-plated lock mechanism.',
-      description: 'Radiating effortless Parisian chic, the Aurelia Crossbody transitions seamlessly from morning meetings to candlelit evenings. The sliding gold gourmette chain can be doubled for an over-the-shoulder carry or extended for crossbody freedom.',
+      shortDescription: 'Soft quilted crossbody with fine gold lock. Wear long or double the chain for dinner.',
+      description: 'The Aurelia Crossbody goes from morning meeting to evening dinner without stress. Soft leather, fine gold chain you can wear long across your body or double for shoulder. Light and fine for everyday Lagos movement.',
       images: [
         'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1000&q=80',
         'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=1000&q=80',
@@ -163,8 +163,8 @@ class SupabaseService {
       basePrice: 175000.0,
       salePrice: 155000.0,
       currency: 'NGN',
-      shortDescription: 'Hand-set pave crystals on a gold-tone hard-shell frame with detachable jewelry snake chain.',
-      description: 'An heirloom-worthy evening companion. The Venetian Minaudière captures every angle of ambient light with over 1,200 hand-set faceted crystals. Holds an iPhone 16 Pro Max, keys, lipstick, and cards effortlessly.',
+      shortDescription: 'Shining crystal party clutch with fine gold chain. Fits iPhone 16 Pro Max.',
+      description: 'This clutch will make you shine at any wedding or Owambe. Over 1,200 crystals that catch light from every angle. Your iPhone 16 Pro Max, keys, lipstick and cards enter well. Bridesmaids and wedding guests love it.',
       images: [
         'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=1000&q=80',
         'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1000&q=80',
@@ -198,8 +198,8 @@ class SupabaseService {
       subCategory: 'Bucket Bag',
       basePrice: 135000.0,
       currency: 'NGN',
-      shortDescription: 'Intricate hand-woven leather lattice exterior with a removable canvas drawstring pouch.',
-      description: 'The Riviera Bucket Bag infuses effortless vacation serenity into modern city life. Its architectural cage silhouette is woven from supple saddle-tanned leather strips, offering airy structure and timeless charm.',
+      shortDescription: 'Fine hand-woven bucket bag with drawstring pouch inside. Light and classy.',
+      description: 'The Riviera Bucket is simple and classy for everyday Lagos life — market, church, brunch. Woven with soft real leather, strong but light. Carries all your small things with style.',
       images: [
         'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1000&q=80',
       ],
@@ -233,8 +233,8 @@ class SupabaseService {
       basePrice: 120000.0,
       salePrice: 110000.0,
       currency: 'NGN',
-      shortDescription: 'Ultra-sleek 90s shoulder silhouette in lustrous croc-embossed glaze leather.',
-      description: 'Designed to sit snugly under the arm, the Milan Baguette is an ode to minimalist nostalgia. Finished with custom brushed-brass buckles and a discreet zip top for total peace of mind.',
+      shortDescription: 'Fine croc shoulder bag for daily use — sits well under the arm, from work to party.',
+      description: 'The Milan Baguette is that one bag you carry everywhere. Fits well under the arm, fine croc leather that cleans easily, strong zip so your things are safe in traffic or market.',
       images: [
         'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=1000&q=80',
       ],
@@ -268,8 +268,8 @@ class SupabaseService {
       basePrice: 115000.0,
       salePrice: 98000.0,
       currency: 'NGN',
-      shortDescription: 'Hand-embellished crystal brooch pump sculpted in luminous duchess satin with a 95mm stiletto heel.',
-      description: 'The definitive party and bridal silhouette. Features an ultra-flattering low-cut vamp, memory foam padded arch support for extended evening wear, and an Italian leather sole.',
+      shortDescription: 'Shining crystal heels with soft padding — dance for hours with no leg pain.',
+      description: 'The Bellissima is the party and bridal favourite. Fine satin, soft padding inside for your leg, and strong sole. Brides dance from church to reception, Owambe guests stand for hours — no wahala.',
       images: [
         'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=1000&q=80',
         'https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=1000&q=80',
@@ -305,8 +305,8 @@ class SupabaseService {
       subCategory: 'Mule',
       basePrice: 88000.0,
       currency: 'NGN',
-      shortDescription: 'Contemporary square-toe mule featuring a curved geometric 60mm block heel in butter-soft leather.',
-      description: 'Effortlessly elevates tailored trousers, linen skirts, and denim alike. The ergonomic block heel provides all-day stability without sacrificing haute editorial poise.',
+      shortDescription: 'Comfy low block-heel mule in soft leather — wear all day for office and church.',
+      description: 'The Paloma Mule is comfort + class. Low stable heel you can wear from morning office to evening outing. Goes well with trousers, skirt, native and jeans. No leg pain.',
       images: [
         'https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=1000&q=80',
       ],
@@ -340,8 +340,8 @@ class SupabaseService {
       basePrice: 110000.0,
       salePrice: 99000.0,
       currency: 'NGN',
-      shortDescription: 'Chic structured vanity box in grained leather with leather top-handle and detachable crossbody strap.',
-      description: 'The Capucine Vanity is an architectural statement in miniature form. Perfect for days when you only need the essentials: cards, keys, compact powder, and lipstick.',
+      shortDescription: 'Small fine box bag with handle + long strap. For phone, cards and lipstick.',
+      description: 'The Capucine Vanity is small but mighty. Carry only what you need — cards, keys, powder and lipstick. Hold by hand for party or wear across body. Very classy for weddings and dinners.',
       images: [
         'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1000&q=80',
       ],
@@ -369,21 +369,21 @@ class SupabaseService {
   static final List<ProductPairing> fallbackPairings = [
     ProductPairing(
       id: 'e1111111-1111-1111-1111-111111111111',
-      title: 'The Grand Soirée & Wedding Guest Set: Venetian Crystal Minaudière & Bellissima Stilettos',
+      title: 'Owambe Ready Set: Crystal Clutch + Crystal Heels',
       bagProductId: 'd3333333-3333-3333-3333-333333333333',
       shoeProductId: 'd6666666-6666-6666-6666-666666666666',
       bundleDiscountPercent: 15,
-      description: 'Turn heads at any high-society reception. Hand-set pave crystal clutch paired with arch-padded stiletto pumps designed for comfort throughout a 6-hour Owambe. Enjoy an exclusive 15% pairing privilege.',
+      description: 'Perfect match for weddings and Owambe. Shining clutch + comfy padded heels you can dance in for 6 hours. Buy together and save 15%. Brides and wedding guests love this set.',
       bagProduct: fallbackProducts[2],
       shoeProduct: fallbackProducts[5],
     ),
     ProductPairing(
       id: 'e2222222-2222-2222-2222-222222222222',
-      title: 'The Executive Power Duo: Sovereign Leather Tote & Paloma Sculpted Mules',
+      title: 'Office Power Set: Laptop Tote + Comfy Mules',
       bagProductId: 'd1111111-1111-1111-1111-111111111111',
       shoeProductId: 'd7777777-7777-7777-7777-777777777777',
       bundleDiscountPercent: 10,
-      description: 'The definitive boardroom power look for women of influence. Structured 14-inch laptop tote in scratch-resistant Italian calfskin paired with all-day comfortable 60mm block mules. Save 10% on the ensemble.',
+      description: 'For working women: strong tote that carries your 14-inch laptop + comfy low heels for all-day office and church. Real leather, no peeling. Save 10% when you buy both.',
       bagProduct: fallbackProducts[0],
       shoeProduct: fallbackProducts[6],
     ),
@@ -393,42 +393,42 @@ class SupabaseService {
     const Review(
       id: 'r1',
       productId: 'd1111111-1111-1111-1111-111111111111',
-      authorName: 'Amina B.',
+      authorName: 'Amina Bello',
       rating: 5,
-      headline: 'The leather quality is unmatched!',
-      comment: 'I took this tote to an executive board meeting at Eko Hotels in Victoria Island and received compliments the entire day. The structure is firm and holds my 14-inch laptop seamlessly.',
+      headline: 'Strong leather, worth it!',
+      comment: 'I carried this tote to a board meeting at Eko Hotels, VI. Everybody asked me about it. Firm, my 14-inch laptop entered well. No peeling at all.',
     ),
     const Review(
       id: 'r2',
       productId: 'd1111111-1111-1111-1111-111111111111',
-      authorName: 'Chidinma O.',
+      authorName: 'Chidinma Okafor',
       rating: 5,
-      headline: 'Pure luxury in your hands',
-      comment: 'Heavy, rich calfskin and the gold hardware has a true 24K non-tarnish luster. Worth every single Naira.',
+      headline: 'You can feel the quality',
+      comment: 'Heavy real leather, gold still shining after rain and sun. Worth every naira. Delivery to Lekki was same day.',
     ),
     const Review(
       id: 'r3',
       productId: 'd2222222-2222-2222-2222-222222222222',
-      authorName: 'Zainab K.',
+      authorName: 'Zainab Kabir',
       rating: 5,
-      headline: 'Best crossbody I own',
-      comment: 'The leather is so soft yet holds its shape. The sliding chain allows me to wear it long or double it up as an elegant shoulder bag for dinner in Ikoyi.',
+      headline: 'My favourite everyday bag',
+      comment: 'Soft but holds shape well. I wear the chain long in the day and double it for dinner in Ikoyi. Very fine.',
     ),
     const Review(
       id: 'r4',
       productId: 'd3333333-3333-3333-3333-333333333333',
-      authorName: 'Folashade A.',
+      authorName: 'Folashade Adeyemi',
       rating: 5,
-      headline: 'Breathtaking in person',
-      comment: 'Wore this to my sister\'s wedding in Abuja. The sparkle is unreal under chandelier lights. Plus, it fits my iPhone 16 Pro Max without bulging!',
+      headline: 'Shines too much!',
+      comment: 'Wore this to my sister wedding in Abuja. Under light ehn, it was blinding! And my iPhone 16 Pro Max entered. I peppered them.',
     ),
     const Review(
       id: 'r5',
       productId: 'd6666666-6666-6666-6666-666666666666',
-      authorName: 'Dr. Ngozi E.',
+      authorName: 'Dr. Ngozi Eze',
       rating: 5,
-      headline: 'Surprisingly comfortable for a high stiletto',
-      comment: 'The arch padding really makes a difference. Wore them for 6 hours straight through a wedding reception in Maitama without foot pain.',
+      headline: 'Heels wey no dey pain leg',
+      comment: 'I wore these heels for 6 hours for wedding in Maitama, my leg no pain. The padding is real. I don recommend to my colleagues.',
     ),
   ];
 
@@ -642,6 +642,36 @@ class SupabaseService {
       return List<Map<String, dynamic>>.from(response);
     } catch (_) {
       return [];
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getUserOrders({String? userId, String? email}) async {
+    final client = _client;
+    if (client == null) return [];
+    try {
+      dynamic query = client.from('orders').select('*, order_items(*)');
+      if (userId != null && userId.isNotEmpty && email != null && email.isNotEmpty) {
+        query = query.or('user_id.eq.$userId,customer_email.eq.$email');
+      } else if (userId != null && userId.isNotEmpty) {
+        query = query.eq('user_id', userId);
+      } else if (email != null && email.isNotEmpty) {
+        query = query.eq('customer_email', email);
+      }
+      final response = await query.order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<bool> updateProfile(String userId, Map<String, dynamic> updates) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('profiles').update(updates).eq('id', userId);
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

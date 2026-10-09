@@ -64,7 +64,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                         Row(
                           children: [
                             Text(
-                              'SHOPPING BAG',
+                              'YOUR BAG',
                               style: GoogleFonts.cormorantGaramond(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -109,8 +109,8 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                             Expanded(
                               child: Text(
                                 cartState.qualifiesForFreeShipping
-                                    ? 'Complimentary VIP courier shipping unlocked!'
-                                    : 'Add ₦${formatter.format(cartState.amountNeededForFreeShipping)} more for complimentary shipping',
+                                    ? 'You don unlock FREE delivery in Lagos!'
+                                    : 'Add ₦${formatter.format(cartState.amountNeededForFreeShipping)} more to get FREE delivery',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -295,8 +295,8 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                                     setState(() {
                                       _promoSuccess = success;
                                       _promoMessage = success
-                                          ? 'Promo applied successfully!'
-                                          : 'Invalid promo code. Try VIP10';
+                                          ? 'Promo applied! You don save money.'
+                                          : 'Hmm, that code no work. Try LAGOS10';
                                     });
                                   },
                                   child: const Text('APPLY'),
@@ -333,7 +333,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('VIP Privilege (${cartState.discountPercent.toInt()}%)', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.successGreen)),
+                                Text('Discount (${cartState.discountPercent.toInt()}%)', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.successGreen)),
                                 Text('-₦${formatter.format(cartState.discountAmount)}', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppTheme.successGreen, fontWeight: FontWeight.w600)),
                               ],
                             ),
@@ -390,7 +390,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                                 backgroundColor: AppTheme.obsidianNoir,
                               ),
                               child: Text(
-                                'PROCEED TO SECURE CHECKOUT',
+                                'CHECKOUT — PAY ON DELIVERY AVAILABLE',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -423,7 +423,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
             const Icon(Icons.shopping_bag_outlined, size: 54, color: AppTheme.primaryGold),
             const SizedBox(height: 16),
             Text(
-              'Your Shopping Bag is Empty',
+              'Your Bag is Empty',
               style: GoogleFonts.cormorantGaramond(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -431,7 +431,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Explore our curated collection of luxury handbags and sculpted footwear.',
+              'Fine bags and comfy shoes dey wait for you. Start with our bestsellers.',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
@@ -444,7 +444,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                 ref.read(cartProvider.notifier).toggleDrawer(false);
                 context.go('/shop');
               },
-              child: const Text('DISCOVER CREATIONS'),
+              child: const Text('SHOP BESTSELLERS'),
             ),
           ],
         ),
