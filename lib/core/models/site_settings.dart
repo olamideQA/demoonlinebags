@@ -54,7 +54,8 @@ class HeaderSettings {
   };
 }
 
-class HeroSettings {
+class HeroSlide {
+  final String id;
   final String badge;
   final String title;
   final String subtitle;
@@ -64,7 +65,8 @@ class HeroSettings {
   final String secondaryCtaUrl;
   final String imageUrl;
 
-  const HeroSettings({
+  const HeroSlide({
+    required this.id,
     required this.badge,
     required this.title,
     required this.subtitle,
@@ -75,28 +77,135 @@ class HeroSettings {
     required this.imageUrl,
   });
 
+  factory HeroSlide.fromJson(Map<String, dynamic> json) {
+    return HeroSlide(
+      id: json['id'] as String? ?? 'slide-1',
+      badge: json['badge'] as String? ?? 'ATELIER 2026 • SIGNATURE CAPSULE',
+      title: json['title'] as String? ?? 'Command Every Room.',
+      subtitle: json['subtitle'] as String? ?? 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
+      ctaText: json['cta_text'] as String? ?? 'EXPLORE BAGS',
+      ctaUrl: json['cta_url'] as String? ?? '/shop',
+      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'COMPLETE THE LOOK',
+      secondaryCtaUrl: json['secondary_cta_url'] as String? ?? '/pairings',
+      imageUrl: json['image_url'] as String? ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'badge': badge,
+    'title': title,
+    'subtitle': subtitle,
+    'cta_text': ctaText,
+    'cta_url': ctaUrl,
+    'secondary_cta_text': secondaryCtaText,
+    'secondary_cta_url': secondaryCtaUrl,
+    'image_url': imageUrl,
+  };
+
+  static const List<HeroSlide> defaultSlides = [
+    HeroSlide(
+      id: 's1',
+      badge: 'ATELIER 2026 • SIGNATURE CAPSULE',
+      title: 'Command Every Room.',
+      subtitle: 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
+      ctaText: 'EXPLORE BAGS',
+      ctaUrl: '/shop',
+      secondaryCtaText: 'COMPLETE THE LOOK',
+      secondaryCtaUrl: '/pairings',
+      imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
+    ),
+    HeroSlide(
+      id: 's2',
+      badge: 'NEW ARRIVAL • 90s ATELIER',
+      title: 'The Riviera 90s Croc.',
+      subtitle: 'Sculpted crocodile-embossed silhouette for brunch in Ikoyi & rooftop soirees.',
+      ctaText: 'DISCOVER BAGUETTES',
+      ctaUrl: '/shop',
+      secondaryCtaText: 'VIEW MATCHING MULES',
+      secondaryCtaUrl: '/pairings',
+      imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1600&q=85',
+    ),
+    HeroSlide(
+      id: 's3',
+      badge: 'OWAMBE GLAMOUR • LIMITED ATELIER',
+      title: 'Venetian Minaudière.',
+      subtitle: 'Swarovski-cut crystals catching every chandelier light. Fits iPhone 16 Pro Max.',
+      ctaText: 'SHOP EVENING BAGS',
+      ctaUrl: '/shop',
+      secondaryCtaText: 'EXPLORE ENSEMBLES',
+      secondaryCtaUrl: '/pairings',
+      imageUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=1600&q=85',
+    ),
+    HeroSlide(
+      id: 's4',
+      badge: 'THE SHOE SALON • EFFORTLESS CO-ORD',
+      title: 'Sculpted Mules & Heels.',
+      subtitle: 'Engineered memory-foam arch support for 6-hour Owambe comfort without fatigue.',
+      ctaText: 'THE SHOE SALON',
+      ctaUrl: '/shop',
+      secondaryCtaText: 'PAIR WITH BAGS',
+      secondaryCtaUrl: '/pairings',
+      imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=1600&q=85',
+    ),
+  ];
+}
+
+class HeroSettings {
+  final String badge;
+  final String title;
+  final String subtitle;
+  final String ctaText;
+  final String ctaUrl;
+  final String secondaryCtaText;
+  final String secondaryCtaUrl;
+  final String imageUrl;
+  final List<HeroSlide> slides;
+
+  const HeroSettings({
+    required this.badge,
+    required this.title,
+    required this.subtitle,
+    required this.ctaText,
+    required this.ctaUrl,
+    required this.secondaryCtaText,
+    required this.secondaryCtaUrl,
+    required this.imageUrl,
+    this.slides = HeroSlide.defaultSlides,
+  });
+
   factory HeroSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const HeroSettings(
-        badge: 'NEW CAPSULE 2026 • LIMITED ATELIER EDITION',
-        title: 'Command Every Room.\nUnapologetic Luxury.',
-        subtitle: 'Crafted in certified Italian full-grain calfskin with non-tarnish 24K gold hardware. Structured for executive boardroom poise and sculpted for high-society wedding guest glamour.',
-        ctaText: 'EXPLORE SIGNATURE BAGS',
+        badge: 'ATELIER 2026 • SIGNATURE CAPSULE',
+        title: 'Command Every Room.',
+        subtitle: 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
+        ctaText: 'EXPLORE BAGS',
         ctaUrl: '/shop',
-        secondaryCtaText: 'COMPLETE THE LOOK (SETS)',
+        secondaryCtaText: 'COMPLETE THE LOOK',
         secondaryCtaUrl: '/pairings',
         imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
+        slides: HeroSlide.defaultSlides,
       );
     }
+
+    List<HeroSlide> parsedSlides = HeroSlide.defaultSlides;
+    if (json['slides'] != null && json['slides'] is List && (json['slides'] as List).isNotEmpty) {
+      parsedSlides = (json['slides'] as List)
+          .map((item) => HeroSlide.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+
     return HeroSettings(
-      badge: json['badge'] as String? ?? 'NEW CAPSULE 2026 • LIMITED ATELIER EDITION',
-      title: json['title'] as String? ?? 'Command Every Room.\nUnapologetic Luxury.',
-      subtitle: json['subtitle'] as String? ?? 'Crafted in certified Italian full-grain calfskin with non-tarnish 24K gold hardware. Structured for executive boardroom poise and sculpted for high-society wedding guest glamour.',
-      ctaText: json['cta_text'] as String? ?? 'EXPLORE SIGNATURE BAGS',
+      badge: json['badge'] as String? ?? 'ATELIER 2026 • SIGNATURE CAPSULE',
+      title: json['title'] as String? ?? 'Command Every Room.',
+      subtitle: json['subtitle'] as String? ?? 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
+      ctaText: json['cta_text'] as String? ?? 'EXPLORE BAGS',
       ctaUrl: json['cta_url'] as String? ?? '/shop',
-      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'COMPLETE THE LOOK (SETS)',
+      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'COMPLETE THE LOOK',
       secondaryCtaUrl: json['secondary_cta_url'] as String? ?? '/pairings',
       imageUrl: json['image_url'] as String? ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
+      slides: parsedSlides,
     );
   }
 
@@ -109,6 +218,7 @@ class HeroSettings {
     'secondary_cta_text': secondaryCtaText,
     'secondary_cta_url': secondaryCtaUrl,
     'image_url': imageUrl,
+    'slides': slides.map((s) => s.toJson()).toList(),
   };
 }
 

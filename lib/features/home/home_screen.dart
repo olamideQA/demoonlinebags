@@ -13,6 +13,7 @@ import '../common/cart_drawer.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../common/product_card.dart';
+import 'widgets/hero_carousel.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -73,106 +74,7 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildHeroSection(BuildContext context, WidgetRef ref, bool isMobile) {
     final hero = ref.watch(siteSettingsProvider).hero;
-
-    return Container(
-      height: isMobile ? 540 : 660,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.obsidianNoir,
-        image: DecorationImage(
-          image: CachedNetworkImageProvider(hero.imageUrl),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black.withValues(alpha: 0.3),
-              Colors.black.withValues(alpha: 0.75),
-            ],
-          ),
-        ),
-        padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 24 : 72,
-          vertical: 48,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              color: AppTheme.primaryGold,
-              child: Text(
-                hero.badge,
-                style: GoogleFonts.plusJakartaSans(
-                  color: AppTheme.obsidianNoir,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2.5,
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              hero.title,
-              style: GoogleFonts.cormorantGaramond(
-                color: Colors.white,
-                fontSize: isMobile ? 36 : 56,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-                height: 1.1,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 620),
-              child: Text(
-                hero.subtitle,
-                style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: isMobile ? 13 : 15,
-                  height: 1.6,
-                ),
-              ),
-            ),
-            const SizedBox(height: 28),
-            Wrap(
-              spacing: 16,
-              runSpacing: 12,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppTheme.obsidianNoir,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-                  ),
-                  onPressed: () {
-                    if (hero.ctaUrl.contains('category')) {
-                      ref.read(selectedProductTypeProvider.notifier).state = 'bag';
-                    }
-                    context.go(hero.ctaUrl);
-                  },
-                  child: Text(hero.ctaText),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white, width: 1.5),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-                  ),
-                  onPressed: () => context.go(hero.secondaryCtaUrl),
-                  child: Text(hero.secondaryCtaText),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    return HeroCarousel(heroSettings: hero, isMobile: isMobile);
   }
 
   Widget _buildCategorySpotlights(BuildContext context, WidgetRef ref, AsyncValue<List<Category>> categoriesAsync, bool isMobile) {
@@ -359,9 +261,9 @@ class HomeScreen extends ConsumerWidget {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: isMobile ? 2 : (MediaQuery.of(context).size.width > 1200 ? 4 : 3),
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 32,
-              childAspectRatio: 0.62,
+              crossAxisSpacing: isMobile ? 12 : 20,
+              mainAxisSpacing: isMobile ? 20 : 32,
+              childAspectRatio: isMobile ? 0.58 : 0.64,
             ),
             itemCount: bags.length,
             itemBuilder: (ctx, index) => ProductCard(product: bags[index]),
@@ -620,9 +522,9 @@ class HomeScreen extends ConsumerWidget {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: isMobile ? 2 : (MediaQuery.of(context).size.width > 1200 ? 4 : 2),
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 32,
-              childAspectRatio: 0.62,
+              crossAxisSpacing: isMobile ? 12 : 20,
+              mainAxisSpacing: isMobile ? 20 : 32,
+              childAspectRatio: isMobile ? 0.58 : 0.64,
             ),
             itemCount: shoes.length,
             itemBuilder: (ctx, index) => ProductCard(product: shoes[index]),
@@ -780,9 +682,10 @@ class _ReviewBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 900;
     return Container(
-      width: 340,
-      padding: const EdgeInsets.all(28),
+      width: isMobile ? double.infinity : 340,
+      padding: EdgeInsets.all(isMobile ? 20 : 28),
       decoration: BoxDecoration(
         color: AppTheme.backgroundLight,
         border: Border.all(color: AppTheme.borderSubtle),

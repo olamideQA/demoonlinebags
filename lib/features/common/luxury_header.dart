@@ -29,43 +29,51 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
         color: Colors.white,
         border: Border(bottom: BorderSide(color: AppTheme.borderSubtle)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 24, vertical: isMobile ? 8 : 12),
       child: Row(
         children: [
           if (isMobile)
             IconButton(
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               icon: const Icon(Icons.menu, color: AppTheme.obsidianNoir),
               onPressed: () => _showMobileDrawer(context, ref, authState),
             ),
 
           // Brand Logo & Tagline (Dynamic from CMS)
-          InkWell(
-            onTap: () => context.go('/'),
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  siteSettings.header.brandName,
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: isMobile ? 18 : 24,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 2.2,
-                    color: AppTheme.obsidianNoir,
+          Flexible(
+            child: InkWell(
+              onTap: () => context.go('/'),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    siteSettings.header.brandName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.cormorantGaramond(
+                      fontSize: isMobile ? 16 : 24,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: isMobile ? 1.4 : 2.2,
+                      color: AppTheme.obsidianNoir,
+                    ),
                   ),
-                ),
-                Text(
-                  siteSettings.header.tagline,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: isMobile ? 8 : 9.5,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.8,
-                    color: AppTheme.primaryGoldDark,
+                  Text(
+                    siteSettings.header.tagline,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: isMobile ? 7.5 : 9.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: isMobile ? 1.0 : 1.8,
+                      color: AppTheme.primaryGoldDark,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -159,7 +167,9 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
 
           // Search Button
           IconButton(
-            icon: const Icon(Icons.search, color: AppTheme.obsidianNoir, size: 22),
+            padding: EdgeInsets.all(isMobile ? 5 : 8),
+            constraints: BoxConstraints(minWidth: isMobile ? 32 : 44, minHeight: isMobile ? 32 : 44),
+            icon: Icon(Icons.search, color: AppTheme.obsidianNoir, size: isMobile ? 20 : 22),
             onPressed: () => _showSearchDialog(context, ref),
             tooltip: 'Search creations',
           ),
@@ -169,7 +179,9 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
             clipBehavior: Clip.none,
             children: [
               IconButton(
-                icon: const Icon(Icons.favorite_border, color: AppTheme.obsidianNoir, size: 22),
+                padding: EdgeInsets.all(isMobile ? 5 : 8),
+                constraints: BoxConstraints(minWidth: isMobile ? 32 : 44, minHeight: isMobile ? 32 : 44),
+                icon: Icon(Icons.favorite_border, color: AppTheme.obsidianNoir, size: isMobile ? 20 : 22),
                 onPressed: () {
                   ref.read(selectedProductTypeProvider.notifier).state = null;
                   context.go('/shop');
@@ -178,20 +190,20 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
               ),
               if (wishlist.isNotEmpty)
                 Positioned(
-                  right: 4,
-                  top: 4,
+                  right: 2,
+                  top: 2,
                   child: Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(3),
                     decoration: const BoxDecoration(
                       color: AppTheme.primaryGold,
                       shape: BoxShape.circle,
                     ),
-                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
                     child: Text(
                       '${wishlist.length}',
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.white,
-                        fontSize: 9,
+                        fontSize: 8.5,
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
@@ -206,7 +218,9 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
             clipBehavior: Clip.none,
             children: [
               IconButton(
-                icon: const Icon(Icons.shopping_bag_outlined, color: AppTheme.obsidianNoir, size: 24),
+                padding: EdgeInsets.all(isMobile ? 5 : 8),
+                constraints: BoxConstraints(minWidth: isMobile ? 32 : 44, minHeight: isMobile ? 32 : 44),
+                icon: Icon(Icons.shopping_bag_outlined, color: AppTheme.obsidianNoir, size: isMobile ? 21 : 24),
                 onPressed: () {
                   ref.read(cartProvider.notifier).toggleDrawer(true);
                 },
@@ -214,20 +228,20 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
               ),
               if (cartState.totalItemCount > 0)
                 Positioned(
-                  right: 4,
-                  top: 4,
+                  right: 2,
+                  top: 2,
                   child: Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(3),
                     decoration: const BoxDecoration(
                       color: AppTheme.obsidianNoir,
                       shape: BoxShape.circle,
                     ),
-                    constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                     child: Text(
                       '${cartState.totalItemCount}',
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
@@ -242,10 +256,12 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
             clipBehavior: Clip.none,
             children: [
               IconButton(
+                padding: EdgeInsets.all(isMobile ? 5 : 8),
+                constraints: BoxConstraints(minWidth: isMobile ? 32 : 44, minHeight: isMobile ? 32 : 44),
                 icon: Icon(
                   authState.isAuthenticated ? Icons.person : Icons.person_outline_rounded,
                   color: authState.isAdmin ? AppTheme.primaryGoldDark : AppTheme.obsidianNoir,
-                  size: 24,
+                  size: isMobile ? 21 : 24,
                 ),
                 onPressed: () => AuthModal.show(context),
                 tooltip: authState.isAuthenticated
@@ -254,11 +270,11 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
               ),
               if (authState.isAuthenticated)
                 Positioned(
-                  right: 6,
-                  top: 6,
+                  right: 4,
+                  top: 4,
                   child: Container(
-                    width: 8,
-                    height: 8,
+                    width: 7,
+                    height: 7,
                     decoration: BoxDecoration(
                       color: authState.isAdmin ? AppTheme.primaryGold : AppTheme.successGreen,
                       shape: BoxShape.circle,

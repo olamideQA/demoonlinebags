@@ -194,36 +194,47 @@ class _ProductCardState extends ConsumerState<ProductCard> {
             const SizedBox(height: 6),
             Row(
               children: [
-                Text(
-                  p.formattedEffectivePrice,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.obsidianNoir,
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        p.formattedEffectivePrice,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.obsidianNoir,
+                        ),
+                      ),
+                      if (p.isOnSale) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          p.formattedBasePrice,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w400,
+                            color: AppTheme.textMuted,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                if (p.isOnSale) ...[
-                  const SizedBox(width: 8),
-                  Text(
-                    p.formattedBasePrice,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: AppTheme.textMuted,
-                      decoration: TextDecoration.lineThrough,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.star, size: 12, color: AppTheme.primaryGold),
+                    const SizedBox(width: 2),
+                    Text(
+                      p.rating.toStringAsFixed(1),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textDark,
+                      ),
                     ),
-                  ),
-                ],
-                const Spacer(),
-                const Icon(Icons.star, size: 13, color: AppTheme.primaryGold),
-                const SizedBox(width: 3),
-                Text(
-                  p.rating.toStringAsFixed(1),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textDark,
-                  ),
+                  ],
                 ),
               ],
             ),
