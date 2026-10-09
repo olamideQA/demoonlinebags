@@ -48,6 +48,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    // Rebuild content when user taps a different tab (was stuck before).
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
     final authState = ref.read(authProvider);
     _nameController = TextEditingController(text: authState.profile?.fullName ?? '');
     _phoneController = TextEditingController(text: authState.profile?.phone ?? '');
@@ -292,7 +296,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            fullName,
+                            'Hello, $fullName',
                             style: GoogleFonts.cormorantGaramond(
                               color: Colors.white,
                               fontSize: isMobile ? 24 : 32,
@@ -301,10 +305,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            email + (phone.isNotEmpty ? ' • $phone' : ''),
+                            'Welcome back • $email${phone.isNotEmpty ? ' • $phone' : ''}',
                             style: GoogleFonts.plusJakartaSans(
                               color: Colors.white70,
                               fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Your orders, saved bags and delivery details — all in one place.',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: Colors.white54,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -374,30 +386,30 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
               const Divider(color: Colors.white12, height: 1),
               const SizedBox(height: 24),
 
-              // Metric Highlights Cards
+              // Quick stats - plain language, useful at a glance.
               Wrap(
                 spacing: 16,
                 runSpacing: 12,
                 children: [
                   _buildMetricPill(
-                    icon: Icons.receipt_long,
-                    label: 'ACQUISITIONS',
-                    value: '${_userOrders.length} Order${_userOrders.length == 1 ? '' : 's'}',
+                    icon: Icons.shopping_bag_outlined,
+                    label: 'MY ORDERS',
+                    value: '${_userOrders.length} order${_userOrders.length == 1 ? '' : 's'}',
                   ),
                   _buildMetricPill(
-                    icon: Icons.favorite,
-                    label: 'SAVED CREATIONS',
-                    value: '${wishlist.length} Piece${wishlist.length == 1 ? '' : 's'}',
+                    icon: Icons.favorite_border,
+                    label: 'SAVED BAGS',
+                    value: '${wishlist.length} saved',
                   ),
                   _buildMetricPill(
-                    icon: Icons.local_shipping,
-                    label: 'VIP DELIVERY',
-                    value: 'Complimentary VIP Courier',
+                    icon: Icons.local_shipping_outlined,
+                    label: 'DELIVERY',
+                    value: 'Free in Lagos over ₦150,000',
                   ),
                   _buildMetricPill(
-                    icon: Icons.verified,
-                    label: 'CRAFTSMANSHIP',
-                    value: '100% Italian Leather Guarantee',
+                    icon: Icons.chat_outlined,
+                    label: 'NEED HELP?',
+                    value: 'WhatsApp: +234 906 791 4511',
                   ),
                 ],
               ),

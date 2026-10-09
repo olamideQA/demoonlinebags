@@ -569,10 +569,12 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
       final auth = ref.read(authProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Welcome back, ${auth.profile?.fullName ?? email}!'),
+          content: Text('Welcome back, ${auth.profile?.fullName ?? email}! Taking you to your dashboard.'),
           backgroundColor: AppTheme.obsidianNoir,
         ),
       );
+      // Clients land straight on their dashboard after signing in.
+      context.go('/account');
     }
   }
 
@@ -607,10 +609,12 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('VIP Account successfully created! Welcome to the Atelier, $name.'),
+          content: Text('Welcome to LUXE LAGOS, $name! Taking you to your dashboard.'),
           backgroundColor: AppTheme.obsidianNoir,
         ),
       );
+      // New clients land straight on their dashboard after creating account.
+      context.go('/account');
     }
   }
 }
