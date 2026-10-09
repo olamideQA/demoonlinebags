@@ -103,6 +103,7 @@ class HeroSlide {
     'image_url': imageUrl,
   };
 
+  // Local assets = never blank, instant even on slow MTN/Airtel. Permanent fix.
   static const List<HeroSlide> defaultSlides = [
     HeroSlide(
       id: 's1',
@@ -113,7 +114,7 @@ class HeroSlide {
       ctaUrl: '/shop',
       secondaryCtaText: 'SHOP MATCHING SETS',
       secondaryCtaUrl: '/pairings',
-      imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
+      imageUrl: 'assets/images/hero1.jpg',
     ),
     HeroSlide(
       id: 's2',
@@ -124,29 +125,29 @@ class HeroSlide {
       ctaUrl: '/shop',
       secondaryCtaText: 'SEE MATCHING SHOES',
       secondaryCtaUrl: '/pairings',
-      imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1600&q=85',
+      imageUrl: 'assets/images/hero2.jpg',
     ),
     HeroSlide(
       id: 's3',
       badge: 'OWAMBE & WEDDING SEASON • LIMITED',
       title: 'Shine Like Candlelight.',
       subtitle: 'Crystal clutch that catches every light at weddings. Fits iPhone 16 Pro Max.',
-      ctaText: 'SHOP EVENING BAGS',
+      ctaText: 'SHOP PARTY CLUTCHES',
       ctaUrl: '/shop',
-      secondaryCtaText: 'EXPLORE ENSEMBLES',
+      secondaryCtaText: 'SHOP BAG + SHOE SETS',
       secondaryCtaUrl: '/pairings',
-      imageUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=1600&q=85',
+      imageUrl: 'assets/images/hero3.jpg',
     ),
     HeroSlide(
       id: 's4',
-      badge: 'THE SHOE SALON • EFFORTLESS CO-ORD',
-      title: 'Sculpted Mules & Heels.',
-      subtitle: 'Engineered memory-foam arch support for 6-hour Owambe comfort without fatigue.',
-      ctaText: 'THE SHOE SALON',
+      badge: 'COMFY HEELS • DANCE ALL NIGHT',
+      title: 'Heels That Dont Hurt.',
+      subtitle: 'Soft padded heels for 6-hour Owambes, church and office. No leg pain, no wahala.',
+      ctaText: 'SHOP COMFY HEELS',
       ctaUrl: '/shop',
-      secondaryCtaText: 'PAIR WITH BAGS',
+      secondaryCtaText: 'MATCH WITH A BAG',
       secondaryCtaUrl: '/pairings',
-      imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=1600&q=85',
+      imageUrl: 'assets/images/hero4.jpg',
     ),
   ];
 }

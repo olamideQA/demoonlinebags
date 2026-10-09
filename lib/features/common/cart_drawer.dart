@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/providers/cart_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/fast_image.dart';
+import '../../core/utils/shop_image.dart';
 
 class CartDrawer extends ConsumerStatefulWidget {
   const CartDrawer({super.key});
@@ -157,10 +157,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                                       border: Border.all(color: AppTheme.borderSubtle),
                                     ),
                                     clipBehavior: Clip.antiAlias,
-                                    child: CachedNetworkImage(
-                                      imageUrl: fastImg(item.product.primaryImage, w: 200, q: 60),
-                                      fit: BoxFit.cover,
-                                    ),
+                                    child: ShopImage(fastImg(item.product.primaryImage, w: 200, q: 60)),
                                   ),
                                   const SizedBox(width: 16),
 

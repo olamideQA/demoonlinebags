@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/shop_image.dart';
 import '../common/announcement_bar.dart';
 import '../common/cart_drawer.dart';
 import '../common/luxury_bottom_nav.dart';
@@ -176,7 +176,7 @@ class AboutScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(border: Border.all(color: AppTheme.borderSubtle)),
         clipBehavior: Clip.antiAlias,
-        child: CachedNetworkImage(imageUrl: url, fit: BoxFit.cover),
+        child: ShopImage(url),
       ),
     );
   }

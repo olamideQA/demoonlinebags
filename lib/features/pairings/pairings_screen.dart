@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +12,7 @@ import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../../core/utils/fast_image.dart';
+import '../../core/utils/shop_image.dart';
 
 class PairingsScreen extends ConsumerWidget {
   const PairingsScreen({super.key});
@@ -141,10 +141,7 @@ class PairingsScreen extends ConsumerWidget {
               aspectRatio: 0.85,
               child: Container(
                 color: AppTheme.surfaceGrey,
-                child: CachedNetworkImage(
-                  imageUrl: fastImg(pairing.bagProduct!.primaryImage, w: 600, q: 60),
-                  fit: BoxFit.cover,
-                ),
+                child: ShopImage(fastImg(pairing.bagProduct!.primaryImage, w: 600, q: 60)),
               ),
             ),
           ),
@@ -155,10 +152,7 @@ class PairingsScreen extends ConsumerWidget {
               aspectRatio: 0.85,
               child: Container(
                 color: AppTheme.surfaceGrey,
-                child: CachedNetworkImage(
-                  imageUrl: fastImg(pairing.shoeProduct!.primaryImage, w: 600, q: 60),
-                  fit: BoxFit.cover,
-                ),
+                child: ShopImage(fastImg(pairing.shoeProduct!.primaryImage, w: 600, q: 60)),
               ),
             ),
           ),

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +14,7 @@ import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../../core/utils/fast_image.dart';
+import '../../core/utils/shop_image.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String slug;
@@ -205,10 +205,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               border: Border.all(color: AppTheme.borderSubtle),
             ),
             clipBehavior: Clip.antiAlias,
-            child: CachedNetworkImage(
-              imageUrl: fastImg(currentImage, w: 1000, q: 65),
-              fit: BoxFit.cover,
-            ),
+            child: ShopImage(fastImg(currentImage, w: 1000, q: 65)),
           ),
         ),
         const SizedBox(height: 16),
@@ -234,10 +231,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: CachedNetworkImage(
-                      imageUrl: fastImg(images[index], w: 200, q: 60),
-                      fit: BoxFit.cover,
-                    ),
+                    child: ShopImage(fastImg(images[index], w: 200, q: 60)),
                   ),
                 );
               },
@@ -673,7 +667,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 width: 60,
                 height: 72,
                 color: Colors.white,
-                child: CachedNetworkImage(imageUrl: otherProduct.primaryImage, fit: BoxFit.cover),
+                child: ShopImage(otherProduct.primaryImage),
               ),
               const SizedBox(width: 14),
               Expanded(

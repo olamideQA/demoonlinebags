@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +14,7 @@ import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../common/product_card.dart';
 import '../../core/utils/fast_image.dart';
+import '../../core/utils/shop_image.dart';
 import 'widgets/hero_carousel.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -155,10 +155,7 @@ class HomeScreen extends ConsumerWidget {
                       children: [
                         if (cat.imageUrl != null)
                           Positioned.fill(
-                            child: CachedNetworkImage(
-                              imageUrl: fastImg(cat.imageUrl!, w: 400, q: 60),
-                              fit: BoxFit.cover,
-                            ),
+                            child: ShopImage(fastImg(cat.imageUrl!, w: 400, q: 60)),
                           ),
                         Positioned.fill(
                           child: Container(
@@ -359,10 +356,7 @@ class HomeScreen extends ConsumerWidget {
               aspectRatio: 0.8,
               child: Container(
                 color: AppTheme.surfaceDark,
-                child: CachedNetworkImage(
-                  imageUrl: pairing.bagProduct!.primaryImage,
-                  fit: BoxFit.cover,
-                ),
+                child: ShopImage(pairing.bagProduct!.primaryImage),
               ),
             ),
           ),
@@ -373,10 +367,7 @@ class HomeScreen extends ConsumerWidget {
               aspectRatio: 0.8,
               child: Container(
                 color: AppTheme.surfaceDark,
-                child: CachedNetworkImage(
-                  imageUrl: pairing.shoeProduct!.primaryImage,
-                  fit: BoxFit.cover,
-                ),
+                child: ShopImage(pairing.shoeProduct!.primaryImage),
               ),
             ),
           ),
@@ -611,10 +602,7 @@ class HomeScreen extends ConsumerWidget {
           border: Border.all(color: AppTheme.borderSubtle),
         ),
         clipBehavior: Clip.antiAlias,
-        child: CachedNetworkImage(
-          imageUrl: fastImg('https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1000&q=80', w: 800, q: 60),
-          fit: BoxFit.cover,
-        ),
+        child: ShopImage(fastImg('https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1000&q=80', w: 800, q: 60)),
       ),
     );
   }

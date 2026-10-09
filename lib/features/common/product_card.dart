@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,23 +49,17 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                       scale: _isHovered ? 1.04 : 1.0,
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      child: CachedNetworkImage(
-                        imageUrl: fastImg(p.primaryImage, w: 600, q: 60),
+                      // FadeInImage: placeholder asset shows instantly, never blank.
+                      // Network image fades in when ready. Permanent fix.
+                      child: FadeInImage(
+                        placeholder: const AssetImage('assets/images/placeholder.jpg'),
+                        image: NetworkImage(fastImg(p.primaryImage, w: 600, q: 60)),
                         fit: BoxFit.cover,
-                        memCacheWidth: 600,
-                        maxWidthDiskCache: 600,
-                        fadeInDuration: const Duration(milliseconds: 200),
-                        placeholder: (context, url) => Container(
-                          color: AppTheme.surfaceGrey,
-                          child: const Center(
-                            child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 28),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: AppTheme.surfaceGrey,
-                          child: const Center(
-                            child: Icon(Icons.shopping_bag_outlined, color: AppTheme.textMuted, size: 32),
-                          ),
+                        fadeInDuration: const Duration(milliseconds: 250),
+                        fadeOutDuration: const Duration(milliseconds: 100),
+                        imageErrorBuilder: (context, err, stack) => Image.asset(
+                          'assets/images/placeholder.jpg',
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),

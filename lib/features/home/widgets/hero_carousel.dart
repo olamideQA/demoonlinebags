@@ -33,19 +33,26 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
           ? widget.heroSettings.slides
           : HeroSlide.defaultSlides;
 
+  bool _isLocal(String url) => url.startsWith('assets/');
+
+  String _heroUrl(HeroSlide s) => _isLocal(s.imageUrl)
+      ? s.imageUrl
+      : fastImg(s.imageUrl, w: widget.isMobile ? 800 : 1200, q: 60);
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     _startAutoPlay();
-    // Preload ALL heroes upfront so swiping never shows blank on slow networks.
+    // Preload ALL heroes upfront so swiping never shows blank.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       for (final s in _slides) {
-        precacheImage(
-          NetworkImage(fastImg(s.imageUrl, w: widget.isMobile ? 800 : 1200, q: 60)),
-          context,
-        );
+        if (_isLocal(s.imageUrl)) {
+          precacheImage(AssetImage(s.imageUrl), context);
+        } else {
+          precacheImage(NetworkImage(_heroUrl(s)), context);
+        }
       }
     });
   }
@@ -58,10 +65,11 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         for (final s in _slides) {
-          precacheImage(
-            NetworkImage(fastImg(s.imageUrl, w: widget.isMobile ? 800 : 1200, q: 60)),
-            context,
-          );
+          if (_isLocal(s.imageUrl)) {
+            precacheImage(AssetImage(s.imageUrl), context);
+          } else {
+            precacheImage(NetworkImage(_heroUrl(s)), context);
+          }
         }
       });
     }
@@ -219,35 +227,41 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Background Image - Image.network (browser-cached, fastest on web)
-        // gaplessPlayback keeps it from flashing blank while next slide loads.
-        Image.network(
-          fastImg(slide.imageUrl, w: isMobile ? 800 : 1200, q: 60),
-          fit: BoxFit.cover,
-          gaplessPlayback: true,
-          loadingBuilder: (ctx, child, progress) {
-            if (progress == null) return child;
-            return Container(
+        // Background Image - local asset = instant, never blank (permanent fix).
+        // CMS network URLs still supported as fallback.
+        if (_isLocal(slide.imageUrl))
+          Image.asset(
+            slide.imageUrl,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (ctx, err, stack) => Container(
               color: AppTheme.obsidianNoir,
               child: const Center(
-                child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 40),
-              ),
-            );
-          },
-          errorBuilder: (ctx, err, stack) => Container(
-            color: AppTheme.obsidianNoir,
-            child: const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 48),
-                  SizedBox(height: 8),
-                  Text('LUXE LAGOS', style: TextStyle(color: Colors.white54, fontSize: 10, letterSpacing: 2)),
-                ],
+                child: Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold, size: 48),
               ),
             ),
+          )
+        else
+          Image.network(
+            _heroUrl(slide),
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            loadingBuilder: (ctx, child, progress) {
+              if (progress == null) return child;
+              // Show branded placeholder while loading - never empty black.
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset('assets/images/placeholder.jpg', fit: BoxFit.cover),
+                  Container(color: Colors.black.withValues(alpha: 0.55)),
+                ],
+              );
+            },
+            errorBuilder: (ctx, err, stack) => Image.asset(
+              'assets/images/placeholder.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
 
         // Gradient Overlay: light at top to showcase product, dark at bottom for crisp text readability
         Container(
