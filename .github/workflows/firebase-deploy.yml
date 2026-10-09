@@ -1,0 +1,36 @@
+name: Deploy to Firebase Hosting on Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: |
+          flutter build web --release \
+            --dart-define=SUPABASE_URL="https://htvcavnqsgyjrbtqefxk.supabase.co" \
+            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmNhdm5xc2d5anJidHFlZnhrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MTU2OTI3OCwiZXhwIjoyMTA3MTQ1Mjc4fQ.OJQecqa4JD2xRUZb4FDR-A3uAHpufwkDUUMT7oAVneI' }}"
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEMOONLINEBAGS || secrets.FIREBASE_SERVICE_ACCOUNT || secrets.FIREBASE_TOKEN }}'
+          channelId: live
+          projectId: demoonlinebags

@@ -1,0 +1,6 @@
+{
+  "SUPABASE_URL": "https://htvcavnqsgyjrbtqefxk.supabase.co",
+  "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dmNhdm5xc2d5anJidHFlZnhrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MTU2OTI3OCwiZXhwIjoyMTA3MTQ1Mjc4fQ.OJQecqa4JD2xRUZb4FDR-A3uAHpufwkDUUMT7oAVneI",
+  "SITE_URL": "http://localhost:8080",
+  "ENVIRONMENT": "development"
+}
