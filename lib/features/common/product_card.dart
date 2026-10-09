@@ -104,7 +104,7 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                     top: 8,
                     right: 8,
                     child: Material(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       shape: const CircleBorder(),
                       child: InkWell(
                         customBorder: const CircleBorder(),
@@ -142,7 +142,7 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          color: AppTheme.obsidianNoir.withOpacity(0.95),
+                          color: AppTheme.obsidianNoir.withValues(alpha: 0.95),
                           alignment: Alignment.center,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,

@@ -217,7 +217,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: images.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (ctx, i) => const SizedBox(width: 12),
               itemBuilder: (ctx, index) {
                 final isSelected = index == _selectedImageIndex;
                 return InkWell(

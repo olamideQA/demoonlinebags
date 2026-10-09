@@ -30,23 +30,23 @@ class LuxuryFooter extends ConsumerWidget {
             children: const [
               _TrustItem(
                 icon: Icons.verified_outlined,
-                title: '100% FULL-GRAIN LEATHER',
-                subtitle: 'Authentic artisan materials sourced from Italy',
+                title: '100% GENUINE LEATHER GUARANTEE',
+                subtitle: 'Pure Italian full-grain hides • Zero flaking or peeling',
               ),
               _TrustItem(
                 icon: Icons.local_shipping_outlined,
-                title: 'INSURED NATIONWIDE DELIVERY',
-                subtitle: 'White-glove courier across Nigeria & globally',
+                title: 'PRIORITY VIP DISPATCH',
+                subtitle: 'Same-day in Lagos • 24–48hrs to Abuja, PH & Nationwide',
               ),
               _TrustItem(
-                icon: Icons.lock_outline,
-                title: 'SECURE ENCRYPTED CHECKOUT',
-                subtitle: 'Guaranteed privacy & encrypted payment processing',
+                icon: Icons.shield_outlined,
+                title: '24K NON-TARNISH HARDWARE',
+                subtitle: 'Weather-tested to preserve gold luster in coastal humidity',
               ),
               _TrustItem(
-                icon: Icons.support_agent_outlined,
-                title: 'VIP CONCIERGE ASSISTANCE',
-                subtitle: 'Dedicated styling and sizing consultants',
+                icon: Icons.chat_outlined,
+                title: 'DIRECT WHATSAPP CONCIERGE',
+                subtitle: 'Real-time video viewing & personal styling consultants',
               ),
             ],
           ),

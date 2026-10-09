@@ -232,7 +232,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _selectedState,
+            initialValue: _selectedState,
             decoration: const InputDecoration(labelText: 'State / Region *'),
             items: _states.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
             onChanged: (val) {
@@ -407,7 +407,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           ),
                           if (item.selectedColor != null || item.selectedSize != null)
                             Text(
-                              '${item.selectedColor ?? ""} ${item.selectedSize != null ? "• " + item.selectedSize! : ""}',
+                              '${item.selectedColor ?? ""} ${item.selectedSize != null ? "• ${item.selectedSize!}" : ""}',
                               style: GoogleFonts.plusJakartaSans(fontSize: 10, color: AppTheme.textMuted),
                             ),
                           Text(

@@ -39,7 +39,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
         Positioned.fill(
           child: GestureDetector(
             onTap: () => cartNotifier.toggleDrawer(false),
-            child: Container(color: Colors.black.withOpacity(0.5)),
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
           ),
         ),
 
@@ -141,7 +141,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                         : ListView.separated(
                             padding: const EdgeInsets.all(24),
                             itemCount: cartState.items.length,
-                            separatorBuilder: (_, __) => const Divider(height: 32),
+                            separatorBuilder: (ctx, i) => const Divider(height: 32),
                             itemBuilder: (ctx, index) {
                               final item = cartState.items[index];
                               return Row(

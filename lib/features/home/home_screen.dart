@@ -90,8 +90,8 @@ class HomeScreen extends ConsumerWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.black.withOpacity(0.3),
-              Colors.black.withOpacity(0.75),
+              Colors.black.withValues(alpha: 0.3),
+              Colors.black.withValues(alpha: 0.75),
             ],
           ),
         ),
@@ -133,7 +133,7 @@ class HomeScreen extends ConsumerWidget {
               child: Text(
                 hero.subtitle,
                 style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontSize: isMobile ? 13 : 15,
                   height: 1.6,
                 ),
@@ -231,7 +231,7 @@ class HomeScreen extends ConsumerWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              separatorBuilder: (ctx, i) => const SizedBox(width: 16),
               itemBuilder: (ctx, index) {
                 final cat = categories[index];
                 return InkWell(
@@ -263,7 +263,7 @@ class HomeScreen extends ConsumerWidget {
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   Colors.transparent,
-                                  Colors.black.withOpacity(0.75),
+                                  Colors.black.withValues(alpha: 0.75),
                                 ],
                               ),
                             ),
@@ -383,7 +383,7 @@ class HomeScreen extends ConsumerWidget {
       child: Column(
         children: [
           Text(
-            'THE HARMONY OF ACCESSORIES',
+            'EFFORTLESS CO-ORD GLAMOUR',
             style: GoogleFonts.plusJakartaSans(
               color: AppTheme.primaryGold,
               fontSize: 11,
@@ -393,7 +393,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Complete The Look: Bags & Shoes',
+            'Complete The Look: Perfectly Paired Bags & Shoes',
             textAlign: TextAlign.center,
             style: GoogleFonts.cormorantGaramond(
               color: Colors.white,
@@ -404,9 +404,9 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 620),
             child: Text(
-              'Curated luxury ensembles combining matching leather textures, hardware finishes, and colors. Receive an automatic 10-15% privilege when ordering both.',
+              'Never worry about mismatching leather grains or hardware finishes. Our atelier pairs statement handbags with matching sculpted footwear in identical Italian calfskin and 24K gold accents. Receive an automatic 10%–15% bundle privilege when acquired together.',
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 color: AppTheme.textMuted,
@@ -745,17 +745,17 @@ class HomeScreen extends ConsumerWidget {
             alignment: WrapAlignment.center,
             children: const [
               _ReviewBox(
-                quote: '“The Sovereign Tote was the centerpiece of my executive conference. The calfskin is thick, rich, and retains structure impeccably.”',
+                quote: '“The Sovereign Tote was the centerpiece of my executive conference at Eko Hotels. The calfskin is thick, holds my 14-inch MacBook without sagging, and the gold hardware looks like real jewellery.”',
                 author: 'Amina B.',
                 location: 'Victoria Island, Lagos',
               ),
               _ReviewBox(
-                quote: '“I ordered the Venetian Crystal Minaudière with the Bellissima crystal stilettos for my sister gala. Stunning synergy and compliments all night!”',
+                quote: '“I ordered the Venetian Crystal Minaudière with the Bellissima crystal stilettos for my sister\'s wedding. I danced through the entire 6-hour Owambe and my feet did not ache once! Breathtaking synergy.”',
                 author: 'Folashade A.',
-                location: 'Abuja, FCT',
+                location: 'Maitama, Abuja',
               ),
               _ReviewBox(
-                quote: '“The attention to hardware weight and stitch alignment is equivalent to high European fashion houses. Truly top notch.”',
+                quote: '“Delivery arrived in Lekki less than 3 hours after ordering via WhatsApp Concierge. Packaged in a velvet dust bag and gold-embossed box. Zero flaking, true international luxury.”',
                 author: 'Zainab K.',
                 location: 'Ikoyi, Lagos',
               ),

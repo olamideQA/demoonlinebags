@@ -211,7 +211,7 @@ class _ContactScreenState extends State<ContactScreen> {
           ),
           const SizedBox(height: 20),
           DropdownButtonFormField<String>(
-            value: _inquiryType,
+            initialValue: _inquiryType,
             decoration: const InputDecoration(labelText: 'Nature of Inquiry *'),
             items: _types.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
             onChanged: (val) {

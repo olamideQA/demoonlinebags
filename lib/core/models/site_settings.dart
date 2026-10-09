@@ -10,12 +10,12 @@ class AnnouncementSettings {
   factory AnnouncementSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const AnnouncementSettings(
-        text: 'COMPLIMENTARY VIP COURIER DELIVERY ACROSS NIGERIA ON ORDERS OVER ₦150,000 • 100% ITALIAN FULL-GRAIN LEATHER',
+        text: 'COMPLIMENTARY VIP COURIER DELIVERY ON ORDERS OVER ₦150,000  •  SAME-DAY LAGOS DISPATCH & 24–48HR NATIONWIDE  •  100% AUTHENTIC FULL-GRAIN LEATHER',
         isActive: true,
       );
     }
     return AnnouncementSettings(
-      text: json['text'] as String? ?? 'COMPLIMENTARY VIP COURIER DELIVERY ACROSS NIGERIA ON ORDERS OVER ₦150,000 • 100% ITALIAN FULL-GRAIN LEATHER',
+      text: json['text'] as String? ?? 'COMPLIMENTARY VIP COURIER DELIVERY ON ORDERS OVER ₦150,000  •  SAME-DAY LAGOS DISPATCH & 24–48HR NATIONWIDE  •  100% AUTHENTIC FULL-GRAIN LEATHER',
       isActive: json['is_active'] as bool? ?? true,
     );
   }
@@ -39,12 +39,12 @@ class HeaderSettings {
     if (json == null) {
       return const HeaderSettings(
         brandName: 'DEMO ONLINE BAGS',
-        tagline: 'LUXURY HANDBAGS & FOOTWEAR',
+        tagline: 'LUXURY HANDBAGS & FOOTWEAR • ATELIER LAGOS',
       );
     }
     return HeaderSettings(
       brandName: json['brand_name'] as String? ?? 'DEMO ONLINE BAGS',
-      tagline: json['tagline'] as String? ?? 'LUXURY HANDBAGS & FOOTWEAR',
+      tagline: json['tagline'] as String? ?? 'LUXURY HANDBAGS & FOOTWEAR • ATELIER LAGOS',
     );
   }
 
@@ -78,23 +78,23 @@ class HeroSettings {
   factory HeroSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const HeroSettings(
-        badge: 'NEW CAPSULE 2026',
-        title: 'Sculpted Architecture.\nUncompromising Luxury.',
-        subtitle: 'Impeccable craftsmanship in full-grain Italian leathers and sculptured silhouettes tailored for modern executive elegance.',
-        ctaText: 'EXPLORE THE ATELIER',
+        badge: 'NEW CAPSULE 2026 • LIMITED ATELIER EDITION',
+        title: 'Command Every Room.\nUnapologetic Luxury.',
+        subtitle: 'Crafted in certified Italian full-grain calfskin with non-tarnish 24K gold hardware. Structured for executive boardroom poise and sculpted for high-society wedding guest glamour.',
+        ctaText: 'EXPLORE SIGNATURE BAGS',
         ctaUrl: '/shop',
-        secondaryCtaText: 'COMPLETE THE LOOK',
+        secondaryCtaText: 'COMPLETE THE LOOK (SETS)',
         secondaryCtaUrl: '/pairings',
         imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
       );
     }
     return HeroSettings(
-      badge: json['badge'] as String? ?? 'NEW CAPSULE 2026',
-      title: json['title'] as String? ?? 'Sculpted Architecture.\nUncompromising Luxury.',
-      subtitle: json['subtitle'] as String? ?? 'Impeccable craftsmanship in full-grain Italian leathers and sculptured silhouettes tailored for modern executive elegance.',
-      ctaText: json['cta_text'] as String? ?? 'EXPLORE THE ATELIER',
+      badge: json['badge'] as String? ?? 'NEW CAPSULE 2026 • LIMITED ATELIER EDITION',
+      title: json['title'] as String? ?? 'Command Every Room.\nUnapologetic Luxury.',
+      subtitle: json['subtitle'] as String? ?? 'Crafted in certified Italian full-grain calfskin with non-tarnish 24K gold hardware. Structured for executive boardroom poise and sculpted for high-society wedding guest glamour.',
+      ctaText: json['cta_text'] as String? ?? 'EXPLORE SIGNATURE BAGS',
       ctaUrl: json['cta_url'] as String? ?? '/shop',
-      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'COMPLETE THE LOOK',
+      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'COMPLETE THE LOOK (SETS)',
       secondaryCtaUrl: json['secondary_cta_url'] as String? ?? '/pairings',
       imageUrl: json['image_url'] as String? ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
     );
@@ -134,22 +134,22 @@ class FooterSettings {
   factory FooterSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const FooterSettings(
-        bio: 'Demo Online Bags is an exclusive luxury atelier dedicated to the craft of exquisite leather handbags and sculptured footwear for the modern, discerning woman.',
+        bio: 'Demo Online Bags is Nigeria\'s premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.',
         email: 'concierge@demoonlinebags.com',
-        phone: '+234 800 000 2247',
-        whatsapp: '+234 800 000 2247',
+        phone: '+234 810 000 2247',
+        whatsapp: '+234 810 000 2247',
         address: 'Victoria Island, Lagos, Nigeria',
-        copyright: '© 2026 DEMO ONLINE BAGS. ALL RIGHTS RESERVED.',
+        copyright: '© 2026 DEMO ONLINE BAGS ATELIER. ALL RIGHTS RESERVED.',
         instagram: 'https://instagram.com/demoonlinebags',
       );
     }
     return FooterSettings(
-      bio: json['bio'] as String? ?? 'Demo Online Bags is an exclusive luxury atelier dedicated to the craft of exquisite leather handbags and sculptured footwear for the modern, discerning woman.',
+      bio: json['bio'] as String? ?? 'Demo Online Bags is Nigeria\'s premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.',
       email: json['email'] as String? ?? 'concierge@demoonlinebags.com',
-      phone: json['phone'] as String? ?? '+234 800 000 2247',
-      whatsapp: json['whatsapp'] as String? ?? '+234 800 000 2247',
+      phone: json['phone'] as String? ?? '+234 810 000 2247',
+      whatsapp: json['whatsapp'] as String? ?? '+234 810 000 2247',
       address: json['address'] as String? ?? 'Victoria Island, Lagos, Nigeria',
-      copyright: json['copyright'] as String? ?? '© 2026 DEMO ONLINE BAGS. ALL RIGHTS RESERVED.',
+      copyright: json['copyright'] as String? ?? '© 2026 DEMO ONLINE BAGS ATELIER. ALL RIGHTS RESERVED.',
       instagram: json['instagram'] as String? ?? 'https://instagram.com/demoonlinebags',
     );
   }
