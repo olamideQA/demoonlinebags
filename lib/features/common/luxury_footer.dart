@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/providers/site_settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 
-class LuxuryFooter extends StatelessWidget {
+class LuxuryFooter extends ConsumerWidget {
   const LuxuryFooter({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final siteSettings = ref.watch(siteSettingsProvider);
     final isMobile = MediaQuery.of(context).size.width < 900;
 
     return Container(
@@ -56,7 +59,7 @@ class LuxuryFooter extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildBrandBio(context),
+                _buildBrandBio(context, siteSettings),
                 const SizedBox(height: 32),
                 _buildLinksGroup(context, 'COLLECTIONS', [
                   'Tote Bags',
@@ -66,19 +69,14 @@ class LuxuryFooter extends StatelessWidget {
                   'Complete The Look',
                 ]),
                 const SizedBox(height: 24),
-                _buildLinksGroup(context, 'CLIENT CARE', [
-                  'VIP Concierge Support',
-                  'Size & Fit Guide',
-                  'Shipping & Delivery Terms',
-                  'Care & Maintenance',
-                ]),
+                _buildConciergeGroup(context, siteSettings),
               ],
             )
           else
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(flex: 3, child: _buildBrandBio(context)),
+                Expanded(flex: 3, child: _buildBrandBio(context, siteSettings)),
                 const SizedBox(width: 48),
                 Expanded(
                   flex: 2,
@@ -91,13 +89,8 @@ class LuxuryFooter extends StatelessWidget {
                   ]),
                 ),
                 Expanded(
-                  flex: 2,
-                  child: _buildLinksGroup(context, 'CLIENT SERVICES', [
-                    'VIP Concierge Support',
-                    'Shoe Sizing Guide',
-                    'Insured Delivery Details',
-                    'Leather Care Ritual',
-                  ]),
+                  flex: 3,
+                  child: _buildConciergeGroup(context, siteSettings),
                 ),
                 Expanded(
                   flex: 3,
@@ -117,7 +110,7 @@ class LuxuryFooter extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
-                '© 2026 DEMO ONLINE BAGS ATELIER. ALL RIGHTS RESERVED.',
+                siteSettings.footer.copyright,
                 style: GoogleFonts.plusJakartaSans(
                   color: AppTheme.textMuted,
                   fontSize: 10,
@@ -140,12 +133,12 @@ class LuxuryFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildBrandBio(BuildContext context) {
+  Widget _buildBrandBio(BuildContext context, siteSettings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'DEMO ONLINE BAGS',
+          siteSettings.header.brandName,
           style: GoogleFonts.cormorantGaramond(
             color: Colors.white,
             fontSize: 22,
@@ -155,11 +148,57 @@ class LuxuryFooter extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Curators of modern luxury handbags, structured totes, and complementary sculpted footwear. Each silhouette is engineered with exacting standards to stand the test of time.',
+          siteSettings.footer.bio,
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.textMuted,
             fontSize: 12,
             height: 1.6,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConciergeGroup(BuildContext context, siteSettings) {
+    final footer = siteSettings.footer;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'VIP CONCIERGE & ATELIER',
+          style: GoogleFonts.plusJakartaSans(
+            color: AppTheme.primaryGold,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 2.0,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _contactRow(Icons.mail_outline, footer.email),
+        const SizedBox(height: 8),
+        _contactRow(Icons.phone_outlined, footer.phone),
+        const SizedBox(height: 8),
+        _contactRow(Icons.chat_bubble_outline, 'WhatsApp: ${footer.whatsapp}'),
+        const SizedBox(height: 8),
+        _contactRow(Icons.location_on_outlined, footer.address),
+      ],
+    );
+  }
+
+  Widget _contactRow(IconData icon, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: AppTheme.primaryGold),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.plusJakartaSans(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
           ),
         ),
       ],
@@ -202,7 +241,7 @@ class LuxuryFooter extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'THE PRIVATE CAPSULE',
+          'THE ATELIER PRIVATE CIRCLE',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.primaryGold,
             fontSize: 11,
@@ -212,7 +251,7 @@ class LuxuryFooter extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Subscribe to receive private preview access to limited edition drops, runway releases, and VIP styling.',
+          'Receive invitation-only preview access to limited production runs.',
           style: GoogleFonts.plusJakartaSans(
             color: AppTheme.textMuted,
             fontSize: 12,
@@ -223,45 +262,38 @@ class LuxuryFooter extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Container(
-                height: 44,
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.borderStrong),
-                  color: AppTheme.surfaceDark,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                alignment: Alignment.centerLeft,
-                child: TextField(
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your email address',
-                    hintStyle: TextStyle(color: AppTheme.textMuted, fontSize: 12),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
+              child: TextField(
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+                decoration: InputDecoration(
+                  hintText: 'Enter your email address...',
+                  hintStyle: const TextStyle(color: Colors.white38, fontSize: 12),
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: AppTheme.borderStrong),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: AppTheme.borderStrong),
                   ),
                 ),
               ),
             ),
-            Container(
-              height: 44,
-              color: AppTheme.primaryGold,
-              child: TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Thank you for subscribing to private capsule access.')),
-                  );
-                },
-                child: Text(
-                  'JOIN',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AppTheme.obsidianNoir,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5,
-                  ),
-                ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryGold,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Thank you for subscribing to the Private Circle.')),
+                );
+              },
+              child: const Text('JOIN', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
             ),
           ],
         ),
@@ -305,7 +337,7 @@ class _TrustItem extends StatelessWidget {
               subtitle,
               style: GoogleFonts.plusJakartaSans(
                 color: AppTheme.textMuted,
-                fontSize: 11,
+                fontSize: 10,
               ),
             ),
           ],

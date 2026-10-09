@@ -7,12 +7,12 @@
 INSERT INTO public.categories (id, name, slug, type, description, image_url, sort_order)
 VALUES
     ('c1111111-1111-1111-1111-111111111111', 'Tote Bags', 'tote-bags', 'bags', 'Spacious, structured luxury totes tailored for everyday elegance and executive lifestyles.', 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80', 1),
-    ('c2222222-2222-2222-2222-222222222222', 'Crossbody Bags', 'crossbody-bags', 'Effortless hands-free silhouettes with polished hardware and adjustable leather straps.', 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80', 2),
-    ('c3333333-3333-3333-3333-333333333333', 'Shoulder Bags', 'shoulder-bags', 'Iconic 90s-inspired baguettes, ruched croissants, and classic chain-link shoulder carriers.', 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80', 3),
-    ('c4444444-4444-4444-4444-444444444444', 'Evening Clutches', 'evening-clutches', 'Show-stopping minaudières, crystal-encrusted boxes, and lustrous silk-satin pouches.', 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=800&q=80', 4),
-    ('c5555555-5555-5555-5555-555555555555', 'Mini & Bucket Bags', 'mini-bucket-bags', 'Playful yet sophisticated compact designs crafted in structured grain leathers.', 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80', 5),
-    ('c6666666-6666-6666-6666-666666666666', 'Luxury Heels', 'luxury-heels', 'Signature sculpted stilettos, kitten heels, and slingbacks made to complement every bag.', 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80', 6),
-    ('c7777777-7777-7777-7777-777777777777', 'Mules & Slides', 'mules-slides', 'Architectural block heels, slip-on metallic mules, and cushioned everyday slides.', 'https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=800&q=80', 7)
+    ('c2222222-2222-2222-2222-222222222222', 'Crossbody Bags', 'crossbody-bags', 'bags', 'Effortless hands-free silhouettes with polished hardware and adjustable leather straps.', 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80', 2),
+    ('c3333333-3333-3333-3333-333333333333', 'Shoulder Bags', 'shoulder-bags', 'bags', 'Iconic 90s-inspired baguettes, ruched croissants, and classic chain-link shoulder carriers.', 'https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=80', 3),
+    ('c4444444-4444-4444-4444-444444444444', 'Evening Clutches', 'evening-clutches', 'bags', 'Show-stopping minaudières, crystal-encrusted boxes, and lustrous silk-satin pouches.', 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=800&q=80', 4),
+    ('c5555555-5555-5555-5555-555555555555', 'Mini & Bucket Bags', 'mini-bucket-bags', 'bags', 'Playful yet sophisticated compact designs crafted in structured grain leathers.', 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80', 5),
+    ('c6666666-6666-6666-6666-666666666666', 'Luxury Heels', 'luxury-heels', 'shoes', 'Signature sculpted stilettos, kitten heels, and slingbacks made to complement every bag.', 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80', 6),
+    ('c7777777-7777-7777-7777-777777777777', 'Mules & Slides', 'mules-slides', 'shoes', 'Architectural block heels, slip-on metallic mules, and cushioned everyday slides.', 'https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?auto=format&fit=crop&w=800&q=80', 7)
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Insert Collections
@@ -40,7 +40,7 @@ INSERT INTO public.products (
 VALUES
     -- PRODUCT 1: The Sovereign Executive Tote
     (
-        'p1111111-1111-1111-1111-111111111111',
+        'd1111111-1111-1111-1111-111111111111',
         'The Sovereign Structured Leather Tote',
         'the-sovereign-structured-leather-tote',
         'c1111111-1111-1111-1111-111111111111',
@@ -72,7 +72,7 @@ VALUES
 
     -- PRODUCT 2: The Aurelia Quilted Crossbody
     (
-        'p2222222-2222-2222-2222-222222222222',
+        'd2222222-2222-2222-2222-222222222222',
         'The Aurelia Quilted Flap Crossbody',
         'the-aurelia-quilted-flap-crossbody',
         'c2222222-2222-2222-2222-222222222222',
@@ -103,7 +103,7 @@ VALUES
 
     -- PRODUCT 3: The Venetian Crystal Minaudière Clutch
     (
-        'p3333333-3333-3333-3333-333333333333',
+        'd3333333-3333-3333-3333-333333333333',
         'The Venetian Crystal Minaudière Clutch',
         'the-venetian-crystal-minaudiere-clutch',
         'c4444444-4444-4444-4444-444444444444',
@@ -134,7 +134,7 @@ VALUES
 
     -- PRODUCT 4: The Riviera Woven Leather Bucket Bag
     (
-        'p4444444-4444-4444-4444-444444444444',
+        'd4444444-4444-4444-4444-444444444444',
         'The Riviera Woven Nappa Bucket Bag',
         'the-riviera-woven-nappa-bucket-bag',
         'c5555555-5555-5555-5555-555555555555',
@@ -165,7 +165,7 @@ VALUES
 
     -- PRODUCT 5: The Milan 90s Croc Baguette
     (
-        'p5555555-5555-5555-5555-555555555555',
+        'd5555555-5555-5555-5555-555555555555',
         'The Milan Croc-Embossed Baguette Shoulder Bag',
         'the-milan-croc-embossed-baguette',
         'c3333333-3333-3333-3333-333333333333',
@@ -196,7 +196,7 @@ VALUES
 
     -- PRODUCT 6: The Bellissima Crystal Stiletto Pump (SHOE)
     (
-        'p6666666-6666-6666-6666-666666666666',
+        'd6666666-6666-6666-6666-666666666666',
         'The Bellissima Crystal Pointed Stiletto',
         'the-bellissima-crystal-pointed-stiletto',
         'c6666666-6666-6666-6666-666666666666',
@@ -227,7 +227,7 @@ VALUES
 
     -- PRODUCT 7: The Paloma Architectural Block Mule (SHOE)
     (
-        'p7777777-7777-7777-7777-777777777777',
+        'd7777777-7777-7777-7777-777777777777',
         'The Paloma Sculpted Block Heel Mule',
         'the-paloma-sculpted-block-heel-mule',
         'c7777777-7777-7777-7777-777777777777',
@@ -258,7 +258,7 @@ VALUES
 
     -- PRODUCT 8: The Capucine Petite Top-Handle Vanity Case
     (
-        'p8888888-8888-8888-8888-888888888888',
+        'd8888888-8888-8888-8888-888888888888',
         'The Capucine Petite Top-Handle Vanity',
         'the-capucine-petite-top-handle-vanity',
         'c5555555-5555-5555-5555-555555555555',
@@ -291,43 +291,43 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.product_variants (product_id, variant_type, name, color_hex, stock_quantity, sku)
 VALUES
     -- The Sovereign Tote Colors
-    ('p1111111-1111-1111-1111-111111111111', 'color', 'Obsidian Black', '#1A1A1A', 4, 'SOV-TOT-BLK'),
-    ('p1111111-1111-1111-1111-111111111111', 'color', 'Cognac Tan', '#8B4513', 3, 'SOV-TOT-COG'),
-    ('p1111111-1111-1111-1111-111111111111', 'color', 'Alabaster Ivory', '#F5F5DC', 2, 'SOV-TOT-IVR'),
+    ('d1111111-1111-1111-1111-111111111111', 'color', 'Obsidian Black', '#1A1A1A', 4, 'SOV-TOT-BLK'),
+    ('d1111111-1111-1111-1111-111111111111', 'color', 'Cognac Tan', '#8B4513', 3, 'SOV-TOT-COG'),
+    ('d1111111-1111-1111-1111-111111111111', 'color', 'Alabaster Ivory', '#F5F5DC', 2, 'SOV-TOT-IVR'),
 
     -- The Aurelia Crossbody Colors
-    ('p2222222-2222-2222-2222-222222222222', 'color', 'Noir Black', '#1A1A1A', 6, 'AUR-CRS-BLK'),
-    ('p2222222-2222-2222-2222-222222222222', 'color', 'Burgundy Wine', '#6A1B29', 4, 'AUR-CRS-BUR'),
-    ('p2222222-2222-2222-2222-222222222222', 'color', 'Emerald Green', '#0B5345', 2, 'AUR-CRS-EMR'),
+    ('d2222222-2222-2222-2222-222222222222', 'color', 'Noir Black', '#1A1A1A', 6, 'AUR-CRS-BLK'),
+    ('d2222222-2222-2222-2222-222222222222', 'color', 'Burgundy Wine', '#6A1B29', 4, 'AUR-CRS-BUR'),
+    ('d2222222-2222-2222-2222-222222222222', 'color', 'Emerald Green', '#0B5345', 2, 'AUR-CRS-EMR'),
 
     -- The Bellissima Stiletto Shoe Sizes
-    ('p6666666-6666-6666-6666-666666666666', 'size', 'EU 37 / UK 4', NULL, 4, 'BEL-STL-37'),
-    ('p6666666-6666-6666-6666-666666666666', 'size', 'EU 38 / UK 5', NULL, 6, 'BEL-STL-38'),
-    ('p6666666-6666-6666-6666-666666666666', 'size', 'EU 39 / UK 6', NULL, 5, 'BEL-STL-39'),
-    ('p6666666-6666-6666-6666-666666666666', 'size', 'EU 40 / UK 7', NULL, 3, 'BEL-STL-40'),
-    ('p6666666-6666-6666-6666-666666666666', 'size', 'EU 41 / UK 8', NULL, 2, 'BEL-STL-41'),
+    ('d6666666-6666-6666-6666-666666666666', 'size', 'EU 37 / UK 4', NULL, 4, 'BEL-STL-37'),
+    ('d6666666-6666-6666-6666-666666666666', 'size', 'EU 38 / UK 5', NULL, 6, 'BEL-STL-38'),
+    ('d6666666-6666-6666-6666-666666666666', 'size', 'EU 39 / UK 6', NULL, 5, 'BEL-STL-39'),
+    ('d6666666-6666-6666-6666-666666666666', 'size', 'EU 40 / UK 7', NULL, 3, 'BEL-STL-40'),
+    ('d6666666-6666-6666-6666-666666666666', 'size', 'EU 41 / UK 8', NULL, 2, 'BEL-STL-41'),
 
     -- The Paloma Mule Shoe Sizes
-    ('p7777777-7777-7777-7777-777777777777', 'size', 'EU 38 / UK 5', NULL, 5, 'PAL-MUL-38'),
-    ('p7777777-7777-7777-7777-777777777777', 'size', 'EU 39 / UK 6', NULL, 7, 'PAL-MUL-39'),
-    ('p7777777-7777-7777-7777-777777777777', 'size', 'EU 40 / UK 7', NULL, 4, 'PAL-MUL-40');
+    ('d7777777-7777-7777-7777-777777777777', 'size', 'EU 38 / UK 5', NULL, 5, 'PAL-MUL-38'),
+    ('d7777777-7777-7777-7777-777777777777', 'size', 'EU 39 / UK 6', NULL, 7, 'PAL-MUL-39'),
+    ('d7777777-7777-7777-7777-777777777777', 'size', 'EU 40 / UK 7', NULL, 4, 'PAL-MUL-40');
 
 -- 6. Insert Pairings ("Complete The Look" matching sets)
 INSERT INTO public.pairings (id, title, bag_product_id, shoe_product_id, bundle_discount_percent, description)
 VALUES
     (
-        'm1111111-1111-1111-1111-111111111111',
+        'e1111111-1111-1111-1111-111111111111',
         'The Black-Tie Gala Set: Venetian Minaudière & Bellissima Crystal Stiletto',
-        'p3333333-3333-3333-3333-333333333333',
-        'p6666666-6666-6666-6666-666666666666',
+        'd3333333-3333-3333-3333-333333333333',
+        'd6666666-6666-6666-6666-666666666666',
         15,
         'Save 15% when ordering the Venetian Crystal Clutch paired with the matching Bellissima Crystal Stiletto for weddings, galas, and red carpet occasions.'
     ),
     (
-        'm2222222-2222-2222-2222-222222222222',
+        'e2222222-2222-2222-2222-222222222222',
         'The Executive Power Duo: Sovereign Leather Tote & Paloma Sculpted Mule',
-        'p1111111-1111-1111-1111-111111111111',
-        'p7777777-7777-7777-7777-777777777777',
+        'd1111111-1111-1111-1111-111111111111',
+        'd7777777-7777-7777-7777-777777777777',
         10,
         'The ultimate luxury wardrobe pairing for women in business. Structured full-grain Italian leather elegance paired with all-day comfortable block heels.'
     )
@@ -336,8 +336,8 @@ ON CONFLICT (id) DO NOTHING;
 -- 7. Insert Customer Reviews
 INSERT INTO public.reviews (product_id, author_name, rating, headline, comment, is_verified_buyer)
 VALUES
-    ('p1111111-1111-1111-1111-111111111111', 'Amina B.', 5, 'The leather quality is unmatched!', 'I took this tote to a board meeting in Lagos and received compliments the entire day. The structure is firm and holds my 14-inch laptop seamlessly.', true),
-    ('p1111111-1111-1111-1111-111111111111', 'Chidinma O.', 5, 'Pure luxury in your hands', 'Heavy, rich calfskin and the gold hardware has a true 24K luster. Worth every single Naira.', true),
-    ('p2222222-2222-2222-2222-222222222222', 'Zainab K.', 5, 'Best crossbody I own', 'The leather is so soft yet holds its shape. The sliding chain allows me to wear it long or double it up as an elegant shoulder bag.', true),
-    ('p3333333-3333-3333-3333-333333333333', 'Folashade A.', 5, 'Breathtaking in person', 'Wore this to my sister wedding dinner. The sparkle is unreal under chandelier lights. Plus, it fits my phone without bulging!', true),
-    ('p6666666-6666-6666-6666-666666666666', 'Ngozi E.', 5, 'Surprisingly comfortable for a high stiletto', 'The arch padding really makes a difference. Wore them for 6 hours straight without pain.', true);
+    ('d1111111-1111-1111-1111-111111111111', 'Amina B.', 5, 'The leather quality is unmatched!', 'I took this tote to a board meeting in Lagos and received compliments the entire day. The structure is firm and holds my 14-inch laptop seamlessly.', true),
+    ('d1111111-1111-1111-1111-111111111111', 'Chidinma O.', 5, 'Pure luxury in your hands', 'Heavy, rich calfskin and the gold hardware has a true 24K luster. Worth every single Naira.', true),
+    ('d2222222-2222-2222-2222-222222222222', 'Zainab K.', 5, 'Best crossbody I own', 'The leather is so soft yet holds its shape. The sliding chain allows me to wear it long or double it up as an elegant shoulder bag.', true),
+    ('d3333333-3333-3333-3333-333333333333', 'Folashade A.', 5, 'Breathtaking in person', 'Wore this to my sister wedding dinner. The sparkle is unreal under chandelier lights. Plus, it fits my phone without bulging!', true),
+    ('d6666666-6666-6666-6666-666666666666', 'Ngozi E.', 5, 'Surprisingly comfortable for a high stiletto', 'The arch padding really makes a difference. Wore them for 6 hours straight without pain.', true);

@@ -80,7 +80,7 @@ class SupabaseService {
   static final List<Product> fallbackProducts = [
     // 1. The Sovereign Tote
     const Product(
-      id: 'p1111111-1111-1111-1111-111111111111',
+      id: 'd1111111-1111-1111-1111-111111111111',
       title: 'The Sovereign Structured Leather Tote',
       slug: 'the-sovereign-structured-leather-tote',
       categoryId: 'c1111111-1111-1111-1111-111111111111',
@@ -111,14 +111,14 @@ class SupabaseService {
       reviewCount: 34,
       tags: ['bestseller', 'workwear', 'tote', 'luxury-bag'],
       variants: [
-        ProductVariant(id: 'v1', productId: 'p1111111-1111-1111-1111-111111111111', variantType: 'color', name: 'Obsidian Black', colorHex: '#1A1A1A'),
-        ProductVariant(id: 'v2', productId: 'p1111111-1111-1111-1111-111111111111', variantType: 'color', name: 'Cognac Tan', colorHex: '#8B4513'),
-        ProductVariant(id: 'v3', productId: 'p1111111-1111-1111-1111-111111111111', variantType: 'color', name: 'Alabaster Ivory', colorHex: '#F5F5DC'),
+        ProductVariant(id: 'v1', productId: 'd1111111-1111-1111-1111-111111111111', variantType: 'color', name: 'Obsidian Black', colorHex: '#1A1A1A'),
+        ProductVariant(id: 'v2', productId: 'd1111111-1111-1111-1111-111111111111', variantType: 'color', name: 'Cognac Tan', colorHex: '#8B4513'),
+        ProductVariant(id: 'v3', productId: 'd1111111-1111-1111-1111-111111111111', variantType: 'color', name: 'Alabaster Ivory', colorHex: '#F5F5DC'),
       ],
     ),
     // 2. The Aurelia Crossbody
     const Product(
-      id: 'p2222222-2222-2222-2222-222222222222',
+      id: 'd2222222-2222-2222-2222-222222222222',
       title: 'The Aurelia Quilted Flap Crossbody',
       slug: 'the-aurelia-quilted-flap-crossbody',
       categoryId: 'c2222222-2222-2222-2222-222222222222',
@@ -147,14 +147,14 @@ class SupabaseService {
       reviewCount: 28,
       tags: ['crossbody', 'quilted', 'signature', 'gold-chain'],
       variants: [
-        ProductVariant(id: 'v4', productId: 'p2222222-2222-2222-2222-222222222222', variantType: 'color', name: 'Noir Black', colorHex: '#1A1A1A'),
-        ProductVariant(id: 'v5', productId: 'p2222222-2222-2222-2222-222222222222', variantType: 'color', name: 'Burgundy Wine', colorHex: '#6A1B29'),
-        ProductVariant(id: 'v6', productId: 'p2222222-2222-2222-2222-222222222222', variantType: 'color', name: 'Emerald Green', colorHex: '#0B5345'),
+        ProductVariant(id: 'v4', productId: 'd2222222-2222-2222-2222-222222222222', variantType: 'color', name: 'Noir Black', colorHex: '#1A1A1A'),
+        ProductVariant(id: 'v5', productId: 'd2222222-2222-2222-2222-222222222222', variantType: 'color', name: 'Burgundy Wine', colorHex: '#6A1B29'),
+        ProductVariant(id: 'v6', productId: 'd2222222-2222-2222-2222-222222222222', variantType: 'color', name: 'Emerald Green', colorHex: '#0B5345'),
       ],
     ),
     // 3. The Venetian Crystal Minaudière Clutch
     const Product(
-      id: 'p3333333-3333-3333-3333-333333333333',
+      id: 'd3333333-3333-3333-3333-333333333333',
       title: 'The Venetian Crystal Minaudière Clutch',
       slug: 'the-venetian-crystal-minaudiere-clutch',
       categoryId: 'c4444444-4444-4444-4444-444444444444',
@@ -184,13 +184,13 @@ class SupabaseService {
       reviewCount: 19,
       tags: ['evening', 'clutch', 'crystals', 'wedding'],
       variants: [
-        ProductVariant(id: 'v7', productId: 'p3333333-3333-3333-3333-333333333333', variantType: 'color', name: 'Champagne Gold', colorHex: '#D4AF37'),
-        ProductVariant(id: 'v8', productId: 'p3333333-3333-3333-3333-333333333333', variantType: 'color', name: 'Silver Starlight', colorHex: '#E0E0E0'),
+        ProductVariant(id: 'v7', productId: 'd3333333-3333-3333-3333-333333333333', variantType: 'color', name: 'Champagne Gold', colorHex: '#D4AF37'),
+        ProductVariant(id: 'v8', productId: 'd3333333-3333-3333-3333-333333333333', variantType: 'color', name: 'Silver Starlight', colorHex: '#E0E0E0'),
       ],
     ),
     // 4. The Riviera Woven Leather Bucket Bag
     const Product(
-      id: 'p4444444-4444-4444-4444-444444444444',
+      id: 'd4444444-4444-4444-4444-444444444444',
       title: 'The Riviera Woven Nappa Bucket Bag',
       slug: 'the-riviera-woven-nappa-bucket-bag',
       categoryId: 'c5555555-5555-5555-5555-555555555555',
@@ -218,13 +218,13 @@ class SupabaseService {
       reviewCount: 14,
       tags: ['woven', 'bucket-bag', 'riviera', 'summer'],
       variants: [
-        ProductVariant(id: 'v9', productId: 'p4444444-4444-4444-4444-444444444444', variantType: 'color', name: 'Natural Sand', colorHex: '#D2B48C'),
-        ProductVariant(id: 'v10', productId: 'p4444444-4444-4444-4444-444444444444', variantType: 'color', name: 'Caramel Toffee', colorHex: '#A0522D'),
+        ProductVariant(id: 'v9', productId: 'd4444444-4444-4444-4444-444444444444', variantType: 'color', name: 'Natural Sand', colorHex: '#D2B48C'),
+        ProductVariant(id: 'v10', productId: 'd4444444-4444-4444-4444-444444444444', variantType: 'color', name: 'Caramel Toffee', colorHex: '#A0522D'),
       ],
     ),
     // 5. The Milan Croc Baguette
     const Product(
-      id: 'p5555555-5555-5555-5555-555555555555',
+      id: 'd5555555-5555-5555-5555-555555555555',
       title: 'The Milan Croc-Embossed Baguette Shoulder Bag',
       slug: 'the-milan-croc-embossed-baguette',
       categoryId: 'c3333333-3333-3333-3333-333333333333',
@@ -253,13 +253,13 @@ class SupabaseService {
       reviewCount: 22,
       tags: ['shoulder-bag', 'baguette', 'croc', '90s'],
       variants: [
-        ProductVariant(id: 'v11', productId: 'p5555555-5555-5555-5555-555555555555', variantType: 'color', name: 'Espresso Croc', colorHex: '#2A1810'),
-        ProductVariant(id: 'v12', productId: 'p5555555-5555-5555-5555-555555555555', variantType: 'color', name: 'Cherry Patent', colorHex: '#800020'),
+        ProductVariant(id: 'v11', productId: 'd5555555-5555-5555-5555-555555555555', variantType: 'color', name: 'Espresso Croc', colorHex: '#2A1810'),
+        ProductVariant(id: 'v12', productId: 'd5555555-5555-5555-5555-555555555555', variantType: 'color', name: 'Cherry Patent', colorHex: '#800020'),
       ],
     ),
     // 6. The Bellissima Crystal Pointed Stiletto (SHOE)
     const Product(
-      id: 'p6666666-6666-6666-6666-666666666666',
+      id: 'd6666666-6666-6666-6666-666666666666',
       title: 'The Bellissima Crystal Pointed Stiletto',
       slug: 'the-bellissima-crystal-pointed-stiletto',
       categoryId: 'c6666666-6666-6666-6666-666666666666',
@@ -288,16 +288,16 @@ class SupabaseService {
       reviewCount: 41,
       tags: ['heels', 'stiletto', 'crystals', 'wedding-shoes'],
       variants: [
-        ProductVariant(id: 'v13', productId: 'p6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 37 / UK 4'),
-        ProductVariant(id: 'v14', productId: 'p6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 38 / UK 5'),
-        ProductVariant(id: 'v15', productId: 'p6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 39 / UK 6'),
-        ProductVariant(id: 'v16', productId: 'p6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 40 / UK 7'),
-        ProductVariant(id: 'v17', productId: 'p6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 41 / UK 8'),
+        ProductVariant(id: 'v13', productId: 'd6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 37 / UK 4'),
+        ProductVariant(id: 'v14', productId: 'd6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 38 / UK 5'),
+        ProductVariant(id: 'v15', productId: 'd6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 39 / UK 6'),
+        ProductVariant(id: 'v16', productId: 'd6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 40 / UK 7'),
+        ProductVariant(id: 'v17', productId: 'd6666666-6666-6666-6666-666666666666', variantType: 'size', name: 'EU 41 / UK 8'),
       ],
     ),
     // 7. The Paloma Sculpted Block Heel Mule (SHOE)
     const Product(
-      id: 'p7777777-7777-7777-7777-777777777777',
+      id: 'd7777777-7777-7777-7777-777777777777',
       title: 'The Paloma Sculpted Block Heel Mule',
       slug: 'the-paloma-sculpted-block-heel-mule',
       categoryId: 'c7777777-7777-7777-7777-777777777777',
@@ -324,14 +324,14 @@ class SupabaseService {
       reviewCount: 16,
       tags: ['mules', 'block-heel', 'comfortable-heels', 'everyday-chic'],
       variants: [
-        ProductVariant(id: 'v18', productId: 'p7777777-7777-7777-7777-777777777777', variantType: 'size', name: 'EU 38 / UK 5'),
-        ProductVariant(id: 'v19', productId: 'p7777777-7777-7777-7777-777777777777', variantType: 'size', name: 'EU 39 / UK 6'),
-        ProductVariant(id: 'v20', productId: 'p7777777-7777-7777-7777-777777777777', variantType: 'size', name: 'EU 40 / UK 7'),
+        ProductVariant(id: 'v18', productId: 'd7777777-7777-7777-7777-777777777777', variantType: 'size', name: 'EU 38 / UK 5'),
+        ProductVariant(id: 'v19', productId: 'd7777777-7777-7777-7777-777777777777', variantType: 'size', name: 'EU 39 / UK 6'),
+        ProductVariant(id: 'v20', productId: 'd7777777-7777-7777-7777-777777777777', variantType: 'size', name: 'EU 40 / UK 7'),
       ],
     ),
     // 8. The Capucine Vanity
     const Product(
-      id: 'p8888888-8888-8888-8888-888888888888',
+      id: 'd8888888-8888-8888-8888-888888888888',
       title: 'The Capucine Petite Top-Handle Vanity',
       slug: 'the-capucine-petite-top-handle-vanity',
       categoryId: 'c5555555-5555-5555-5555-555555555555',
@@ -360,28 +360,28 @@ class SupabaseService {
       reviewCount: 11,
       tags: ['vanity-bag', 'mini-bag', 'top-handle'],
       variants: [
-        ProductVariant(id: 'v21', productId: 'p8888888-8888-8888-8888-888888888888', variantType: 'color', name: 'Caramel Grain', colorHex: '#C68B59'),
-        ProductVariant(id: 'v22', productId: 'p8888888-8888-8888-8888-888888888888', variantType: 'color', name: 'Noir Classic', colorHex: '#1A1A1A'),
+        ProductVariant(id: 'v21', productId: 'd8888888-8888-8888-8888-888888888888', variantType: 'color', name: 'Caramel Grain', colorHex: '#C68B59'),
+        ProductVariant(id: 'v22', productId: 'd8888888-8888-8888-8888-888888888888', variantType: 'color', name: 'Noir Classic', colorHex: '#1A1A1A'),
       ],
     ),
   ];
 
   static final List<ProductPairing> fallbackPairings = [
     ProductPairing(
-      id: 'm1111111-1111-1111-1111-111111111111',
+      id: 'e1111111-1111-1111-1111-111111111111',
       title: 'The Black-Tie Gala Set: Venetian Minaudière & Bellissima Crystal Stiletto',
-      bagProductId: 'p3333333-3333-3333-3333-333333333333',
-      shoeProductId: 'p6666666-6666-6666-6666-666666666666',
+      bagProductId: 'd3333333-3333-3333-3333-333333333333',
+      shoeProductId: 'd6666666-6666-6666-6666-666666666666',
       bundleDiscountPercent: 15,
       description: 'Save 15% when ordering the Venetian Crystal Clutch paired with the matching Bellissima Crystal Stiletto for weddings, galas, and red carpet occasions.',
       bagProduct: fallbackProducts[2],
       shoeProduct: fallbackProducts[5],
     ),
     ProductPairing(
-      id: 'm2222222-2222-2222-2222-222222222222',
+      id: 'e2222222-2222-2222-2222-222222222222',
       title: 'The Executive Power Duo: Sovereign Leather Tote & Paloma Sculpted Mule',
-      bagProductId: 'p1111111-1111-1111-1111-111111111111',
-      shoeProductId: 'p7777777-7777-7777-7777-777777777777',
+      bagProductId: 'd1111111-1111-1111-1111-111111111111',
+      shoeProductId: 'd7777777-7777-7777-7777-777777777777',
       bundleDiscountPercent: 10,
       description: 'The ultimate luxury wardrobe pairing for women in business. Structured full-grain Italian leather elegance paired with all-day comfortable block heels.',
       bagProduct: fallbackProducts[0],
@@ -392,7 +392,7 @@ class SupabaseService {
   static final List<Review> fallbackReviews = [
     const Review(
       id: 'r1',
-      productId: 'p1111111-1111-1111-1111-111111111111',
+      productId: 'd1111111-1111-1111-1111-111111111111',
       authorName: 'Amina B.',
       rating: 5,
       headline: 'The leather quality is unmatched!',
@@ -400,7 +400,7 @@ class SupabaseService {
     ),
     const Review(
       id: 'r2',
-      productId: 'p1111111-1111-1111-1111-111111111111',
+      productId: 'd1111111-1111-1111-1111-111111111111',
       authorName: 'Chidinma O.',
       rating: 5,
       headline: 'Pure luxury in your hands',
@@ -408,7 +408,7 @@ class SupabaseService {
     ),
     const Review(
       id: 'r3',
-      productId: 'p2222222-2222-2222-2222-222222222222',
+      productId: 'd2222222-2222-2222-2222-222222222222',
       authorName: 'Zainab K.',
       rating: 5,
       headline: 'Best crossbody I own',
@@ -416,7 +416,7 @@ class SupabaseService {
     ),
     const Review(
       id: 'r4',
-      productId: 'p3333333-3333-3333-3333-333333333333',
+      productId: 'd3333333-3333-3333-3333-333333333333',
       authorName: 'Folashade A.',
       rating: 5,
       headline: 'Breathtaking in person',
@@ -424,7 +424,7 @@ class SupabaseService {
     ),
     const Review(
       id: 'r5',
-      productId: 'p6666666-6666-6666-6666-666666666666',
+      productId: 'd6666666-6666-6666-6666-666666666666',
       authorName: 'Ngozi E.',
       rating: 5,
       headline: 'Surprisingly comfortable for a high stiletto',
@@ -599,5 +599,98 @@ class SupabaseService {
       }
     }
     return orderNumber;
+  }
+
+  static Future<bool> createProduct(Map<String, dynamic> productData) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('products').insert(productData);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> updateProduct(String id, Map<String, dynamic> updates) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('products').update(updates).eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> deleteProduct(String id) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('products').delete().eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getOrders() async {
+    final client = _client;
+    if (client == null) return [];
+    try {
+      final response = await client.from('orders').select('*, order_items(*)').order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<bool> updateOrderStatus(String orderId, String status, {String? trackingCode}) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      final data = <String, dynamic>{'status': status};
+      if (trackingCode != null && trackingCode.isNotEmpty) {
+        data['tracking_code'] = trackingCode;
+      }
+      await client.from('orders').update(data).eq('id', orderId);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> createPairing({
+    required String title,
+    required String bagProductId,
+    required String shoeProductId,
+    required int discountPercent,
+    required String description,
+  }) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('pairings').insert({
+        'title': title,
+        'bag_product_id': bagProductId,
+        'shoe_product_id': shoeProductId,
+        'bundle_discount_percent': discountPercent,
+        'description': description,
+      });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> deletePairing(String id) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('pairings').delete().eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

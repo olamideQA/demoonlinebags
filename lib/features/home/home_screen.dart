@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/models/models.dart';
 import '../../core/providers/cart_provider.dart';
 import '../../core/providers/products_provider.dart';
+import '../../core/providers/site_settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../common/announcement_bar.dart';
 import '../common/cart_drawer.dart';
@@ -71,15 +72,15 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildHeroSection(BuildContext context, WidgetRef ref, bool isMobile) {
+    final hero = ref.watch(siteSettingsProvider).hero;
+
     return Container(
       height: isMobile ? 540 : 660,
       width: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.obsidianNoir,
         image: DecorationImage(
-          image: CachedNetworkImageProvider(
-            'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1920&q=85',
-          ),
+          image: CachedNetworkImageProvider(hero.imageUrl),
           fit: BoxFit.cover,
         ),
       ),
@@ -106,7 +107,7 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               color: AppTheme.primaryGold,
               child: Text(
-                'NEW CAPSULE 2026',
+                hero.badge,
                 style: GoogleFonts.plusJakartaSans(
                   color: AppTheme.obsidianNoir,
                   fontSize: 10,
@@ -117,7 +118,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              'Sculpted Architecture.\nUncompromising Luxury.',
+              hero.title,
               style: GoogleFonts.cormorantGaramond(
                 color: Colors.white,
                 fontSize: isMobile ? 36 : 56,
@@ -130,7 +131,7 @@ class HomeScreen extends ConsumerWidget {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 620),
               child: Text(
-                'Discover handcrafted full-grain Italian leather handbags and complementary sculpted footwear engineered for timeless elegance and lasting presence.',
+                hero.subtitle,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.9),
                   fontSize: isMobile ? 13 : 15,
@@ -150,10 +151,12 @@ class HomeScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
                   ),
                   onPressed: () {
-                    ref.read(selectedProductTypeProvider.notifier).state = 'bag';
-                    context.go('/shop');
+                    if (hero.ctaUrl.contains('category')) {
+                      ref.read(selectedProductTypeProvider.notifier).state = 'bag';
+                    }
+                    context.go(hero.ctaUrl);
                   },
-                  child: const Text('DISCOVER HANDBAGS'),
+                  child: Text(hero.ctaText),
                 ),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -161,8 +164,8 @@ class HomeScreen extends ConsumerWidget {
                     side: const BorderSide(color: Colors.white, width: 1.5),
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
                   ),
-                  onPressed: () => context.go('/pairings'),
-                  child: const Text('COMPLETE THE LOOK'),
+                  onPressed: () => context.go(hero.secondaryCtaUrl),
+                  child: Text(hero.secondaryCtaText),
                 ),
               ],
             ),

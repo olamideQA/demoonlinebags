@@ -426,3 +426,40 @@ class Order {
     return '₦${formatter.format(total)}';
   }
 }
+
+class Profile {
+  final String id;
+  final String email;
+  final String? fullName;
+  final String? phone;
+  final String role; // 'customer', 'admin', 'staff'
+  final String preferredCurrency;
+  final List<dynamic> savedAddresses;
+  final DateTime? createdAt;
+
+  const Profile({
+    required this.id,
+    required this.email,
+    this.fullName,
+    this.phone,
+    this.role = 'customer',
+    this.preferredCurrency = 'NGN',
+    this.savedAddresses = const [],
+    this.createdAt,
+  });
+
+  factory Profile.fromJson(Map<String, dynamic> json) {
+    return Profile(
+      id: json['id'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      fullName: json['full_name'] as String?,
+      phone: json['phone'] as String?,
+      role: json['role'] as String? ?? 'customer',
+      preferredCurrency: json['preferred_currency'] as String? ?? 'NGN',
+      savedAddresses: (json['saved_addresses'] as List?) ?? const [],
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
+    );
+  }
+
+  bool get isAdmin => role == 'admin';
+}

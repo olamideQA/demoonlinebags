@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/providers/site_settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 
-class AnnouncementBar extends StatelessWidget {
+class AnnouncementBar extends ConsumerWidget {
   const AnnouncementBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(siteSettingsProvider).announcement;
+
+    if (!settings.isActive || settings.text.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       width: double.infinity,
       color: AppTheme.obsidianNoir,
@@ -20,7 +28,7 @@ class AnnouncementBar extends StatelessWidget {
               const Icon(Icons.stars, color: AppTheme.primaryGold, size: 14),
               const SizedBox(width: 8),
               Text(
-                'COMPLIMENTARY VIP COURIER DELIVERY ACROSS NIGERIA ON ORDERS OVER ₦150,000  •  100% ITALIAN FULL-GRAIN LEATHER',
+                settings.text,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white,
                   fontSize: 11,
