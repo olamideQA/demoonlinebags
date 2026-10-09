@@ -86,7 +86,17 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                   children: [
                     const SizedBox(width: 28),
                     _NavLink(
-                      title: 'BAGS',
+                      title: 'SHOP',
+                      isHighlighted: true,
+                      onTap: () {
+                        ref.read(selectedProductTypeProvider.notifier).state = null;
+                        ref.read(selectedCategorySlugProvider.notifier).state = null;
+                        context.go('/shop');
+                      },
+                    ),
+                    const SizedBox(width: 18),
+                    _NavLink(
+                      title: 'HANDBAGS',
                       onTap: () {
                         ref.read(selectedProductTypeProvider.notifier).state = 'bag';
                         ref.read(selectedCategorySlugProvider.notifier).state = null;
@@ -105,17 +115,7 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     const SizedBox(width: 18),
                     _NavLink(
                       title: 'COMPLETE THE LOOK',
-                      isHighlighted: true,
                       onTap: () => context.go('/pairings'),
-                    ),
-                    const SizedBox(width: 18),
-                    _NavLink(
-                      title: 'ALL CREATIONS',
-                      onTap: () {
-                        ref.read(selectedProductTypeProvider.notifier).state = null;
-                        ref.read(selectedCategorySlugProvider.notifier).state = null;
-                        context.go('/shop');
-                      },
                     ),
                     const SizedBox(width: 18),
                     _NavLink(
@@ -387,6 +387,33 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                     ),
 
                   const Divider(height: 16),
+                  Container(
+                    color: AppTheme.surfaceGrey,
+                    child: ListTile(
+                      title: Text(
+                        'SHOP ALL CREATIONS',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          letterSpacing: 1.2,
+                          color: AppTheme.obsidianNoir,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Explore all handbags & footwear',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 10, color: AppTheme.textMuted),
+                      ),
+                      leading: const Icon(Icons.storefront, color: AppTheme.primaryGold),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: AppTheme.primaryGold),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        ref.read(selectedProductTypeProvider.notifier).state = null;
+                        ref.read(selectedCategorySlugProvider.notifier).state = null;
+                        context.go('/shop');
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   ListTile(
                     title: const Text('HANDBAGS & TOTES'),
                     leading: const Icon(Icons.shopping_bag_outlined, color: AppTheme.primaryGold),

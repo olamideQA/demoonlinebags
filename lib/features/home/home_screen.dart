@@ -10,6 +10,7 @@ import '../../core/providers/site_settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../common/announcement_bar.dart';
 import '../common/cart_drawer.dart';
+import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../common/product_card.dart';
@@ -29,6 +30,7 @@ class HomeScreen extends ConsumerWidget {
     final shoeProducts = products.where((p) => p.productType == 'shoe').take(4).toList();
 
     return Scaffold(
+      bottomNavigationBar: isMobile ? const LuxuryBottomNav() : null,
       body: Stack(
         children: [
           SingleChildScrollView(

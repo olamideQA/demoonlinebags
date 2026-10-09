@@ -5,6 +5,7 @@ import '../../core/providers/products_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../common/announcement_bar.dart';
 import '../common/cart_drawer.dart';
+import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../common/product_card.dart';
@@ -25,6 +26,7 @@ class ShopScreen extends ConsumerWidget {
     final categories = categoriesAsync.value ?? [];
 
     return Scaffold(
+      bottomNavigationBar: isMobile ? const LuxuryBottomNav() : null,
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -147,11 +149,11 @@ class ShopScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
 
                       // Search bar & Sort Controls
-                      Row(
-                        children: [
-                          // Search Box
-                          Expanded(
-                            child: SizedBox(
+                      if (isMobile)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(
                               height: 38,
                               child: TextField(
                                 decoration: InputDecoration(
@@ -168,41 +170,93 @@ class ShopScreen extends ConsumerWidget {
                                 onChanged: (val) => ref.read(searchQueryProvider.notifier).state = val,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-
-                          // Sort Dropdown
-                          Container(
-                            height: 38,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppTheme.borderSubtle),
-                              color: Colors.white,
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: sortBy,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  color: AppTheme.obsidianNoir,
-                                  fontWeight: FontWeight.w500,
+                            const SizedBox(height: 10),
+                            Container(
+                              height: 38,
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: AppTheme.borderSubtle),
+                                color: Colors.white,
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  value: sortBy,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    color: AppTheme.obsidianNoir,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+                                  items: const [
+                                    DropdownMenuItem(value: 'featured', child: Text('Sort: Featured Creations')),
+                                    DropdownMenuItem(value: 'newest', child: Text('Sort: Newest First')),
+                                    DropdownMenuItem(value: 'price_asc', child: Text('Price: Low to High')),
+                                    DropdownMenuItem(value: 'price_desc', child: Text('Price: High to Low')),
+                                    DropdownMenuItem(value: 'rating', child: Text('Customer Rating')),
+                                  ],
+                                  onChanged: (val) {
+                                    if (val != null) ref.read(sortByProvider.notifier).state = val;
+                                  },
                                 ),
-                                icon: const Icon(Icons.keyboard_arrow_down, size: 18),
-                                items: const [
-                                  DropdownMenuItem(value: 'featured', child: Text('Sort: Featured')),
-                                  DropdownMenuItem(value: 'newest', child: Text('Sort: Newest')),
-                                  DropdownMenuItem(value: 'price_asc', child: Text('Price: Low to High')),
-                                  DropdownMenuItem(value: 'price_desc', child: Text('Price: High to Low')),
-                                  DropdownMenuItem(value: 'rating', child: Text('Customer Rating')),
-                                ],
-                                onChanged: (val) {
-                                  if (val != null) ref.read(sortByProvider.notifier).state = val;
-                                },
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 38,
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: 'Search by silhouette, material, leather...',
+                                    prefixIcon: const Icon(Icons.search, size: 18),
+                                    suffixIcon: searchQuery.isNotEmpty
+                                        ? IconButton(
+                                            icon: const Icon(Icons.clear, size: 16),
+                                            onPressed: () => ref.read(searchQueryProvider.notifier).state = '',
+                                          )
+                                        : null,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                                  ),
+                                  onChanged: (val) => ref.read(searchQueryProvider.notifier).state = val,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Container(
+                              height: 38,
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: AppTheme.borderSubtle),
+                                color: Colors.white,
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: sortBy,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    color: AppTheme.obsidianNoir,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+                                  items: const [
+                                    DropdownMenuItem(value: 'featured', child: Text('Sort: Featured')),
+                                    DropdownMenuItem(value: 'newest', child: Text('Sort: Newest')),
+                                    DropdownMenuItem(value: 'price_asc', child: Text('Price: Low to High')),
+                                    DropdownMenuItem(value: 'price_desc', child: Text('Price: High to Low')),
+                                    DropdownMenuItem(value: 'rating', child: Text('Customer Rating')),
+                                  ],
+                                  onChanged: (val) {
+                                    if (val != null) ref.read(sortByProvider.notifier).state = val;
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -259,9 +313,9 @@ class ShopScreen extends ConsumerWidget {
                           physics: const NeverScrollableScrollPhysics(),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: isMobile ? 2 : (MediaQuery.of(context).size.width > 1200 ? 4 : 3),
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 32,
-                            childAspectRatio: 0.62,
+                            crossAxisSpacing: isMobile ? 12 : 20,
+                            mainAxisSpacing: isMobile ? 20 : 32,
+                            childAspectRatio: isMobile ? 0.58 : 0.64,
                           ),
                           itemCount: filteredProducts.length,
                           itemBuilder: (ctx, index) => ProductCard(product: filteredProducts[index]),

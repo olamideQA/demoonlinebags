@@ -5,6 +5,7 @@ import '../../core/config/app_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../common/announcement_bar.dart';
 import '../common/cart_drawer.dart';
+import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 
@@ -60,6 +61,7 @@ class _ContactScreenState extends State<ContactScreen> {
     final isMobile = MediaQuery.of(context).size.width < 900;
 
     return Scaffold(
+      bottomNavigationBar: isMobile ? const LuxuryBottomNav() : null,
       body: Stack(
         children: [
           SingleChildScrollView(
