@@ -26,31 +26,31 @@ def run_sql(query_str):
 
 settings = [
     ('announcement', {
-        'text': 'COMPLIMENTARY VIP COURIER DELIVERY ON ORDERS OVER ₦150,000  •  SAME-DAY LAGOS DISPATCH & 24–48HR NATIONWIDE  •  100% AUTHENTIC FULL-GRAIN LEATHER',
+        'text': 'FREE VIP DELIVERY IN LAGOS OVER ₦150,000  •  PAY ON DELIVERY IN LAGOS & ABUJA  •  100% REAL LEATHER — NO PEELING, NO FAKE',
         'is_active': True
     }),
     ('header', {
-        'brand_name': 'DEMO ONLINE BAGS',
-        'tagline': 'LUXURY HANDBAGS & FOOTWEAR • ATELIER LAGOS'
+        'brand_name': 'LUXE LAGOS',
+        'tagline': 'LUXURY BAGS & SHOES • LAGOS • ABUJA • NATIONWIDE'
     }),
     ('hero', {
-        'badge': 'NEW CAPSULE 2026 • LIMITED ATELIER EDITION',
-        'title': 'Command Every Room.\nUnapologetic Luxury.',
-        'subtitle': 'Crafted in certified Italian full-grain calfskin with non-tarnish 24K gold hardware. Structured for executive boardroom poise and sculpted for high-society wedding guest glamour.',
-        'cta_text': 'EXPLORE SIGNATURE BAGS',
+        'badge': 'LAGOS BESTSELLER • 2026 COLLECTION',
+        'title': 'Pepper Them at Every Owambe.',
+        'subtitle': 'Real Italian leather that will not peel in Lagos heat. Loved from Lekki to Maitama.',
+        'cta_text': 'SHOP BAGS',
         'cta_url': '/shop',
-        'secondary_cta_text': 'COMPLETE THE LOOK (SETS)',
+        'secondary_cta_text': 'SHOP MATCHING SETS',
         'secondary_cta_url': '/pairings',
         'image_url': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85'
     }),
     ('footer', {
-        'bio': "Demo Online Bags is Nigeria's premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.",
-        'email': 'concierge@demoonlinebags.com',
-        'phone': '+234 810 000 2247',
-        'whatsapp': '+234 810 000 2247',
-        'address': 'Victoria Island, Lagos, Nigeria',
-        'copyright': '© 2026 DEMO ONLINE BAGS ATELIER. ALL RIGHTS RESERVED.',
-        'instagram': 'https://instagram.com/demoonlinebags'
+        'bio': "LUXE LAGOS is made for Nigerian women who do it all — boardroom by day, Owambe by night. Real Italian leather bags and comfy matching shoes that will not peel. Chat on WhatsApp, pay on delivery in Lagos & Abuja.",
+        'email': 'hello@luxelagos.ng',
+        'phone': '+234 810 123 4567',
+        'whatsapp': '+234 810 123 4567',
+        'address': '12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
+        'copyright': '© 2026 LUXE LAGOS. ALL RIGHTS RESERVED.',
+        'instagram': 'https://instagram.com/luxelagos.ng'
     }),
     ('general', {
         'currency': 'NGN',
@@ -71,15 +71,15 @@ def main():
         run_sql(sql)
         print(f"  OK: site_settings -> {key}")
 
-    # Also update categories descriptions to high-fashion Nigerian appeal
+    # Also update categories descriptions to warm Nigerian appeal
     category_updates = [
-        ('tote-bags', 'Architectural executive totes engineered for high-flying women. Holds your laptop, planner, and vanity pouch with zero sagging.'),
-        ('crossbody-bags', 'Chic hands-free luxury for effortless airport travel, weekend brunches, and high-street shopping in Victoria Island.'),
-        ('shoulder-bags', 'Sleek under-the-arm baguettes and chain carriers crafted to transition seamlessly from desk to dinner.'),
-        ('evening-clutches', 'Show-stopping crystal minaudières and gilded clutches designed for red carpets, wedding guest glam, and grand evening receptions.'),
-        ('mini-bucket-bags', 'Petite structured vanity silhouettes in rich pebble leather—holds your iPhone Pro Max, lip gloss, and cards in pure style.'),
-        ('luxury-heels', 'Architectural stilettos and party pumps engineered with triple-layer memory-foam arch support to dance all night at Owambes without foot fatigue.'),
-        ('mules-slides', 'Slip-on block mules with cushioned glove-leather insoles for effortless boardroom poise and luxury brunch dates.')
+        ('tote-bags', 'Strong office totes for working women. Carries your 14-inch laptop, planner and purse — no sagging, no peeling.'),
+        ('crossbody-bags', 'Hands-free bags for market runs, travel, brunch in VI and everyday slay. Light, fine and easy to carry.'),
+        ('shoulder-bags', 'Fine under-arm bags that go from office in the morning to dinner at night. One bag, many occasions.'),
+        ('evening-clutches', 'Shining crystal clutches for weddings, Owambe, church anniversary and red-carpet nights. Pepper them well.'),
+        ('mini-bucket-bags', 'Small fine bags for phone, lip gloss and cards. Perfect for quick outings and Detty December parties.'),
+        ('luxury-heels', 'Fine party heels with soft padding. Dance for hours at Owambe with no leg pain. Brides love them.'),
+        ('mules-slides', 'Easy slip-on mules for office, church and brunch. Soft inside, classy outside.')
     ]
 
     print("\n=== UPDATING CATEGORIES DESCRIPTIONS ===")
@@ -90,8 +90,8 @@ def main():
 
     # Also update pairings descriptions
     pairing_updates = [
-        ('e1111111-1111-1111-1111-111111111111', 'The Grand Soirée & Wedding Guest Set: Venetian Crystal Minaudière & Bellissima Stilettos', 'Turn heads at any high-society reception. Hand-set pave crystal clutch paired with arch-padded stiletto pumps designed for comfort throughout a 6-hour Owambe. Enjoy an exclusive 15% pairing privilege.'),
-        ('e2222222-2222-2222-2222-222222222222', 'The Executive Power Duo: Sovereign Leather Tote & Paloma Sculpted Mules', 'The definitive boardroom power look for women of influence. Structured 14-inch laptop tote in scratch-resistant Italian calfskin paired with all-day comfortable 60mm block mules. Save 10% on the ensemble.')
+        ('e1111111-1111-1111-1111-111111111111', 'Owambe Ready Set: Crystal Clutch + Crystal Heels', 'Perfect match for weddings and Owambe. Shining clutch + comfy padded heels you can dance in for 6 hours. Buy together and save 15%.'),
+        ('e2222222-2222-2222-2222-222222222222', 'Office Power Set: Laptop Tote + Comfy Mules', 'For working women: strong tote that carries your 14-inch laptop + comfy low heels for all-day office and church. Real leather, no peeling. Save 10% when you buy both.')
     ]
 
     print("\n=== UPDATING PAIRINGS COPY ===")

@@ -10,12 +10,12 @@ class AnnouncementSettings {
   factory AnnouncementSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const AnnouncementSettings(
-        text: 'COMPLIMENTARY VIP COURIER DELIVERY ON ORDERS OVER ₦150,000  •  SAME-DAY LAGOS DISPATCH & 24–48HR NATIONWIDE  •  100% AUTHENTIC FULL-GRAIN LEATHER',
+        text: 'FREE VIP DELIVERY IN LAGOS OVER ₦150,000  •  PAY ON DELIVERY IN LAGOS & ABUJA  •  100% REAL LEATHER — NO PEELING, NO FAKE',
         isActive: true,
       );
     }
     return AnnouncementSettings(
-      text: json['text'] as String? ?? 'COMPLIMENTARY VIP COURIER DELIVERY ON ORDERS OVER ₦150,000  •  SAME-DAY LAGOS DISPATCH & 24–48HR NATIONWIDE  •  100% AUTHENTIC FULL-GRAIN LEATHER',
+      text: json['text'] as String? ?? 'FREE VIP DELIVERY IN LAGOS OVER ₦150,000  •  PAY ON DELIVERY IN LAGOS & ABUJA  •  100% REAL LEATHER — NO PEELING, NO FAKE',
       isActive: json['is_active'] as bool? ?? true,
     );
   }
@@ -38,13 +38,13 @@ class HeaderSettings {
   factory HeaderSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const HeaderSettings(
-        brandName: 'DEMO ONLINE BAGS',
-        tagline: 'LUXURY HANDBAGS & FOOTWEAR • ATELIER LAGOS',
+        brandName: 'LUXE LAGOS',
+        tagline: 'LUXURY BAGS & SHOES • LAGOS • ABUJA • NATIONWIDE',
       );
     }
     return HeaderSettings(
-      brandName: json['brand_name'] as String? ?? 'DEMO ONLINE BAGS',
-      tagline: json['tagline'] as String? ?? 'LUXURY HANDBAGS & FOOTWEAR • ATELIER LAGOS',
+      brandName: json['brand_name'] as String? ?? 'LUXE LAGOS',
+      tagline: json['tagline'] as String? ?? 'LUXURY BAGS & SHOES • LAGOS • ABUJA • NATIONWIDE',
     );
   }
 
@@ -80,12 +80,12 @@ class HeroSlide {
   factory HeroSlide.fromJson(Map<String, dynamic> json) {
     return HeroSlide(
       id: json['id'] as String? ?? 'slide-1',
-      badge: json['badge'] as String? ?? 'ATELIER 2026 • SIGNATURE CAPSULE',
-      title: json['title'] as String? ?? 'Command Every Room.',
-      subtitle: json['subtitle'] as String? ?? 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
-      ctaText: json['cta_text'] as String? ?? 'EXPLORE BAGS',
+      badge: json['badge'] as String? ?? 'LAGOS BESTSELLER • 2026 COLLECTION',
+      title: json['title'] as String? ?? 'Pepper Them at Every Owambe.',
+      subtitle: json['subtitle'] as String? ?? 'Real Italian leather that will not peel in Lagos heat. Loved from Lekki to Maitama.',
+      ctaText: json['cta_text'] as String? ?? 'SHOP BAGS',
       ctaUrl: json['cta_url'] as String? ?? '/shop',
-      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'COMPLETE THE LOOK',
+      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'SHOP MATCHING SETS',
       secondaryCtaUrl: json['secondary_cta_url'] as String? ?? '/pairings',
       imageUrl: json['image_url'] as String? ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
     );
@@ -106,31 +106,31 @@ class HeroSlide {
   static const List<HeroSlide> defaultSlides = [
     HeroSlide(
       id: 's1',
-      badge: 'ATELIER 2026 • SIGNATURE CAPSULE',
-      title: 'Command Every Room.',
-      subtitle: 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
-      ctaText: 'EXPLORE BAGS',
+      badge: 'LAGOS BESTSELLER • 2026 COLLECTION',
+      title: 'Pepper Them at Every Owambe.',
+      subtitle: 'Real Italian leather that will not peel in Lagos heat. Loved from Lekki to Maitama.',
+      ctaText: 'SHOP BAGS',
       ctaUrl: '/shop',
-      secondaryCtaText: 'COMPLETE THE LOOK',
+      secondaryCtaText: 'SHOP MATCHING SETS',
       secondaryCtaUrl: '/pairings',
       imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
     ),
     HeroSlide(
       id: 's2',
-      badge: 'NEW ARRIVAL • 90s ATELIER',
-      title: 'The Riviera 90s Croc.',
-      subtitle: 'Sculpted crocodile-embossed silhouette for brunch in Ikoyi & rooftop soirees.',
-      ctaText: 'DISCOVER BAGUETTES',
+      badge: 'NEW ARRIVAL • CHURCH TO BRUNCH',
+      title: 'One Bag, From Desk to Dinner.',
+      subtitle: 'Fine croc-finish shoulder bag for work in VI, brunch in Ikoyi and dinner after.',
+      ctaText: 'SHOP SHOULDER BAGS',
       ctaUrl: '/shop',
-      secondaryCtaText: 'VIEW MATCHING MULES',
+      secondaryCtaText: 'SEE MATCHING SHOES',
       secondaryCtaUrl: '/pairings',
       imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1600&q=85',
     ),
     HeroSlide(
       id: 's3',
-      badge: 'OWAMBE GLAMOUR • LIMITED ATELIER',
-      title: 'Venetian Minaudière.',
-      subtitle: 'Swarovski-cut crystals catching every chandelier light. Fits iPhone 16 Pro Max.',
+      badge: 'OWAMBE & WEDDING SEASON • LIMITED',
+      title: 'Shine Like Candlelight.',
+      subtitle: 'Crystal clutch that catches every light at weddings. Fits iPhone 16 Pro Max.',
       ctaText: 'SHOP EVENING BAGS',
       ctaUrl: '/shop',
       secondaryCtaText: 'EXPLORE ENSEMBLES',
@@ -177,12 +177,12 @@ class HeroSettings {
   factory HeroSettings.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const HeroSettings(
-        badge: 'ATELIER 2026 • SIGNATURE CAPSULE',
-        title: 'Command Every Room.',
-        subtitle: 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
-        ctaText: 'EXPLORE BAGS',
+        badge: 'LAGOS BESTSELLER • 2026 COLLECTION',
+        title: 'Pepper Them at Every Owambe.',
+        subtitle: 'Real Italian leather that will not peel in Lagos heat. Loved from Lekki to Maitama.',
+        ctaText: 'SHOP BAGS',
         ctaUrl: '/shop',
-        secondaryCtaText: 'COMPLETE THE LOOK',
+        secondaryCtaText: 'SHOP MATCHING SETS',
         secondaryCtaUrl: '/pairings',
         imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
         slides: HeroSlide.defaultSlides,
@@ -197,12 +197,12 @@ class HeroSettings {
     }
 
     return HeroSettings(
-      badge: json['badge'] as String? ?? 'ATELIER 2026 • SIGNATURE CAPSULE',
-      title: json['title'] as String? ?? 'Command Every Room.',
-      subtitle: json['subtitle'] as String? ?? 'Certified Italian calfskin with non-tarnish 24K gold hardware.',
-      ctaText: json['cta_text'] as String? ?? 'EXPLORE BAGS',
+      badge: json['badge'] as String? ?? 'LAGOS BESTSELLER • 2026 COLLECTION',
+      title: json['title'] as String? ?? 'Pepper Them at Every Owambe.',
+      subtitle: json['subtitle'] as String? ?? 'Real Italian leather that will not peel in Lagos heat. Loved from Lekki to Maitama.',
+      ctaText: json['cta_text'] as String? ?? 'SHOP BAGS',
       ctaUrl: json['cta_url'] as String? ?? '/shop',
-      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'COMPLETE THE LOOK',
+      secondaryCtaText: json['secondary_cta_text'] as String? ?? 'SHOP MATCHING SETS',
       secondaryCtaUrl: json['secondary_cta_url'] as String? ?? '/pairings',
       imageUrl: json['image_url'] as String? ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85',
       slides: parsedSlides,
@@ -245,22 +245,22 @@ class FooterSettings {
     if (json == null) {
       return const FooterSettings(
         bio: 'Demo Online Bags is Nigeria\'s premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.',
-        email: 'concierge@demoonlinebags.com',
-        phone: '+234 810 000 2247',
-        whatsapp: '+234 810 000 2247',
-        address: 'Victoria Island, Lagos, Nigeria',
-        copyright: '© 2026 DEMO ONLINE BAGS ATELIER. ALL RIGHTS RESERVED.',
-        instagram: 'https://instagram.com/demoonlinebags',
+        email: 'hello@luxelagos.ng',
+        phone: '+234 810 123 4567',
+        whatsapp: '+234 810 123 4567',
+        address: '12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
+        copyright: '© 2026 LUXE LAGOS. ALL RIGHTS RESERVED.',
+        instagram: 'https://instagram.com/luxelagos.ng',
       );
     }
     return FooterSettings(
       bio: json['bio'] as String? ?? 'Demo Online Bags is Nigeria\'s premier luxury handbag house and atelier. We craft structured full-grain leather handbags and perfectly paired sculpted footwear for discerning, modern African women who lead and inspire.',
-      email: json['email'] as String? ?? 'concierge@demoonlinebags.com',
-      phone: json['phone'] as String? ?? '+234 810 000 2247',
-      whatsapp: json['whatsapp'] as String? ?? '+234 810 000 2247',
-      address: json['address'] as String? ?? 'Victoria Island, Lagos, Nigeria',
-      copyright: json['copyright'] as String? ?? '© 2026 DEMO ONLINE BAGS ATELIER. ALL RIGHTS RESERVED.',
-      instagram: json['instagram'] as String? ?? 'https://instagram.com/demoonlinebags',
+      email: json['email'] as String? ?? 'hello@luxelagos.ng',
+      phone: json['phone'] as String? ?? '+234 810 123 4567',
+      whatsapp: json['whatsapp'] as String? ?? '+234 810 123 4567',
+      address: json['address'] as String? ?? '12 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
+      copyright: json['copyright'] as String? ?? '© 2026 LUXE LAGOS. ALL RIGHTS RESERVED.',
+      instagram: json['instagram'] as String? ?? 'https://instagram.com/luxelagos.ng',
     );
   }
 

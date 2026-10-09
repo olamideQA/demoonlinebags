@@ -1,6 +1,6 @@
 class AppConfig {
-  static const String appName = 'DEMO ONLINE BAGS';
-  static const String appTagline = 'Luxury Handbags & Sculpted Footwear';
+  static const String appName = 'LUXE LAGOS';
+  static const String appTagline = 'Luxury Bags & Comfy Shoes for Nigerian Women';
   
   // Supabase Configuration
   static const String supabaseUrl = String.fromEnvironment(
@@ -18,7 +18,7 @@ class AppConfig {
   static const String defaultCurrencyCode = 'NGN';
   
   // Contact & Socials
-  static const String conciergeEmail = 'vip@demoonlinebags.com';
-  static const String conciergePhone = '+234 800 DEMO BAGS';
-  static const String instagramUrl = 'https://instagram.com/demoonlinebags';
+  static const String conciergeEmail = 'hello@luxelagos.ng';
+  static const String conciergePhone = '+234 810 123 4567';
+  static const String instagramUrl = 'https://instagram.com/luxelagos.ng';
 }
