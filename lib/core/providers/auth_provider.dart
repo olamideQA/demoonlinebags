@@ -18,11 +18,12 @@ class AppAuthState {
   });
 
   bool get isAuthenticated => user != null;
-  // Single source of truth: profiles.role == 'admin'. Bootstrap email kept
-  // only so the store owner never gets locked out before first role is set.
+  // Source of truth: profiles.role == 'admin'. Owner emails kept as bootstrap
+  // so the store owner never gets locked out.
   bool get isAdmin =>
       profile?.role == 'admin' ||
-      user?.email?.toLowerCase() == 'admin@luxelagos.ng';
+      user?.email?.toLowerCase() == 'admin@luxelagos.ng' ||
+      user?.email?.toLowerCase() == 'admin@demoonlinebags.com';
 
   AppAuthState copyWith({
     User? user,
