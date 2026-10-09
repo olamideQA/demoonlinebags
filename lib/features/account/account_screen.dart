@@ -431,8 +431,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
             unselectedLabelColor: AppTheme.textMuted,
             indicatorColor: AppTheme.primaryGold,
             indicatorWeight: 3,
-            labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-            unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 1.2),
+            // Smaller on phones so all 5 tabs fit without crowding.
+            labelStyle: GoogleFonts.plusJakartaSans(fontSize: isMobile ? 11 : 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: isMobile ? 11 : 12, fontWeight: FontWeight.w500, letterSpacing: 1.2),
+            labelPadding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: 4),
             tabs: [
               Tab(
                 icon: const Icon(Icons.shopping_bag_outlined, size: 18),
