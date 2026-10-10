@@ -8,6 +8,7 @@ import '../../core/providers/products_provider.dart';
 import '../../core/providers/site_settings_provider.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/shop_image.dart';
 import '../common/announcement_bar.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
@@ -1070,7 +1071,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  // --- TAB 3: COMPLETE THE LOOK / PAIRINGS ---
+  // --- TAB 3: MATCHING SETS ---
   Widget _buildPairingsManagerTab(BuildContext context) {
     final pairingsAsync = ref.watch(pairingsProvider);
     final products = ref.watch(filteredProductsProvider);
@@ -1086,12 +1087,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'MATCHING SUITES & BUNDLES',
+                  'MATCHING BAG + SHOE SETS',
                   style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Complete The Look: Handbag + Shoe Sets (${pairings.length} Active)',
+                  'Matching Sets (${pairings.length} Active)',
                   style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -1104,8 +1105,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                 side: const BorderSide(color: AppTheme.primaryGold),
               ),
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('CREATE NEW PAIRING', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-              onPressed: () => _showCreatePairingDialog(context, products),
+              label: const Text('CREATE NEW SET', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+              onPressed: () => _showPairingDialog(context, products),
             ),
           ],
         ),
@@ -1128,22 +1129,22 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                 child: Row(
                   children: [
                     if (pair.bagProduct != null)
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(image: NetworkImage(pair.bagProduct!.primaryImage), fit: BoxFit.cover),
+                      ClipRRect(
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: ShopImage(pair.bagProduct!.primaryImage, w: 200, q: 60),
                         ),
                       ),
                     const SizedBox(width: 8),
                     const Icon(Icons.add, size: 16, color: AppTheme.primaryGold),
                     const SizedBox(width: 8),
                     if (pair.shoeProduct != null)
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(image: NetworkImage(pair.shoeProduct!.primaryImage), fit: BoxFit.cover),
+                      ClipRRect(
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: ShopImage(pair.shoeProduct!.primaryImage, w: 200, q: 60),
                         ),
                       ),
                     const SizedBox(width: 16),
@@ -1163,7 +1164,13 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       ),
                     ),
                     IconButton(
+                      icon: const Icon(Icons.edit_outlined, color: AppTheme.obsidianNoir),
+                      tooltip: 'Edit this set',
+                      onPressed: () => _showPairingDialog(context, products, existing: pair),
+                    ),
+                    IconButton(
                       icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed),
+                      tooltip: 'Delete this set',
                       onPressed: () async {
                         await SupabaseService.deletePairing(pair.id);
                         ref.invalidate(pairingsProvider);
@@ -1179,22 +1186,30 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  void _showCreatePairingDialog(BuildContext context, List<Product> products) {
+  /// How matching sets work: pick ONE bag + ONE shoe, give the set a name,
+  /// a short description and a discount (10 or 15). Shoppers see it on
+  /// Matching Sets page and can buy both together cheaper.
+  /// Same dialog creates new sets and edits existing ones.
+  void _showPairingDialog(BuildContext context, List<Product> products, {ProductPairing? existing}) {
     final bags = products.where((p) => p.productType == 'bag').toList();
     final shoes = products.where((p) => p.productType == 'shoe').toList();
 
     if (bags.isEmpty || shoes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('At least one bag and one shoe required to create a pairing.')),
+        const SnackBar(content: Text('Add at least one bag and one shoe first, then make a set.')),
       );
       return;
     }
 
-    String selectedBagId = bags.first.id;
-    String selectedShoeId = shoes.first.id;
-    final titleCtrl = TextEditingController(text: 'New Matching Set');
-    final descCtrl = TextEditingController(text: 'Curated handbag and footwear matching suite with exclusive bundle pricing.');
-    final discountCtrl = TextEditingController(text: '10');
+    final isEditing = existing != null;
+    String selectedBagId = existing?.bagProductId ?? bags.first.id;
+    String selectedShoeId = existing?.shoeProductId ?? shoes.first.id;
+    // Guard against deleted products still referenced by an old set.
+    if (!bags.any((b) => b.id == selectedBagId)) selectedBagId = bags.first.id;
+    if (!shoes.any((s) => s.id == selectedShoeId)) selectedShoeId = shoes.first.id;
+    final titleCtrl = TextEditingController(text: existing?.title ?? 'New Matching Set');
+    final descCtrl = TextEditingController(text: existing?.description ?? 'Matching bag + shoe set. Buy together and save.');
+    final discountCtrl = TextEditingController(text: '${existing?.bundleDiscountPercent ?? 10}');
 
     showDialog(
       context: context,
@@ -1203,46 +1218,49 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
           builder: (ctx, setDialogState) {
             return AlertDialog(
               backgroundColor: Colors.white,
-              title: const Text('Create Complete The Look Set'),
+              title: Text(isEditing ? 'Edit Matching Set' : 'Create Matching Set'),
               content: SizedBox(
                 width: 500,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedBagId,
-                      decoration: const InputDecoration(labelText: 'Select Handbag'),
-                      items: bags.map((b) => DropdownMenuItem(value: b.id, child: Text(b.title, overflow: TextOverflow.ellipsis))).toList(),
-                      onChanged: (val) {
-                        if (val != null) setDialogState(() => selectedBagId = val);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedShoeId,
-                      decoration: const InputDecoration(labelText: 'Select Footwear'),
-                      items: shoes.map((s) => DropdownMenuItem(value: s.id, child: Text(s.title, overflow: TextOverflow.ellipsis))).toList(),
-                      onChanged: (val) {
-                        if (val != null) setDialogState(() => selectedShoeId = val);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: titleCtrl,
-                      decoration: const InputDecoration(labelText: 'Pairing Ensemle Title'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: descCtrl,
-                      decoration: const InputDecoration(labelText: 'Editorial Pairing Story'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: discountCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Bundle Discount Percent (e.g. 10 or 15)'),
-                    ),
-                  ],
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedBagId,
+                        decoration: const InputDecoration(labelText: 'Bag in this set *'),
+                        items: bags.map((b) => DropdownMenuItem(value: b.id, child: Text(b.title, overflow: TextOverflow.ellipsis))).toList(),
+                        onChanged: (val) {
+                          if (val != null) setDialogState(() => selectedBagId = val);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedShoeId,
+                        decoration: const InputDecoration(labelText: 'Shoe in this set *'),
+                        items: shoes.map((s) => DropdownMenuItem(value: s.id, child: Text(s.title, overflow: TextOverflow.ellipsis))).toList(),
+                        onChanged: (val) {
+                          if (val != null) setDialogState(() => selectedShoeId = val);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: titleCtrl,
+                        decoration: const InputDecoration(labelText: 'Set name * (e.g. Owambe Ready Set)'),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: descCtrl,
+                        maxLines: 2,
+                        decoration: const InputDecoration(labelText: 'Short description (why this match is fine)'),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: discountCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Discount % when bought together (10 or 15)'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -1250,18 +1268,42 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: AppTheme.obsidianNoir, foregroundColor: Colors.white),
                   onPressed: () async {
-                    final discount = int.tryParse(discountCtrl.text.trim()) ?? 10;
-                    await SupabaseService.createPairing(
-                      title: titleCtrl.text.trim(),
-                      bagProductId: selectedBagId,
-                      shoeProductId: selectedShoeId,
-                      discountPercent: discount,
-                      description: descCtrl.text.trim(),
-                    );
+                    if (titleCtrl.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Please give the set a name.')),
+                      );
+                      return;
+                    }
+                    final discount = (int.tryParse(discountCtrl.text.trim()) ?? 10).clamp(1, 50);
+                    bool ok;
+                    if (isEditing) {
+                      ok = await SupabaseService.updatePairing(
+                        id: existing.id,
+                        title: titleCtrl.text.trim(),
+                        bagProductId: selectedBagId,
+                        shoeProductId: selectedShoeId,
+                        discountPercent: discount,
+                        description: descCtrl.text.trim(),
+                      );
+                    } else {
+                      ok = await SupabaseService.createPairing(
+                        title: titleCtrl.text.trim(),
+                        bagProductId: selectedBagId,
+                        shoeProductId: selectedShoeId,
+                        discountPercent: discount,
+                        description: descCtrl.text.trim(),
+                      );
+                    }
+                    if (!ok && ctx.mounted) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Could not save. Check connection and try again.')),
+                      );
+                      return;
+                    }
                     ref.invalidate(pairingsProvider);
                     if (ctx.mounted) Navigator.pop(ctx);
                   },
-                  child: const Text('CREATE PAIRING'),
+                  child: Text(isEditing ? 'SAVE CHANGES' : 'CREATE SET'),
                 ),
               ],
             );

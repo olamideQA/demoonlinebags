@@ -713,6 +713,30 @@ class SupabaseService {
     }
   }
 
+  static Future<bool> updatePairing({
+    required String id,
+    required String title,
+    required String bagProductId,
+    required String shoeProductId,
+    required int discountPercent,
+    required String description,
+  }) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('pairings').update({
+        'title': title,
+        'bag_product_id': bagProductId,
+        'shoe_product_id': shoeProductId,
+        'bundle_discount_percent': discountPercent,
+        'description': description,
+      }).eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<bool> deletePairing(String id) async {
     final client = _client;
     if (client == null) return false;
