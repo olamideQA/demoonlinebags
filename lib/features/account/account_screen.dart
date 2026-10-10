@@ -381,10 +381,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
               const Divider(color: Colors.white12, height: 1),
               const SizedBox(height: 24),
 
-              // Quick stats - plain language, useful at a glance.
-              Wrap(
-                spacing: 16,
-                runSpacing: 12,
+              // Quick stats - even grid: 4 across desktop, 2x2 phone/tablet.
+              GridView.count(
+                crossAxisCount: isMobile ? 2 : 4,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 12,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: isMobile ? 2.6 : 2.2,
                 children: [
                   _buildMetricPill(
                     icon: Icons.shopping_bag_outlined,
