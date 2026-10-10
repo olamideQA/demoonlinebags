@@ -260,11 +260,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                 runSpacing: 20,
                 children: [
                   Row(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: isMobile ? 56 : 72,
-                        height: isMobile ? 56 : 72,
+                        width: isMobile ? 52 : 72,
+                        height: isMobile ? 52 : 72,
                         decoration: BoxDecoration(
                           color: Colors.black,
                           border: Border.all(color: AppTheme.primaryGold, width: 2),
@@ -273,17 +273,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                           child: Text(
                             displayName.isNotEmpty ? displayName[0].toUpperCase() : 'C',
                             style: GoogleFonts.cormorantGaramond(
-                              fontSize: isMobile ? 28 : 36,
+                              fontSize: isMobile ? 26 : 36,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.primaryGold,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 18),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                      const SizedBox(width: 14),
+                      // Flexible lets long emails wrap instead of overlapping.
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                           Row(
                             children: [
                               Container(
@@ -307,9 +309,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                           const SizedBox(height: 6),
                           Text(
                             'Hello, $displayName',
+                            softWrap: true,
                             style: GoogleFonts.cormorantGaramond(
                               color: Colors.white,
-                              fontSize: isMobile ? 24 : 32,
+                              fontSize: isMobile ? 22 : 32,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -330,6 +333,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                             ),
                           ),
                         ],
+                        ),
                       ),
                     ],
                   ),
@@ -399,11 +403,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
               // Quick stats - even grid: 4 across desktop, 2x2 phone/tablet.
               GridView.count(
                 crossAxisCount: isMobile ? 2 : 4,
-                crossAxisSpacing: 16,
+                crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: isMobile ? 2.6 : 2.2,
+                // Taller cells on phones so two-line values never clip.
+                childAspectRatio: isMobile ? 1.65 : 2.2,
                 children: [
                   _buildMetricPill(
                     icon: Icons.shopping_bag_outlined,
@@ -512,25 +517,31 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
         ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(icon, color: AppTheme.primaryGold, size: 16),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white54,
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+          // Flexible so long values wrap inside grid cells instead of overflowing.
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white54,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
                 ),
-              ),
               Text(
                 value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white,
                   fontSize: 11.5,
@@ -538,6 +549,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                 ),
               ),
             ],
+            ),
           ),
         ],
       ),
