@@ -1145,20 +1145,54 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                 ),
               ],
             ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.obsidianNoir,
-                foregroundColor: AppTheme.primaryGold,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                side: const BorderSide(color: AppTheme.primaryGold),
-              ),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(
-                'ADD NEW CREATION',
-                style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-              ),
-              onPressed: () => _showProductDialog(context, null),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.end,
+              children: [
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.obsidianNoir,
+                    side: const BorderSide(color: AppTheme.borderSubtle),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  ),
+                  icon: const Icon(Icons.category_outlined, size: 18),
+                  label: Text(
+                    'CATEGORIES',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
+                  onPressed: () => _showCategoriesDialog(context),
+                ),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.obsidianNoir,
+                    side: const BorderSide(color: AppTheme.borderSubtle),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  ),
+                  icon: const Icon(Icons.reviews_outlined, size: 18),
+                  label: Text(
+                    'REVIEWS',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
+                  onPressed: () => _showReviewsDialog(context),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.obsidianNoir,
+                    foregroundColor: AppTheme.primaryGold,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    side: const BorderSide(color: AppTheme.primaryGold),
+                  ),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(
+                    'ADD NEW PRODUCT',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                  ),
+                  onPressed: () => _showProductDialog(context, null),
+                ),
+              ],
             ),
           ],
         ),
@@ -1213,6 +1247,299 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
           ),
         ),
       ],
+    );
+  }
+
+  /// Categories: bag types shoppers filter by (Tote, Crossbody...).
+  /// Add new ones (e.g. Aso-Oke Clutches), rename, change photo or delete.
+  /// Deleting a category keeps its products (they become uncategorized).
+  void _showCategoriesDialog(BuildContext context) {
+    final nameCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    final imgCtrl = TextEditingController();
+    String newType = 'bags';
+    bool uploading = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setD) {
+          Future<void> upload(TextEditingController target) async {
+            final messenger = ScaffoldMessenger.of(context);
+            final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+            if (res == null || res.files.isEmpty) return;
+            final bytes = res.files.first.bytes;
+            if (bytes == null) return;
+            setD(() { uploading = true; });
+            final url = await SupabaseService.uploadProductImage(bytes, res.files.first.name);
+            setD(() => uploading = false);
+            if (url == null) {
+              messenger.showSnackBar(const SnackBar(content: Text('Upload failed. Paste a link instead.')));
+              return;
+            }
+            target.text = url;
+            setD(() {});
+          }
+
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text('Manage Categories'),
+            content: SizedBox(
+              width: 560,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FutureBuilder<List<Category>>(
+                      future: SupabaseService.getCategories(),
+                      builder: (c, snap) {
+                        final cats = snap.data ?? [];
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppTheme.primaryGold)));
+                        }
+                        if (cats.isEmpty) return const Text('No categories yet.');
+                        return Column(
+                          children: [
+                            for (final cat in cats)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: AppTheme.surfaceGrey, border: Border.all(color: AppTheme.borderSubtle)),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      child: SizedBox(
+                                        width: 44, height: 44,
+                                        child: (cat.imageUrl ?? '').isEmpty
+                                            ? const Icon(Icons.category_outlined, color: AppTheme.textMuted)
+                                            : ShopImage(cat.imageUrl!, w: 200, q: 60),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(cat.name, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold)),
+                                          Text('${cat.type} • ${cat.slug}', style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted)),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined, size: 18),
+                                      tooltip: 'Edit category',
+                                      onPressed: () {
+                                        nameCtrl.text = cat.name;
+                                        descCtrl.text = cat.description ?? '';
+                                        imgCtrl.text = cat.imageUrl ?? '';
+                                        newType = cat.type;
+                                        setD(() {});
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Editing "${cat.name}" below — change fields then tap SAVE.')),
+                                        );
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, size: 18, color: AppTheme.errorRed),
+                                      tooltip: 'Delete category (products are kept)',
+                                      onPressed: () async {
+                                        final ok = await SupabaseService.deleteCategory(cat.id);
+                                        if (!ok && context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Delete failed.')));
+                                          return;
+                                        }
+                                        ref.invalidate(categoriesProvider);
+                                        setD(() {});
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                    const Divider(height: 32),
+                    Text('ADD / EDIT CATEGORY', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                    const SizedBox(height: 12),
+                    TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name * (e.g. Aso-Oke Clutches)')),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: newType,
+                      decoration: const InputDecoration(labelText: 'Type *'),
+                      items: const [
+                        DropdownMenuItem(value: 'bags', child: Text('Bags')),
+                        DropdownMenuItem(value: 'shoes', child: Text('Shoes')),
+                        DropdownMenuItem(value: 'accessories', child: Text('Accessories')),
+                      ],
+                      onChanged: (v) { if (v != null) setD(() => newType = v); },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(controller: descCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Description (shown on homepage strip)')),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: TextField(controller: imgCtrl, decoration: const InputDecoration(labelText: 'Photo link (or upload)'))),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryGold, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14)),
+                          icon: uploading
+                              ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Icon(Icons.upload, size: 16),
+                          label: const Text('UPLOAD'),
+                          onPressed: uploading ? null : () => upload(imgCtrl),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('DONE')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.obsidianNoir, foregroundColor: Colors.white),
+                onPressed: () async {
+                  if (nameCtrl.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Type a name first.')));
+                    return;
+                  }
+                  // If a category with this exact name exists, update it; else create.
+                  final cats = await SupabaseService.getCategories();
+                  Category? match;
+                  for (final c in cats) {
+                    if (c.name.toLowerCase() == nameCtrl.text.trim().toLowerCase()) match = c;
+                  }
+                  bool ok;
+                  if (match != null) {
+                    ok = await SupabaseService.updateCategory(id: match.id, name: nameCtrl.text.trim(), type: newType, description: descCtrl.text.trim(), imageUrl: imgCtrl.text.trim());
+                  } else {
+                    ok = await SupabaseService.createCategory(name: nameCtrl.text.trim(), type: newType, description: descCtrl.text.trim(), imageUrl: imgCtrl.text.trim());
+                  }
+                  if (!ok && ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Save failed. Try again.')));
+                    return;
+                  }
+                  ref.invalidate(categoriesProvider);
+                  ref.invalidate(allProductsProvider);
+                  nameCtrl.clear(); descCtrl.clear(); imgCtrl.clear();
+                  setD(() {});
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Category saved — live on shop now.')));
+                },
+                child: const Text('SAVE CATEGORY'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Reviews: pick a product, read what buyers said, delete rude/fake ones.
+  void _showReviewsDialog(BuildContext context) {
+    final products = ref.watch(filteredProductsProvider);
+    String? selectedId = products.isNotEmpty ? products.first.id : null;
+    String selectedTitle = products.isNotEmpty ? products.first.title : '';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setD) => AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text('Moderate Reviews'),
+          content: SizedBox(
+            width: 560,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedId,
+                    decoration: const InputDecoration(labelText: 'Product *'),
+                    items: products.map((p) => DropdownMenuItem(value: p.id, child: Text(p.title, overflow: TextOverflow.ellipsis))).toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setD(() {
+                        selectedId = v;
+                        selectedTitle = products.firstWhere((p) => p.id == v).title;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  if (selectedId == null)
+                    const Text('No products yet.')
+                  else
+                    FutureBuilder<List<Review>>(
+                      future: SupabaseService.getReviews(selectedId!),
+                      builder: (c, snap) {
+                        final revs = snap.data ?? [];
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppTheme.primaryGold)));
+                        }
+                        if (revs.isEmpty) {
+                          return Container(
+                            padding: const EdgeInsets.all(24),
+                            color: AppTheme.surfaceGrey,
+                            child: Text('No reviews for "$selectedTitle" yet.', textAlign: TextAlign.center,
+                                style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                          );
+                        }
+                        return Column(
+                          children: [
+                            for (final r in revs)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(color: AppTheme.surfaceGrey, border: Border.all(color: AppTheme.borderSubtle)),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              ...List.generate(r.rating, (_) => const Icon(Icons.star, size: 13, color: AppTheme.primaryGold)),
+                                              const SizedBox(width: 8),
+                                              Expanded(child: Text(r.authorName, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                                            ],
+                                          ),
+                                          if (r.headline != null && r.headline!.isNotEmpty) ...[
+                                            const SizedBox(height: 4),
+                                            Text(r.headline!, style: GoogleFonts.cormorantGaramond(fontSize: 15, fontWeight: FontWeight.bold)),
+                                          ],
+                                          const SizedBox(height: 4),
+                                          Text(r.comment, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted, height: 1.5)),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, size: 18, color: AppTheme.errorRed),
+                                      tooltip: 'Delete this review',
+                                      onPressed: () async {
+                                        await SupabaseService.deleteReview(r.id);
+                                        setD(() {});
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('DONE')),
+          ],
+        ),
+      ),
     );
   }
 

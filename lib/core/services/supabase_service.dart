@@ -549,6 +549,75 @@ class SupabaseService {
     return fallbackReviews.where((r) => r.productId == productId).toList();
   }
 
+  // --- Categories manager ---
+  static Future<bool> createCategory({
+    required String name,
+    required String type,
+    String? description,
+    String? imageUrl,
+  }) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      final slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-$'), '');
+      await client.from('categories').insert({
+        'name': name.trim(),
+        'slug': slug,
+        'type': type,
+        'description': (description ?? '').trim(),
+        'image_url': (imageUrl ?? '').trim(),
+      });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> updateCategory({
+    required String id,
+    required String name,
+    required String type,
+    String? description,
+    String? imageUrl,
+  }) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('categories').update({
+        'name': name.trim(),
+        'type': type,
+        'description': (description ?? '').trim(),
+        'image_url': (imageUrl ?? '').trim(),
+      }).eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> deleteCategory(String id) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('categories').delete().eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // --- Reviews moderation ---
+  static Future<bool> deleteReview(String id) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('reviews').delete().eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<String> submitOrder({
     required String customerName,
     required String customerEmail,
