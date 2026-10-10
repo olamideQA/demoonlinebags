@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/models/models.dart';
+import '../../core/models/site_settings.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/providers/products_provider.dart';
 import '../../core/providers/site_settings_provider.dart';
@@ -61,7 +62,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _initCMSControllers();
     _loadOrders();
   }
@@ -247,6 +248,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   Tab(icon: Icon(Icons.shopping_bag_outlined, size: 18), text: 'PRODUCTS'),
                   Tab(icon: Icon(Icons.auto_awesome_outlined, size: 18), text: 'MATCHING SETS'),
                   Tab(icon: Icon(Icons.receipt_long_outlined, size: 18), text: 'ORDERS'),
+                  Tab(icon: Icon(Icons.local_offer_outlined, size: 18), text: 'PROMO CODES'),
                   Tab(icon: Icon(Icons.favorite_border, size: 18), text: 'STORE HEALTH'),
                 ],
               ),
@@ -264,6 +266,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     _buildProductsManagerTab(context),
                     _buildPairingsManagerTab(context),
                     _buildOrdersManagerTab(context),
+                    _buildPromoCodesTab(context),
                     _buildSystemHealthTab(context),
                   ],
                 ),
@@ -738,6 +741,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
           ),
           const SizedBox(height: 24),
 
+          // 3b. Homepage Banners (all slides) - this is what shoppers swipe.
+          _buildHeroSlidesEditor(context, ref),
+          const SizedBox(height: 24),
+
           // 4. Footer & Contact Details
           _sectionCard(
             title: 'Contact & WhatsApp Details',
@@ -860,7 +867,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       whatsapp: _footerWhatsappCtrl.text.trim(),
       address: _footerAddressCtrl.text.trim(),
       copyright: _footerCopyrightCtrl.text.trim(),
-      instagram: 'https://instagram.com/demoonlinebags',
+      instagram: 'https://instagram.com/luxelagos.ng',
     );
 
     final threshold = double.tryParse(_freeShippingCtrl.text.replaceAll(',', '').trim()) ?? 150000.0;
@@ -881,6 +888,237 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
         ),
       );
     }
+  }
+
+  /// Banners editor: every slide shoppers swipe, with photo upload.
+  /// Saves instantly (no need for PUBLISH ALL).
+  Widget _buildHeroSlidesEditor(BuildContext context, WidgetRef ref) {
+    final slides = ref.watch(siteSettingsProvider).hero.slides;
+    return _sectionCard(
+      title: 'Homepage Banners (${slides.length} slides)',
+      subtitle: 'These are the photos shoppers swipe on the homepage. Edit any slide or add a new one.',
+      children: [
+        for (int i = 0; i < slides.length; i++) ...[
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceGrey,
+              border: Border.all(color: AppTheme.borderSubtle),
+            ),
+            child: Row(
+              children: [
+                ClipRRect(
+                  child: SizedBox(
+                    width: 72,
+                    height: 72,
+                    child: ShopImage(slides[i].imageUrl, w: 200, q: 60),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SLIDE ${i + 1} • ${slides[i].badge}',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: AppTheme.primaryGoldDark),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        slides[i].title,
+                        style: GoogleFonts.cormorantGaramond(fontSize: 16, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '${slides[i].ctaText}  •  ${slides[i].secondaryCtaText}',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  tooltip: 'Edit slide ${i + 1}',
+                  onPressed: () => _showSlideDialog(context, ref, existing: slides[i], index: i),
+                ),
+                if (slides.length > 1)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 18, color: AppTheme.errorRed),
+                    tooltip: 'Delete slide ${i + 1}',
+                    onPressed: () async {
+                      final next = List<HeroSlide>.from(slides)..removeAt(i);
+                      await ref.read(siteSettingsProvider.notifier).updateHeroSlides(next);
+                      setState(() {});
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppTheme.obsidianNoir,
+            side: const BorderSide(color: AppTheme.borderSubtle),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          ),
+          icon: const Icon(Icons.add, size: 18),
+          label: Text(
+            slides.length >= 6 ? 'MAX 6 SLIDES' : 'ADD NEW BANNER',
+            style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+          ),
+          onPressed: slides.length >= 6
+              ? null
+              : () => _showSlideDialog(context, ref),
+        ),
+      ],
+    );
+  }
+
+  void _showSlideDialog(BuildContext context, WidgetRef ref, {HeroSlide? existing, int? index}) {
+    final isEditing = existing != null;
+    final badgeCtrl = TextEditingController(text: existing?.badge ?? 'LAGOS BESTSELLER');
+    final titleCtrl = TextEditingController(text: existing?.title ?? '');
+    final subCtrl = TextEditingController(text: existing?.subtitle ?? '');
+    final ctaCtrl = TextEditingController(text: existing?.ctaText ?? 'SHOP BAGS');
+    final ctaUrlCtrl = TextEditingController(text: existing?.ctaUrl ?? '/shop');
+    final secCtrl = TextEditingController(text: existing?.secondaryCtaText ?? 'SHOP MATCHING SETS');
+    final secUrlCtrl = TextEditingController(text: existing?.secondaryCtaUrl ?? '/pairings');
+    final imgCtrl = TextEditingController(text: existing?.imageUrl ?? '');
+    Uint8List? pickedBytes;
+    bool uploading = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setD) {
+          Future<void> upload() async {
+            final messenger = ScaffoldMessenger.of(context);
+            final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+            if (res == null || res.files.isEmpty) return;
+            final bytes = res.files.first.bytes;
+            if (bytes == null) {
+              messenger.showSnackBar(const SnackBar(content: Text('Could not read that file.')));
+              return;
+            }
+            setD(() { pickedBytes = bytes; uploading = true; });
+            final url = await SupabaseService.uploadProductImage(bytes, res.files.first.name);
+            setD(() => uploading = false);
+            if (url == null) {
+              messenger.showSnackBar(const SnackBar(content: Text('Upload failed. Paste a link instead.')));
+              return;
+            }
+            imgCtrl.text = url;
+            setD(() {});
+            messenger.showSnackBar(const SnackBar(content: Text('Banner photo uploaded.')));
+          }
+
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text(isEditing ? 'Edit Banner ${index != null ? index + 1 : ''}' : 'Add New Banner'),
+            content: SizedBox(
+              width: 520,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 84,
+                          height: 84,
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceGrey,
+                            border: Border.all(color: AppTheme.borderSubtle),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: pickedBytes != null
+                              ? Image.memory(pickedBytes!, fit: BoxFit.cover)
+                              : (imgCtrl.text.trim().isEmpty
+                                  ? const Icon(Icons.image_outlined, color: AppTheme.textMuted)
+                                  : ShopImage(imgCtrl.text.trim(), w: 200, q: 60)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryGold,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            ),
+                            icon: uploading
+                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Icon(Icons.upload, size: 18),
+                            label: Text(uploading ? 'UPLOADING...' : 'UPLOAD PHOTO',
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                            onPressed: uploading ? null : upload,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(controller: imgCtrl, decoration: const InputDecoration(labelText: 'Photo link (auto-filled after upload, or paste)'), onChanged: (_) => setD(() {})),
+                    const SizedBox(height: 12),
+                    TextField(controller: badgeCtrl, decoration: const InputDecoration(labelText: 'Small top text * (e.g. LAGOS BESTSELLER)')),
+                    const SizedBox(height: 12),
+                    TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Big headline * (e.g. Pepper Them at Every Owambe)')),
+                    const SizedBox(height: 12),
+                    TextField(controller: subCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Short description under headline')),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: TextField(controller: ctaCtrl, decoration: const InputDecoration(labelText: 'Main button (e.g. SHOP BAGS)'))),
+                        const SizedBox(width: 12),
+                        Expanded(child: TextField(controller: secCtrl, decoration: const InputDecoration(labelText: 'Second button'))),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.obsidianNoir, foregroundColor: Colors.white),
+                onPressed: () async {
+                  if (titleCtrl.text.trim().isEmpty || badgeCtrl.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Top text and headline are required.')));
+                    return;
+                  }
+                  final slides = List<HeroSlide>.from(ref.read(siteSettingsProvider).hero.slides);
+                  final slide = HeroSlide(
+                    id: existing?.id ?? 'custom-${DateTime.now().millisecondsSinceEpoch}',
+                    badge: badgeCtrl.text.trim(),
+                    title: titleCtrl.text.trim(),
+                    subtitle: subCtrl.text.trim(),
+                    ctaText: ctaCtrl.text.trim().isEmpty ? 'SHOP BAGS' : ctaCtrl.text.trim(),
+                    ctaUrl: ctaUrlCtrl.text.trim().isEmpty ? '/shop' : ctaUrlCtrl.text.trim(),
+                    secondaryCtaText: secCtrl.text.trim().isEmpty ? 'SHOP MATCHING SETS' : secCtrl.text.trim(),
+                    secondaryCtaUrl: secUrlCtrl.text.trim().isEmpty ? '/pairings' : secUrlCtrl.text.trim(),
+                    imageUrl: imgCtrl.text.trim().isEmpty ? 'assets/images/hero1.jpg' : imgCtrl.text.trim(),
+                  );
+                  if (isEditing && index != null && index < slides.length) {
+                    slides[index] = slide;
+                  } else {
+                    slides.add(slide);
+                  }
+                  await ref.read(siteSettingsProvider.notifier).updateHeroSlides(slides);
+                  setState(() {});
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Banner saved — live on homepage now.')));
+                },
+                child: Text(isEditing ? 'SAVE BANNER' : 'ADD BANNER'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   // --- TAB 2: PRODUCTS MANAGER (FULL CRUD) ---
@@ -1615,7 +1853,178 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  // --- TAB 5: SYSTEM HEALTH ---
+  // --- TAB 5: PROMO CODES (admin-managed discounts) ---
+  Widget _buildPromoCodesTab(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: SupabaseService.getPromoCodes(),
+      builder: (ctx, snap) {
+        final codes = snap.data ?? [];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'DISCOUNT CODES',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Promo Codes (${codes.length})',
+                      style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.obsidianNoir,
+                    foregroundColor: AppTheme.primaryGold,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    side: const BorderSide(color: AppTheme.primaryGold),
+                  ),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('NEW CODE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  onPressed: () => _showPromoDialog(ctx, null),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Shoppers type these at checkout. Example: LUXE10 = 10% off.',
+              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
+            ),
+            const SizedBox(height: 20),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            if (snap.connectionState == ConnectionState.waiting)
+              const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: AppTheme.primaryGold)))
+            else if (codes.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(32),
+                color: Colors.white,
+                child: const Center(child: Text('No codes yet. Create LUXE10 to start.')),
+              )
+            else
+              Expanded(
+                child: ListView.separated(
+                  itemCount: codes.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (c, i) {
+                    final row = codes[i];
+                    final active = (row['is_active'] as bool?) ?? true;
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: active ? AppTheme.borderSubtle : AppTheme.errorRed.withValues(alpha: 0.4)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            color: active ? AppTheme.obsidianNoir : AppTheme.surfaceGrey,
+                            child: Text(
+                              '${row['code']}',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                                color: active ? AppTheme.primaryGold : AppTheme.textMuted,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              '${row['discount_percent']}% off • ${active ? 'Active' : 'Paused'}',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              await SupabaseService.setPromoActive(row['id'].toString(), !active);
+                              setState(() {});
+                            },
+                            child: Text(active ? 'PAUSE' : 'RESUME'),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed),
+                            tooltip: 'Delete code',
+                            onPressed: () async {
+                              await SupabaseService.deletePromoCode(row['id'].toString());
+                              setState(() {});
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPromoDialog(BuildContext context, Map<String, dynamic>? existing) {
+    final codeCtrl = TextEditingController();
+    final percentCtrl = TextEditingController(text: '10');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: const Text('Create Discount Code'),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: codeCtrl,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(labelText: 'Code * (e.g. DETTY20)'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: percentCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Discount % (1-90)'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.obsidianNoir, foregroundColor: Colors.white),
+            onPressed: () async {
+              final code = codeCtrl.text.trim().toUpperCase();
+              final pct = (int.tryParse(percentCtrl.text.trim()) ?? 0).clamp(1, 90);
+              if (code.isEmpty) {
+                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Type a code first.')));
+                return;
+              }
+              final ok = await SupabaseService.createPromoCode(code: code, percent: pct);
+              if (!ok && ctx.mounted) {
+                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Code exists already or save failed.')));
+                return;
+              }
+              setState(() {});
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            child: const Text('CREATE CODE'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- TAB 6: SYSTEM HEALTH ---
   Widget _buildSystemHealthTab(BuildContext context) {
     return SingleChildScrollView(
       child: Column(

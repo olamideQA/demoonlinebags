@@ -41,7 +41,13 @@ settings = [
         'cta_url': '/shop',
         'secondary_cta_text': 'SHOP MATCHING SETS',
         'secondary_cta_url': '/pairings',
-        'image_url': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1600&q=85'
+        'image_url': 'assets/images/hero1.jpg',
+        'slides': [
+            {'id': 's1', 'badge': 'LAGOS BESTSELLER • 2026 COLLECTION', 'title': 'Pepper Them at Every Owambe.', 'subtitle': 'Real Italian leather that will not peel in Lagos heat. Loved from Lekki to Maitama.', 'cta_text': 'SHOP BAGS', 'cta_url': '/shop', 'secondary_cta_text': 'SHOP MATCHING SETS', 'secondary_cta_url': '/pairings', 'image_url': 'assets/images/hero1.jpg'},
+            {'id': 's2', 'badge': 'NEW ARRIVAL • CHURCH TO BRUNCH', 'title': 'One Bag, From Desk to Dinner.', 'subtitle': 'Fine croc-finish shoulder bag for work in VI, brunch in Ikoyi and dinner after.', 'cta_text': 'SHOP SHOULDER BAGS', 'cta_url': '/shop', 'secondary_cta_text': 'SEE MATCHING SHOES', 'secondary_cta_url': '/pairings', 'image_url': 'assets/images/hero2.jpg'},
+            {'id': 's3', 'badge': 'OWAMBE & WEDDING SEASON • LIMITED', 'title': 'Shine Like Candlelight.', 'subtitle': 'Crystal clutch that catches every light at weddings. Fits iPhone 16 Pro Max.', 'cta_text': 'SHOP PARTY CLUTCHES', 'cta_url': '/shop', 'secondary_cta_text': 'SHOP BAG + SHOE SETS', 'secondary_cta_url': '/pairings', 'image_url': 'assets/images/hero3.jpg'},
+            {'id': 's4', 'badge': 'COMFY HEELS • DANCE ALL NIGHT', 'title': 'Heels That Dont Hurt.', 'subtitle': 'Soft padded heels for 6-hour Owambes, church and office. No leg pain, no wahala.', 'cta_text': 'SHOP COMFY HEELS', 'cta_url': '/shop', 'secondary_cta_text': 'MATCH WITH A BAG', 'secondary_cta_url': '/pairings', 'image_url': 'assets/images/hero4.jpg'},
+        ]
     }),
     ('footer', {
         'bio': "LUXE LAGOS is made for Nigerian women who do it all — boardroom by day, Owambe by night. Real Italian leather bags and comfy matching shoes that will not peel. Chat on WhatsApp, pay on delivery in Lagos & Abuja.",

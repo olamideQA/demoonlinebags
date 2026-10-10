@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
+import '../services/supabase_service.dart';
 
 class CartState {
   final List<CartItem> items;
@@ -127,16 +128,35 @@ class CartNotifier extends Notifier<CartState> {
     state = state.copyWith(items: updatedItems);
   }
 
+  /// Sync fallback for built-in codes (works offline).
   bool applyPromoCode(String code) {
     final clean = code.trim().toUpperCase();
-    if (clean == 'VIPLUXE10' || clean == 'VIP10') {
+    if (clean == 'VIPLUXE10' || clean == 'VIP10' || clean == 'LUXE10' || clean == 'LAGOS10') {
       state = state.copyWith(promoCode: clean, discountPercent: 10.0);
       return true;
-    } else if (clean == 'DEMO15') {
+    } else if (clean == 'DEMO15' || clean == 'OWAMBE15') {
       state = state.copyWith(promoCode: clean, discountPercent: 15.0);
       return true;
     }
     return false;
+  }
+
+  /// Async: checks admin-managed DB codes first, falls back to built-ins.
+  /// Returns discount % applied, or 0 if invalid.
+  Future<int> applyPromoCodeAsync(String code) async {
+    final clean = code.trim().toUpperCase();
+    if (clean.isEmpty) return 0;
+    int percent = 0;
+    try {
+      percent = await SupabaseService.validatePromoCode(clean);
+    } catch (_) {
+      percent = 0;
+    }
+    if (percent > 0) {
+      state = state.copyWith(promoCode: clean, discountPercent: percent.toDouble());
+      return percent;
+    }
+    return applyPromoCode(clean) ? state.discountPercent.toInt() : 0;
   }
 
   void removePromoCode() {

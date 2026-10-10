@@ -73,6 +73,7 @@ class SiteSettingsNotifier extends Notifier<SiteSettings> {
     required String secondaryCtaUrl,
     required String imageUrl,
   }) async {
+    // Preserve existing slides so PUBLISH ALL never wipes banners 2-4.
     final updated = HeroSettings(
       badge: badge,
       title: title,
@@ -82,6 +83,26 @@ class SiteSettingsNotifier extends Notifier<SiteSettings> {
       secondaryCtaText: secondaryCtaText,
       secondaryCtaUrl: secondaryCtaUrl,
       imageUrl: imageUrl,
+      slides: state.hero.slides,
+    );
+    state = state.copyWith(hero: updated);
+    await _saveToSupabase('hero', updated.toJson());
+  }
+
+  /// Saves the full banners list. Singles mirror slide 1 as fallback.
+  Future<void> updateHeroSlides(List<HeroSlide> slides) async {
+    final safe = slides.isEmpty ? HeroSlide.defaultSlides : slides;
+    final first = safe.first;
+    final updated = HeroSettings(
+      badge: first.badge,
+      title: first.title,
+      subtitle: first.subtitle,
+      ctaText: first.ctaText,
+      ctaUrl: first.ctaUrl,
+      secondaryCtaText: first.secondaryCtaText,
+      secondaryCtaUrl: first.secondaryCtaUrl,
+      imageUrl: first.imageUrl,
+      slides: safe,
     );
     state = state.copyWith(hero: updated);
     await _saveToSupabase('hero', updated.toJson());

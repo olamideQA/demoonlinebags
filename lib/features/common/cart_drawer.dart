@@ -273,7 +273,7 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                                   child: TextField(
                                     controller: _promoController,
                                     decoration: InputDecoration(
-                                      hintText: 'PROMO CODE (e.g. VIP10)',
+                                      hintText: 'PROMO CODE (e.g. LUXE10)',
                                       hintStyle: GoogleFonts.plusJakartaSans(fontSize: 11),
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                                     ),
@@ -288,13 +288,19 @@ class _CartDrawerState extends ConsumerState<CartDrawer> {
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
                                   ),
-                                  onPressed: () {
-                                    final success = cartNotifier.applyPromoCode(_promoController.text);
+                                  onPressed: () async {
+                                    final code = _promoController.text;
                                     setState(() {
-                                      _promoSuccess = success;
-                                      _promoMessage = success
-                                          ? 'Promo applied! You don save money.'
-                                          : 'Hmm, that code no work. Try LAGOS10';
+                                      _promoMessage = 'Checking code...';
+                                      _promoSuccess = false;
+                                    });
+                                    final percent = await cartNotifier.applyPromoCodeAsync(code);
+                                    if (!mounted) return;
+                                    setState(() {
+                                      _promoSuccess = percent > 0;
+                                      _promoMessage = percent > 0
+                                          ? 'Promo applied! You save $percent%.'
+                                          : 'Hmm, that code no work. Try LUXE10';
                                     });
                                   },
                                   child: const Text('APPLY'),

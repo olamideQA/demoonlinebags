@@ -758,6 +758,73 @@ class SupabaseService {
     }
   }
 
+  // --- Promo codes (DB-driven, admin-managed) ---
+  static Future<List<Map<String, dynamic>>> getPromoCodes() async {
+    final client = _client;
+    if (client == null) return [];
+    try {
+      final res = await client.from('promo_codes').select().order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(res as List);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Returns discount % for an active code, or 0 if invalid.
+  static Future<int> validatePromoCode(String code) async {
+    final client = _client;
+    if (client == null) return 0;
+    try {
+      final res = await client
+          .from('promo_codes')
+          .select('discount_percent')
+          .eq('code', code.trim().toUpperCase())
+          .eq('is_active', true)
+          .maybeSingle();
+      if (res == null) return 0;
+      return (res['discount_percent'] as num?)?.toInt() ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  static Future<bool> createPromoCode({required String code, required int percent}) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('promo_codes').insert({
+        'code': code.trim().toUpperCase(),
+        'discount_percent': percent,
+        'is_active': true,
+      });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> setPromoActive(String id, bool active) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('promo_codes').update({'is_active': active}).eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> deletePromoCode(String id) async {
+    final client = _client;
+    if (client == null) return false;
+    try {
+      await client.from('promo_codes').delete().eq('id', id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<bool> deletePairing(String id) async {
     final client = _client;
     if (client == null) return false;
