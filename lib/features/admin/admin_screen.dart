@@ -223,6 +223,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
               ),
             ),
 
+            // Business overview - how is the shop doing today?
+            _buildBusinessOverview(context, isMobile),
+
             // Tab Navigation
             Container(
               color: Colors.white,
@@ -465,6 +468,106 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
         setState(() => _isLoggingIn = false);
       }
     }
+  }
+
+  /// Business overview strip: revenue, pending orders, products, low stock.
+  /// Answers "how is my shop doing?" at a glance.
+  Widget _buildBusinessOverview(BuildContext context, bool isMobile) {
+    final products = ref.watch(filteredProductsProvider);
+    double revenue = 0;
+    int pending = 0;
+    for (final o in _ordersList) {
+      revenue += ((o['total'] as num?)?.toDouble() ?? 0.0);
+      final st = (o['status']?.toString() ?? 'pending').toLowerCase();
+      if (st == 'pending' || st == 'processing') pending++;
+    }
+    final lowStock = products.where((p) => p.stockQuantity <= 5).length;
+    final productCount = products.length;
+
+    String naira(double v) {
+      final n = v.round().toString();
+      final buf = StringBuffer();
+      for (int i = 0; i < n.length; i++) {
+        if (i > 0 && (n.length - i) % 3 == 0) buf.write(',');
+        buf.write(n[i]);
+      }
+      return '₦${buf}';
+    }
+
+    Widget stat(IconData icon, String label, String value, {bool alert = false}) {
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: alert ? AppTheme.errorRed.withValues(alpha: 0.5) : AppTheme.borderSubtle,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 16, color: alert ? AppTheme.errorRed : AppTheme.primaryGoldDark),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: GoogleFonts.plusJakartaSans(fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: AppTheme.textMuted),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                value,
+                style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.obsidianNoir),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final cards = [
+      stat(Icons.payments_outlined, 'TOTAL SALES', naira(revenue)),
+      stat(Icons.pending_actions_outlined, 'NEEDS ACTION', '$pending orders', alert: pending > 0),
+      stat(Icons.inventory_2_outlined, 'PRODUCTS', '$productCount live'),
+      stat(Icons.warning_amber_outlined, 'LOW STOCK', '$lowStock items', alert: lowStock > 0),
+    ];
+
+    return Container(
+      color: AppTheme.surfaceGrey,
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 64, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'TODAY AT A GLANCE',
+            style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
+          ),
+          const SizedBox(height: 12),
+          if (isMobile)
+            Column(
+              children: [
+                Row(children: [cards[0], const SizedBox(width: 12), cards[1]]),
+                const SizedBox(height: 12),
+                Row(children: [cards[2], const SizedBox(width: 12), cards[3]]),
+              ],
+            )
+          else
+            Row(
+              children: [
+                cards[0], const SizedBox(width: 12),
+                cards[1], const SizedBox(width: 12),
+                cards[2], const SizedBox(width: 12),
+                cards[3],
+              ],
+            ),
+        ],
+      ),
+    );
   }
 
   // --- TAB 1: WEBSITE CMS (EVERY TEXT & BUTTON CUSTOMIZABLE) ---

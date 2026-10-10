@@ -533,8 +533,9 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
           backgroundColor: AppTheme.obsidianNoir,
         ),
       );
-      // Clients land straight on their dashboard after signing in.
-      context.go('/account');
+      // Owners land on Store Manager, shoppers on their dashboard.
+      final isAdmin = ref.read(authProvider).isAdmin;
+      context.go(isAdmin ? '/admin' : '/account');
     }
   }
 
@@ -573,8 +574,9 @@ class _AuthModalState extends ConsumerState<AuthModal> with SingleTickerProvider
           backgroundColor: AppTheme.obsidianNoir,
         ),
       );
-      // New clients land straight on their dashboard after creating account.
-      context.go('/account');
+      // New owners land on Store Manager, shoppers on their dashboard.
+      final isAdmin = ref.read(authProvider).isAdmin;
+      context.go(isAdmin ? '/admin' : '/account');
     }
   }
 }
