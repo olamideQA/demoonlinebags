@@ -334,11 +334,26 @@ class _AccountScreenState extends ConsumerState<AccountScreen> with SingleTicker
                     ],
                   ),
 
-                  // Action Buttons
+                  // Action Buttons - owner always sees MANAGE STORE first.
                   Wrap(
                     spacing: 12,
                     runSpacing: 10,
                     children: [
+                      if (isAdmin)
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryGold,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          ),
+                          icon: const Icon(Icons.admin_panel_settings, size: 18),
+                          label: Text(
+                            'MANAGE STORE',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 1.4),
+                          ),
+                          onPressed: () => context.go('/admin'),
+                        ),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,

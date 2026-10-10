@@ -136,6 +136,36 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                         onTap: () => context.go('/account'),
                       ),
                     ],
+                    // Owner-only CMS entry. Shoppers never see this.
+                    if (authState.isAdmin && !isMobile) ...[
+                      const SizedBox(width: 18),
+                      InkWell(
+                        onTap: () => context.go('/admin'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.obsidianNoir,
+                            border: Border.all(color: AppTheme.primaryGold),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.admin_panel_settings, size: 14, color: AppTheme.primaryGold),
+                              const SizedBox(width: 6),
+                              Text(
+                                'MANAGE STORE',
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: AppTheme.primaryGold,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -361,6 +391,28 @@ class LuxuryHeader extends ConsumerWidget implements PreferredSizeWidget {
                         context.go('/account');
                       },
                     ),
+                    // Owner-only entry in mobile menu. Shoppers never see this.
+                    if (authState.isAdmin)
+                      ListTile(
+                        title: Text(
+                          'MANAGE STORE (OWNER)',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            letterSpacing: 1.0,
+                            color: AppTheme.primaryGoldDark,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Products, orders & website text',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                        ),
+                        leading: const Icon(Icons.admin_panel_settings, color: AppTheme.primaryGoldDark),
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          context.go('/admin');
+                        },
+                      ),
                   ] else ...[
                     ListTile(
                       title: Text(
