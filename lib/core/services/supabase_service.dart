@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/models.dart';
 
@@ -734,6 +735,26 @@ class SupabaseService {
       return true;
     } catch (_) {
       return false;
+    }
+  }
+
+  /// Uploads a product photo to Supabase Storage `products` bucket.
+  /// Returns the public URL, or null on failure.
+  static Future<String?> uploadProductImage(Uint8List bytes, String filename) async {
+    final client = _client;
+    if (client == null) return null;
+    try {
+      final ext = filename.contains('.') ? filename.split('.').last.toLowerCase() : 'jpg';
+      final safeExt = ['jpg', 'jpeg', 'png', 'webp'].contains(ext) ? ext : 'jpg';
+      final path = 'products/${DateTime.now().millisecondsSinceEpoch}.$safeExt';
+      await client.storage.from('products').uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: 'image/$safeExt', upsert: true),
+      );
+      return client.storage.from('products').getPublicUrl(path);
+    } catch (_) {
+      return null;
     }
   }
 

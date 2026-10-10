@@ -9,6 +9,8 @@ import '../../core/providers/site_settings_provider.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/shop_image.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:typed_data';
 import '../common/announcement_bar.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
@@ -888,6 +890,40 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     final stockCtrl = TextEditingController(text: existing?.stockQuantity.toString() ?? '10');
 
     String selectedType = typeCtrl;
+    Uint8List? pickedBytes;
+    String? pickedName;
+    bool uploading = false;
+
+    Future<void> pickAndUpload(void Function(void Function()) setDialogState, TextEditingController urlCtrl) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+      if (res == null || res.files.isEmpty) return;
+      final f = res.files.first;
+      final bytes = f.bytes;
+      if (bytes == null) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Could not read that file. Try another photo.')),
+        );
+        return;
+      }
+      setDialogState(() {
+        pickedBytes = bytes;
+        pickedName = f.name;
+        uploading = true;
+      });
+      final url = await SupabaseService.uploadProductImage(bytes, f.name);
+      setDialogState(() => uploading = false);
+      if (url == null) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Upload failed. Check connection or paste an image link instead.')),
+        );
+        return;
+      }
+      urlCtrl.text = url;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Photo uploaded.')),
+      );
+    }
 
     showDialog(
       context: context,
@@ -988,9 +1024,57 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                         decoration: const InputDecoration(labelText: 'Dimensions (e.g. 36cm x 27cm x 14cm)'),
                       ),
                       const SizedBox(height: 12),
+                      // Photo: upload from device (recommended) or paste a link.
+                      Row(
+                        children: [
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfaceGrey,
+                              border: Border.all(color: AppTheme.borderSubtle),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: pickedBytes != null
+                                ? Image.memory(pickedBytes!, fit: BoxFit.cover)
+                                : ShopImage(primaryImgCtrl.text.trim(), w: 200, q: 60),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryGold,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                  ),
+                                  icon: uploading
+                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                      : const Icon(Icons.upload, size: 18),
+                                  label: Text(
+                                    uploading ? 'UPLOADING...' : 'UPLOAD PHOTO',
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                  ),
+                                  onPressed: uploading ? null : () => pickAndUpload(setDialogState, primaryImgCtrl),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  pickedName ?? 'JPG/PNG from your phone or laptop. Auto-fills the link below.',
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       TextField(
                         controller: primaryImgCtrl,
-                        decoration: const InputDecoration(labelText: 'Primary Image URL'),
+                        decoration: const InputDecoration(labelText: 'Primary Image URL (auto-filled after upload, or paste link)'),
+                        onChanged: (_) => setDialogState(() {}),
                       ),
                     ],
                   ),
