@@ -262,8 +262,10 @@ class ShopScreen extends ConsumerWidget {
                   ),
                 ),
 
-                if (selectedType != 'shoe')
-                  const VideoCatalogueShowcase(isCompactHeader: true),
+                VideoCatalogueShowcase(
+                  isCompactHeader: true,
+                  productTypeFilter: selectedType,
+                ),
 
                 // Products Count Header
                 Padding(

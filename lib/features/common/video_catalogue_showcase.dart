@@ -13,8 +13,13 @@ import '../../core/utils/shop_video_player.dart';
 /// includes any new video products added by the store owner in Admin CMS.
 class VideoCatalogueShowcase extends ConsumerWidget {
   final bool isCompactHeader;
+  final String? productTypeFilter;
 
-  const VideoCatalogueShowcase({super.key, this.isCompactHeader = false});
+  const VideoCatalogueShowcase({
+    super.key,
+    this.isCompactHeader = false,
+    this.productTypeFilter,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +28,13 @@ class VideoCatalogueShowcase extends ConsumerWidget {
       data: (items) => items,
       orElse: () => ref.watch(filteredProductsProvider),
     );
-    final videoProducts = allProducts.where((p) => p.hasVideo).toList();
+    final videoProducts = allProducts.where((p) {
+      if (!p.hasVideo) return false;
+      if (productTypeFilter != null && productTypeFilter!.isNotEmpty) {
+        return p.productType == productTypeFilter;
+      }
+      return true;
+    }).toList();
     if (videoProducts.isEmpty) return const SizedBox.shrink();
 
     final isMobile = MediaQuery.of(context).size.width < 900;

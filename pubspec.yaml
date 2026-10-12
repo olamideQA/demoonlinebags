@@ -79,8 +79,14 @@ flutter:
     - assets/images/products/pistachio_tote_3.jpg
     - assets/images/products/ivory_tote_1.jpg
     - assets/images/products/ivory_tote_2.jpg
+    - assets/images/products/kosa_croc_tote_1.jpg
+    - assets/images/products/kosa_croc_tote_2.jpg
+    - assets/images/products/kosa_slides_1.jpg
+    - assets/images/products/kosa_slides_2.jpg
     - assets/videos/pistachio_suede_tote.mp4
     - assets/videos/ivory_canvas_tote.mp4
+    - assets/videos/kosa_croc_tote.mp4
+    - assets/videos/kosa_black_slides.mp4
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
