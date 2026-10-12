@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,11 +12,6 @@ import '../../core/providers/site_settings_provider.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/shop_image.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:typed_data';
-import '../common/announcement_bar.dart';
-import '../common/luxury_footer.dart';
-import '../common/luxury_header.dart';
 
 class AdminScreen extends ConsumerStatefulWidget {
   const AdminScreen({super.key});
@@ -23,8 +20,63 @@ class AdminScreen extends ConsumerStatefulWidget {
   ConsumerState<AdminScreen> createState() => _AdminScreenState();
 }
 
-class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _AdminNavItem {
+  final String label;
+  final String subtitle;
+  final IconData icon;
+  final IconData activeIcon;
+
+  const _AdminNavItem({
+    required this.label,
+    required this.subtitle,
+    required this.icon,
+    required this.activeIcon,
+  });
+}
+
+class _AdminScreenState extends ConsumerState<AdminScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  int _selectedSection = 0;
+
+  static const List<_AdminNavItem> _navItems = [
+    _AdminNavItem(
+      label: 'Overview',
+      subtitle: 'Sales, alerts & quick actions',
+      icon: Icons.dashboard_outlined,
+      activeIcon: Icons.dashboard,
+    ),
+    _AdminNavItem(
+      label: 'Products & Videos',
+      subtitle: 'Bags, shoes, photos & MP4 videos',
+      icon: Icons.shopping_bag_outlined,
+      activeIcon: Icons.shopping_bag,
+    ),
+    _AdminNavItem(
+      label: 'Orders',
+      subtitle: 'Customer purchases & delivery status',
+      icon: Icons.receipt_long_outlined,
+      activeIcon: Icons.receipt_long,
+    ),
+    _AdminNavItem(
+      label: 'Matching Sets',
+      subtitle: 'Bag + shoe combo discounts',
+      icon: Icons.auto_awesome_outlined,
+      activeIcon: Icons.auto_awesome,
+    ),
+    _AdminNavItem(
+      label: 'Promo Codes',
+      subtitle: 'Checkout coupon codes',
+      icon: Icons.local_offer_outlined,
+      activeIcon: Icons.local_offer,
+    ),
+    _AdminNavItem(
+      label: 'Website & Banners',
+      subtitle: 'Homepage slides, text & WhatsApp',
+      icon: Icons.web_outlined,
+      activeIcon: Icons.web,
+    ),
+  ];
 
   // Security Gate Controllers
   final _adminEmailController = TextEditingController();
@@ -32,6 +84,17 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
   bool _obscureAdminPassword = true;
   String? _gateError;
   bool _isLoggingIn = false;
+
+  // Product Filter & Search State
+  final _productSearchCtrl = TextEditingController();
+  String _productSearchQuery = '';
+  String _productFilter = 'all'; // 'all', 'bag', 'shoe', 'video', 'low_stock'
+
+  // Order Filter State
+  String _orderStatusFilter = 'all';
+
+  // CMS Sub-tab State
+  int _cmsSubTab = 0; // 0: Banners, 1: Brand & Notice, 2: Contact & Shipping
 
   // CMS Form Controllers
   late TextEditingController _announcementTextCtrl;
@@ -62,7 +125,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
     _initCMSControllers();
     _loadOrders();
   }
@@ -104,9 +166,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
   @override
   void dispose() {
-    _tabController.dispose();
     _adminEmailController.dispose();
     _adminPasswordController.dispose();
+    _productSearchCtrl.dispose();
     _announcementTextCtrl.dispose();
     _headerBrandCtrl.dispose();
     _headerTaglineCtrl.dispose();
@@ -129,6 +191,39 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     super.dispose();
   }
 
+  String _formatNaira(double v) {
+    final n = v.round().toString();
+    final buf = StringBuffer();
+    for (int i = 0; i < n.length; i++) {
+      if (i > 0 && (n.length - i) % 3 == 0) buf.write(',');
+      buf.write(n[i]);
+    }
+    return '₦$buf';
+  }
+
+  Widget _responsiveFields(bool isMobile, List<Widget> fields, {double spacing = 14}) {
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < fields.length; i++) ...[
+            if (i > 0) SizedBox(height: spacing),
+            fields[i],
+          ],
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < fields.length; i++) ...[
+          if (i > 0) SizedBox(width: spacing),
+          Expanded(child: fields[i]),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -138,163 +233,2270 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       return _buildSecurityGate(context, authState);
     }
 
-    final isMobile = MediaQuery.of(context).size.width < 900;
+    final width = MediaQuery.of(context).size.width;
+    final isDesktop = width >= 960;
+    final isMobile = width < 680;
+    final products = ref.watch(allProductsProvider).value ?? SupabaseService.fallbackProducts;
+    final pendingOrdersCount = _ordersList.where((o) {
+      final st = (o['status']?.toString() ?? 'pending').toLowerCase();
+      return st == 'pending' || st == 'processing';
+    }).length;
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const AnnouncementBar(),
-            const LuxuryHeader(),
-
-            // Admin Header Bar
-            Container(
-              color: AppTheme.obsidianNoir,
-              padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 64, vertical: 28),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      key: _scaffoldKey,
+      backgroundColor: const Color(0xFFF6F5F2),
+      appBar: isDesktop
+          ? null
+          : AppBar(
+              backgroundColor: AppTheme.obsidianNoir,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.menu, color: AppTheme.primaryGold),
+                tooltip: 'Open Admin Menu',
+                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.admin_panel_settings, color: AppTheme.primaryGold, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            'STORE MANAGER',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: AppTheme.primaryGold,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 2.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Orders, Products & Website Text',
-                        style: GoogleFonts.cormorantGaramond(
-                          color: Colors.white,
-                          fontSize: isMobile ? 24 : 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Hello ${authState.profile?.fullName ?? authState.user?.email ?? 'Owner'} • ${_ordersList.length} orders today • Tap a tab below to manage your shop',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: Colors.white60,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'STORE MANAGER',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.8,
+                      color: AppTheme.primaryGold,
+                    ),
                   ),
-                  Wrap(
-                    spacing: 12,
-                    children: [
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white54),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        icon: const Icon(Icons.visibility_outlined, size: 16),
-                        label: const Text('PREVIEW STORE', style: TextStyle(fontSize: 11, letterSpacing: 1.2)),
-                        onPressed: () => context.go('/'),
-                      ),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryGold,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        icon: const Icon(Icons.logout, size: 16),
-                        label: const Text('LOGOUT', style: TextStyle(fontSize: 11, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
-                        onPressed: () async {
-                          await ref.read(authProvider.notifier).signOut();
-                          if (context.mounted) context.go('/');
-                        },
-                      ),
-                    ],
+                  Text(
+                    _navItems[_selectedSection].label,
+                    style: GoogleFonts.cormorantGaramond(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
+              actions: [
+                IconButton(
+                  tooltip: 'Add Product / Video',
+                  icon: const Icon(Icons.add_box_outlined, color: AppTheme.primaryGold),
+                  onPressed: () => _showProductDialog(context, null),
+                ),
+                TextButton.icon(
+                  onPressed: () => context.go('/'),
+                  icon: const Icon(Icons.storefront_outlined, size: 16, color: Colors.white70),
+                  label: Text(
+                    'SHOP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ],
             ),
-
-            // Business overview - how is the shop doing today?
-            _buildBusinessOverview(context, isMobile),
-
-            // Tab Navigation
-            Container(
-              color: Colors.white,
+      drawer: isDesktop
+          ? null
+          : Drawer(
+              backgroundColor: AppTheme.obsidianNoir,
+              child: SafeArea(
+                child: _buildSidebarContent(
+                  context,
+                  authState: authState,
+                  productCount: products.length,
+                  pendingOrdersCount: pendingOrdersCount,
+                  isDrawer: true,
+                ),
+              ),
+            ),
+      bottomNavigationBar: isDesktop
+          ? null
+          : Container(
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppTheme.borderSubtle)),
+                color: Colors.white,
+                border: Border(top: BorderSide(color: AppTheme.borderSubtle)),
               ),
-              child: TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                labelColor: AppTheme.obsidianNoir,
-                unselectedLabelColor: AppTheme.textMuted,
-                indicatorColor: AppTheme.primaryGold,
-                indicatorWeight: 3,
-                labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 1.2),
-                tabs: const [
-                  Tab(icon: Icon(Icons.text_fields_outlined, size: 18), text: 'WEBSITE TEXT'),
-                  Tab(icon: Icon(Icons.shopping_bag_outlined, size: 18), text: 'PRODUCTS'),
-                  Tab(icon: Icon(Icons.auto_awesome_outlined, size: 18), text: 'MATCHING SETS'),
-                  Tab(icon: Icon(Icons.receipt_long_outlined, size: 18), text: 'ORDERS'),
-                  Tab(icon: Icon(Icons.local_offer_outlined, size: 18), text: 'PROMO CODES'),
-                  Tab(icon: Icon(Icons.favorite_border, size: 18), text: 'STORE HEALTH'),
-                ],
-              ),
-            ),
-
-            // Tab Content
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 64, vertical: 36),
-              child: SizedBox(
-                height: 900,
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildCMSCustomizationTab(context),
-                    _buildProductsManagerTab(context),
-                    _buildPairingsManagerTab(context),
-                    _buildOrdersManagerTab(context),
-                    _buildPromoCodesTab(context),
-                    _buildSystemHealthTab(context),
+              child: SafeArea(
+                child: BottomNavigationBar(
+                  currentIndex: _selectedSection < 4 ? _selectedSection : 4,
+                  onTap: (idx) {
+                    if (idx < 4) {
+                      setState(() => _selectedSection = idx);
+                    } else {
+                      _showMobileMoreSheet(context);
+                    }
+                  },
+                  type: BottomNavigationBarType.fixed,
+                  backgroundColor: Colors.white,
+                  selectedItemColor: AppTheme.obsidianNoir,
+                  unselectedItemColor: AppTheme.textMuted,
+                  selectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w800),
+                  unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w500),
+                  elevation: 0,
+                  items: [
+                    const BottomNavigationBarItem(
+                      icon: Icon(Icons.dashboard_outlined, size: 20),
+                      activeIcon: Icon(Icons.dashboard, size: 20, color: AppTheme.primaryGoldDark),
+                      label: 'Overview',
+                    ),
+                    const BottomNavigationBarItem(
+                      icon: Icon(Icons.shopping_bag_outlined, size: 20),
+                      activeIcon: Icon(Icons.shopping_bag, size: 20, color: AppTheme.primaryGoldDark),
+                      label: 'Products',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Badge(
+                        isLabelVisible: pendingOrdersCount > 0,
+                        label: Text('$pendingOrdersCount'),
+                        backgroundColor: AppTheme.errorRed,
+                        child: const Icon(Icons.receipt_long_outlined, size: 20),
+                      ),
+                      activeIcon: const Icon(Icons.receipt_long, size: 20, color: AppTheme.primaryGoldDark),
+                      label: 'Orders',
+                    ),
+                    const BottomNavigationBarItem(
+                      icon: Icon(Icons.auto_awesome_outlined, size: 20),
+                      activeIcon: Icon(Icons.auto_awesome, size: 20, color: AppTheme.primaryGoldDark),
+                      label: 'Sets',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        _selectedSection >= 4 ? Icons.tune : Icons.more_horiz,
+                        size: 20,
+                        color: _selectedSection >= 4 ? AppTheme.primaryGoldDark : AppTheme.textMuted,
+                      ),
+                      label: _selectedSection == 4
+                          ? 'Promos'
+                          : _selectedSection == 5
+                              ? 'Website'
+                              : 'More',
+                    ),
                   ],
                 ),
               ),
             ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (isDesktop)
+            SizedBox(
+              width: 270,
+              child: Material(
+                color: AppTheme.obsidianNoir,
+                child: _buildSidebarContent(
+                  context,
+                  authState: authState,
+                  productCount: products.length,
+                  pendingOrdersCount: pendingOrdersCount,
+                  isDrawer: false,
+                ),
+              ),
+            ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (isDesktop) _buildDesktopTopBar(context, authState),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 16 : 36,
+                      vertical: isMobile ? 20 : 32,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1200),
+                        child: _buildActiveSection(context, isMobile, products),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            const LuxuryFooter(),
-          ],
+  void _showMobileMoreSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'MORE STORE TOOLS',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.8,
+                  color: AppTheme.primaryGoldDark,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const CircleAvatar(
+                  backgroundColor: AppTheme.obsidianNoir,
+                  child: Icon(Icons.local_offer_outlined, color: AppTheme.primaryGold, size: 18),
+                ),
+                title: Text('Promo Codes & Discounts', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 14)),
+                subtitle: Text('Create & pause checkout coupon codes', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  setState(() => _selectedSection = 4);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const CircleAvatar(
+                  backgroundColor: AppTheme.obsidianNoir,
+                  child: Icon(Icons.web_outlined, color: AppTheme.primaryGold, size: 18),
+                ),
+                title: Text('Website Text, Banners & WhatsApp', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 14)),
+                subtitle: Text('Edit homepage slides, store name & contact info', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  setState(() => _selectedSection = 5);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const CircleAvatar(
+                  backgroundColor: AppTheme.surfaceGrey,
+                  child: Icon(Icons.category_outlined, color: AppTheme.obsidianNoir, size: 18),
+                ),
+                title: Text('Manage Categories', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 14)),
+                subtitle: Text('Add or edit bag & shoe categories', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showCategoriesDialog(context);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const CircleAvatar(
+                  backgroundColor: AppTheme.surfaceGrey,
+                  child: Icon(Icons.reviews_outlined, color: AppTheme.obsidianNoir, size: 18),
+                ),
+                title: Text('Customer Reviews', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 14)),
+                subtitle: Text('Read and moderate product reviews', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showReviewsDialog(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSidebarContent(
+    BuildContext context, {
+    required AppAuthState authState,
+    required int productCount,
+    required int pendingOrdersCount,
+    required bool isDrawer,
+  }) {
+    final brandName = ref.watch(siteSettingsProvider).header.brandName;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 20, 20),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryGold.withValues(alpha: 0.15),
+                  border: Border.all(color: AppTheme.primaryGold),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(Icons.diamond_outlined, color: AppTheme.primaryGold, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      brandName.toUpperCase(),
+                      style: GoogleFonts.cormorantGaramond(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'STORE ADMIN SUITE',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: AppTheme.primaryGold,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(color: Colors.white12, height: 1),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+          child: Text(
+            'MANAGEMENT',
+            style: GoogleFonts.plusJakartaSans(
+              color: Colors.white38,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.8,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            itemCount: _navItems.length,
+            itemBuilder: (ctx, i) {
+              final item = _navItems[i];
+              final selected = _selectedSection == i;
+              String? badgeText;
+              Color badgeColor = AppTheme.primaryGold;
+              if (i == 1) {
+                badgeText = '$productCount';
+              } else if (i == 2 && pendingOrdersCount > 0) {
+                badgeText = '$pendingOrdersCount';
+                badgeColor = AppTheme.errorRed;
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: InkWell(
+                  onTap: () {
+                    setState(() => _selectedSection = i);
+                    if (isDrawer) Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: selected ? AppTheme.primaryGold.withValues(alpha: 0.16) : Colors.transparent,
+                      border: Border(
+                        left: BorderSide(
+                          color: selected ? AppTheme.primaryGold : Colors.transparent,
+                          width: 3,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          selected ? item.activeIcon : item.icon,
+                          size: 20,
+                          color: selected ? AppTheme.primaryGold : Colors.white70,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.label,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: selected ? Colors.white : Colors.white70,
+                                  fontSize: 13,
+                                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                item.subtitle,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.white38,
+                                  fontSize: 10,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (badgeText != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: badgeColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              badgeText,
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const Divider(color: Colors.white12, height: 1),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white24),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                ),
+                icon: const Icon(Icons.storefront_outlined, size: 16, color: AppTheme.primaryGold),
+                label: Text(
+                  'VIEW LIVE WEBSITE',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.1),
+                ),
+                onPressed: () => context.go('/'),
+              ),
+              const SizedBox(height: 10),
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white60,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+                icon: const Icon(Icons.logout, size: 16),
+                label: Text(
+                  'SIGN OUT (${authState.user?.email?.split('@').first ?? 'Admin'})',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600),
+                ),
+                onPressed: () async {
+                  await ref.read(authProvider.notifier).signOut();
+                  if (context.mounted) context.go('/');
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopTopBar(BuildContext context, AppAuthState authState) {
+    final current = _navItems[_selectedSection];
+    return Container(
+      height: 76,
+      padding: const EdgeInsets.symmetric(horizontal: 36),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: AppTheme.borderSubtle)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  current.label,
+                  style: GoogleFonts.cormorantGaramond(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.obsidianNoir,
+                  ),
+                ),
+                Text(
+                  current.subtitle,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: AppTheme.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.obsidianNoir,
+              foregroundColor: AppTheme.primaryGold,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              side: const BorderSide(color: AppTheme.primaryGold),
+            ),
+            icon: const Icon(Icons.add, size: 17),
+            label: Text(
+              'ADD PRODUCT / VIDEO',
+              style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+            ),
+            onPressed: () => _showProductDialog(context, null),
+          ),
+          const SizedBox(width: 12),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.obsidianNoir,
+              side: const BorderSide(color: AppTheme.borderSubtle),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            icon: const Icon(Icons.open_in_new, size: 16),
+            label: Text(
+              'LIVE STORE',
+              style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.1),
+            ),
+            onPressed: () => context.go('/'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActiveSection(BuildContext context, bool isMobile, List<Product> products) {
+    switch (_selectedSection) {
+      case 0:
+        return _buildOverviewSection(context, isMobile, products);
+      case 1:
+        return _buildProductsManagerTab(context, isMobile, products);
+      case 2:
+        return _buildOrdersManagerTab(context, isMobile);
+      case 3:
+        return _buildPairingsManagerTab(context, isMobile, products);
+      case 4:
+        return _buildPromoCodesTab(context, isMobile);
+      case 5:
+        return _buildCMSCustomizationTab(context, isMobile);
+      default:
+        return _buildOverviewSection(context, isMobile, products);
+    }
+  }
+
+  // ===========================================================================
+  // SECTION 0: DASHBOARD OVERVIEW
+  // ===========================================================================
+  Widget _buildOverviewSection(BuildContext context, bool isMobile, List<Product> products) {
+    double revenue = 0;
+    int pending = 0;
+    for (final o in _ordersList) {
+      revenue += ((o['total'] as num?)?.toDouble() ?? 0.0);
+      final st = (o['status']?.toString() ?? 'pending').toLowerCase();
+      if (st == 'pending' || st == 'processing') pending++;
+    }
+    final bagsCount = products.where((p) => p.productType == 'bag').length;
+    final shoesCount = products.where((p) => p.productType == 'shoe').length;
+    final videoProducts = products.where((p) => p.hasVideo).toList();
+    final lowStockProducts = products.where((p) => p.stockQuantity <= 5).toList();
+
+    Widget kpiCard({
+      required IconData icon,
+      required String title,
+      required String value,
+      required String subtitle,
+      required VoidCallback onTap,
+      bool alert = false,
+      bool highlightGold = false,
+    }) {
+      return InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: highlightGold ? AppTheme.obsidianNoir : Colors.white,
+            border: Border.all(
+              color: alert
+                  ? AppTheme.errorRed.withValues(alpha: 0.6)
+                  : highlightGold
+                      ? AppTheme.primaryGold
+                      : AppTheme.borderSubtle,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    color: highlightGold
+                        ? AppTheme.primaryGold.withValues(alpha: 0.15)
+                        : alert
+                            ? AppTheme.errorRed.withValues(alpha: 0.1)
+                            : AppTheme.surfaceGrey,
+                    child: Icon(
+                      icon,
+                      size: 18,
+                      color: highlightGold
+                          ? AppTheme.primaryGold
+                          : alert
+                              ? AppTheme.errorRed
+                              : AppTheme.obsidianNoir,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 15,
+                    color: highlightGold ? Colors.white54 : AppTheme.textMuted,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                title,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  color: highlightGold ? AppTheme.primaryGold : AppTheme.textMuted,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: highlightGold ? Colors.white : AppTheme.obsidianNoir,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11.5,
+                  color: highlightGold ? Colors.white70 : AppTheme.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final kpis = [
+      kpiCard(
+        icon: Icons.payments_outlined,
+        title: 'TOTAL REVENUE',
+        value: _formatNaira(revenue),
+        subtitle: '${_ordersList.length} total orders placed',
+        highlightGold: true,
+        onTap: () => setState(() => _selectedSection = 2),
+      ),
+      kpiCard(
+        icon: Icons.pending_actions_outlined,
+        title: 'ORDERS TO FULFILL',
+        value: '$pending Pending',
+        subtitle: pending == 0 ? 'All orders up to date' : 'Tap to update order status',
+        alert: pending > 0,
+        onTap: () => setState(() => _selectedSection = 2),
+      ),
+      kpiCard(
+        icon: Icons.shopping_bag_outlined,
+        title: 'LIVE CATALOGUE',
+        value: '${products.length} Items',
+        subtitle: '$bagsCount Bags • $shoesCount Shoes',
+        onTap: () => setState(() {
+          _productFilter = 'all';
+          _selectedSection = 1;
+        }),
+      ),
+      kpiCard(
+        icon: Icons.videocam_outlined,
+        title: 'LIVE VIDEO SHOWCASES',
+        value: '${videoProducts.length} Videos',
+        subtitle: lowStockProducts.isEmpty
+            ? 'Playing on Home & Shop'
+            : '${lowStockProducts.length} items low on stock',
+        alert: lowStockProducts.isNotEmpty,
+        onTap: () => setState(() {
+          _productFilter = 'video';
+          _selectedSection = 1;
+        }),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Welcome Banner
+        Container(
+          padding: EdgeInsets.all(isMobile ? 20 : 28),
+          decoration: BoxDecoration(
+            color: AppTheme.obsidianNoir,
+            border: Border.all(color: AppTheme.primaryGold.withValues(alpha: 0.5)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    color: AppTheme.primaryGold,
+                    child: Text(
+                      'QUICK START',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Everything is organized into clear steps below',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: Colors.white70),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'What would you like to do today?',
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: isMobile ? 24 : 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryGold,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+                    label: Text(
+                      'ADD NEW BAG OR SHOE',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1),
+                    ),
+                    onPressed: () => _showProductDialog(context, null),
+                  ),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: AppTheme.primaryGold),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    icon: const Icon(Icons.video_call_outlined, size: 18, color: AppTheme.primaryGold),
+                    label: Text(
+                      'MANAGE VIDEO PRODUCTS (${videoProducts.length})',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.1),
+                    ),
+                    onPressed: () => setState(() {
+                      _productFilter = 'video';
+                      _selectedSection = 1;
+                    }),
+                  ),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white30),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    icon: const Icon(Icons.burst_mode_outlined, size: 18),
+                    label: Text(
+                      'EDIT HOMEPAGE BANNERS',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.1),
+                    ),
+                    onPressed: () => setState(() {
+                      _cmsSubTab = 0;
+                      _selectedSection = 5;
+                    }),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // KPI Grid (2x2 on Mobile, 4 across on Desktop)
+        if (isMobile)
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: kpis[0]),
+                  const SizedBox(width: 12),
+                  Expanded(child: kpis[1]),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: kpis[2]),
+                  const SizedBox(width: 12),
+                  Expanded(child: kpis[3]),
+                ],
+              ),
+            ],
+          )
+        else
+          Row(
+            children: [
+              Expanded(child: kpis[0]),
+              const SizedBox(width: 16),
+              Expanded(child: kpis[1]),
+              const SizedBox(width: 16),
+              Expanded(child: kpis[2]),
+              const SizedBox(width: 16),
+              Expanded(child: kpis[3]),
+            ],
+          ),
+
+        const SizedBox(height: 28),
+
+        // Live Video Showcase Summary Card
+        _sectionCard(
+          title: 'Live Video Products (${videoProducts.length} Active)',
+          subtitle: 'These products auto-play in the "Watch In Motion" showcase on your Homepage and Shop page.',
+          trailing: TextButton.icon(
+            onPressed: () => _showProductDialog(context, null),
+            icon: const Icon(Icons.video_call_outlined, size: 18, color: AppTheme.primaryGoldDark),
+            label: Text(
+              'UPLOAD NEW VIDEO PRODUCT',
+              style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.primaryGoldDark),
+            ),
+          ),
+          children: [
+            if (videoProducts.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text('No video products yet. Tap "Upload New Video Product" to add one.'),
+              )
+            else
+              Column(
+                children: [
+                  for (final vp in videoProducts)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceGrey,
+                        border: Border.all(color: AppTheme.borderSubtle),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 54,
+                            height: 54,
+                            child: ShopImage(vp.primaryImage, w: 160, q: 65),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      color: AppTheme.obsidianNoir,
+                                      child: Text(
+                                        '▶ LIVE VIDEO',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 8.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppTheme.primaryGold,
+                                          letterSpacing: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      vp.productType.toUpperCase(),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  vp.title,
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${_formatNaira(vp.effectivePrice)} • Stock: ${vp.stockQuantity}',
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: AppTheme.textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            tooltip: 'Edit product or replace video',
+                            onPressed: () => _showProductDialog(context, vp),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        // Quick Store Shortcuts Grid
+        _sectionCard(
+          title: 'Store Management Shortcuts',
+          subtitle: 'Jump straight to any part of your store back-office',
+          children: [
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _quickActionChip(
+                  icon: Icons.category_outlined,
+                  label: 'Manage Categories',
+                  onTap: () => _showCategoriesDialog(context),
+                ),
+                _quickActionChip(
+                  icon: Icons.reviews_outlined,
+                  label: 'Moderate Reviews',
+                  onTap: () => _showReviewsDialog(context),
+                ),
+                _quickActionChip(
+                  icon: Icons.auto_awesome_outlined,
+                  label: 'Matching Sets',
+                  onTap: () => setState(() => _selectedSection = 3),
+                ),
+                _quickActionChip(
+                  icon: Icons.local_offer_outlined,
+                  label: 'Promo Codes',
+                  onTap: () => setState(() => _selectedSection = 4),
+                ),
+                _quickActionChip(
+                  icon: Icons.campaign_outlined,
+                  label: 'Top Notice Bar',
+                  onTap: () => setState(() {
+                    _cmsSubTab = 1;
+                    _selectedSection = 5;
+                  }),
+                ),
+                _quickActionChip(
+                  icon: Icons.support_agent_outlined,
+                  label: 'WhatsApp & Contact Info',
+                  onTap: () => setState(() {
+                    _cmsSubTab = 2;
+                    _selectedSection = 5;
+                  }),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _quickActionChip({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppTheme.obsidianNoir,
+        backgroundColor: AppTheme.surfaceGrey,
+        side: const BorderSide(color: AppTheme.borderSubtle),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      ),
+      icon: Icon(icon, size: 17, color: AppTheme.primaryGoldDark),
+      label: Text(
+        label,
+        style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700),
+      ),
+      onPressed: onTap,
+    );
+  }
+
+  // ===========================================================================
+  // SECTION 1: PRODUCTS & VIDEOS MANAGER
+  // ===========================================================================
+  Widget _buildProductsManagerTab(BuildContext context, bool isMobile, List<Product> allProducts) {
+    final filtered = allProducts.where((p) {
+      if (_productFilter == 'bag' && p.productType != 'bag') return false;
+      if (_productFilter == 'shoe' && p.productType != 'shoe') return false;
+      if (_productFilter == 'video' && !p.hasVideo) return false;
+      if (_productFilter == 'low_stock' && p.stockQuantity > 5) return false;
+
+      if (_productSearchQuery.trim().isNotEmpty) {
+        final q = _productSearchQuery.toLowerCase();
+        final matchTitle = p.title.toLowerCase().contains(q);
+        final matchSub = (p.subCategory ?? '').toLowerCase().contains(q);
+        return matchTitle || matchSub;
+      }
+      return true;
+    }).toList();
+
+    final bagsCount = allProducts.where((p) => p.productType == 'bag').length;
+    final shoesCount = allProducts.where((p) => p.productType == 'shoe').length;
+    final videoCount = allProducts.where((p) => p.hasVideo).length;
+    final lowStockCount = allProducts.where((p) => p.stockQuantity <= 5).length;
+
+    Widget filterChip(String key, String label) {
+      final selected = _productFilter == key;
+      return ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => setState(() => _productFilter = key),
+        selectedColor: AppTheme.obsidianNoir,
+        backgroundColor: Colors.white,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          color: selected ? AppTheme.primaryGold : AppTheme.obsidianNoir,
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: BorderSide(color: AppTheme.borderSubtle),
+        ),
+        showCheckmark: false,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Top Header + Action Buttons (Responsive)
+        Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppTheme.borderSubtle),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isMobile) ...[
+                Text(
+                  'CATALOGUE & VIDEO PRODUCTS',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${allProducts.length} Total Products ($videoCount with Video)',
+                  style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 14),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.obsidianNoir,
+                    foregroundColor: AppTheme.primaryGold,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    side: const BorderSide(color: AppTheme.primaryGold),
+                  ),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(
+                    'ADD NEW PRODUCT / VIDEO',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+                  ),
+                  onPressed: () => _showProductDialog(context, null),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.obsidianNoir,
+                          side: const BorderSide(color: AppTheme.borderSubtle),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        ),
+                        icon: const Icon(Icons.category_outlined, size: 16),
+                        label: Text('CATEGORIES', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                        onPressed: () => _showCategoriesDialog(context),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.obsidianNoir,
+                          side: const BorderSide(color: AppTheme.borderSubtle),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        ),
+                        icon: const Icon(Icons.reviews_outlined, size: 16),
+                        label: Text('REVIEWS', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                        onPressed: () => _showReviewsDialog(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CATALOGUE & VIDEO PRODUCTS',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Manage Bags, Footwear & Videos (${allProducts.length} Items)',
+                          style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Wrap(
+                      spacing: 10,
+                      children: [
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.obsidianNoir,
+                            side: const BorderSide(color: AppTheme.borderSubtle),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          ),
+                          icon: const Icon(Icons.category_outlined, size: 17),
+                          label: Text('CATEGORIES', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                          onPressed: () => _showCategoriesDialog(context),
+                        ),
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.obsidianNoir,
+                            side: const BorderSide(color: AppTheme.borderSubtle),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          ),
+                          icon: const Icon(Icons.reviews_outlined, size: 17),
+                          label: Text('REVIEWS', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                          onPressed: () => _showReviewsDialog(context),
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.obsidianNoir,
+                            foregroundColor: AppTheme.primaryGold,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            side: const BorderSide(color: AppTheme.primaryGold),
+                          ),
+                          icon: const Icon(Icons.add, size: 18),
+                          label: Text('ADD NEW PRODUCT', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                          onPressed: () => _showProductDialog(context, null),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 18),
+              // Search Field
+              TextField(
+                controller: _productSearchCtrl,
+                onChanged: (v) => setState(() => _productSearchQuery = v),
+                decoration: InputDecoration(
+                  hintText: 'Search products by name or style (e.g. Kosa Luxe, Tote, Slides)...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: _productSearchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () {
+                            _productSearchCtrl.clear();
+                            setState(() => _productSearchQuery = '');
+                          },
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 14),
+              // Filter Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    filterChip('all', 'All (${allProducts.length})'),
+                    const SizedBox(width: 8),
+                    filterChip('bag', 'Bags ($bagsCount)'),
+                    const SizedBox(width: 8),
+                    filterChip('shoe', 'Shoes ($shoesCount)'),
+                    const SizedBox(width: 8),
+                    filterChip('video', '▶ With Video ($videoCount)'),
+                    const SizedBox(width: 8),
+                    filterChip('low_stock', 'Low Stock ($lowStockCount)'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        if (filtered.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(40),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppTheme.borderSubtle),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.inventory_2_outlined, size: 42, color: AppTheme.textMuted),
+                const SizedBox(height: 12),
+                Text('No matching products found', style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Text('Try clearing your search or switching the filter above.', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
+              ],
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filtered.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final p = filtered[index];
+              final isLowStock = p.stockQuantity <= 5;
+              return Container(
+                padding: EdgeInsets.all(isMobile ? 12 : 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppTheme.borderSubtle),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          children: [
+                            Container(
+                              width: isMobile ? 68 : 76,
+                              height: isMobile ? 68 : 76,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: AppTheme.borderSubtle),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: ShopImage(p.primaryImage, w: 180, q: 65),
+                            ),
+                            if (p.hasVideo)
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  color: AppTheme.obsidianNoir.withValues(alpha: 0.88),
+                                  padding: const EdgeInsets.symmetric(vertical: 2),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '▶ VIDEO',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppTheme.primaryGold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                    color: AppTheme.surfaceGrey,
+                                    child: Text(
+                                      '${p.productType.toUpperCase()} • ${p.subCategory ?? 'Luxury'}',
+                                      style: GoogleFonts.plusJakartaSans(fontSize: 9.5, fontWeight: FontWeight.w700, color: AppTheme.obsidianNoir),
+                                    ),
+                                  ),
+                                  if (isLowStock)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      color: AppTheme.errorRed.withValues(alpha: 0.12),
+                                      child: Text(
+                                        'LOW STOCK: ${p.stockQuantity}',
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 9.5, fontWeight: FontWeight.w800, color: AppTheme.errorRed),
+                                      ),
+                                    )
+                                  else
+                                    Text(
+                                      'In Stock: ${p.stockQuantity}',
+                                      style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                p.title,
+                                style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.obsidianNoir),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    _formatNaira(p.effectivePrice),
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppTheme.primaryGoldDark),
+                                  ),
+                                  if (p.salePrice != null && p.salePrice! < p.basePrice) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _formatNaira(p.basePrice),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11.5,
+                                        color: AppTheme.textMuted,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!isMobile)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppTheme.obsidianNoir,
+                                  side: const BorderSide(color: AppTheme.borderSubtle),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                ),
+                                icon: const Icon(Icons.edit_outlined, size: 16),
+                                label: Text('EDIT', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                                onPressed: () => _showProductDialog(context, p),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 20, color: AppTheme.errorRed),
+                                tooltip: 'Delete Product',
+                                onPressed: () => _confirmDeleteProduct(context, p),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                    if (isMobile) ...[
+                      const SizedBox(height: 12),
+                      const Divider(height: 1),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.obsidianNoir,
+                                side: const BorderSide(color: AppTheme.borderSubtle),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                              ),
+                              icon: const Icon(Icons.edit_outlined, size: 16),
+                              label: Text('EDIT PRODUCT / VIDEO', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                              onPressed: () => _showProductDialog(context, p),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.errorRed,
+                              side: BorderSide(color: AppTheme.errorRed.withValues(alpha: 0.4)),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            ),
+                            icon: const Icon(Icons.delete_outline, size: 16),
+                            label: Text('DELETE', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                            onPressed: () => _confirmDeleteProduct(context, p),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // SECTION 2: ORDERS & FULFILLMENT
+  // ===========================================================================
+  Widget _buildOrdersManagerTab(BuildContext context, bool isMobile) {
+    final filteredOrders = _orderStatusFilter == 'all'
+        ? _ordersList
+        : _ordersList.where((o) => (o['status']?.toString() ?? 'pending').toLowerCase() == _orderStatusFilter).toList();
+
+    Widget statusChip(String key, String label) {
+      final selected = _orderStatusFilter == key;
+      return ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => setState(() => _orderStatusFilter = key),
+        selectedColor: AppTheme.obsidianNoir,
+        backgroundColor: Colors.white,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          color: selected ? AppTheme.primaryGold : AppTheme.obsidianNoir,
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: BorderSide(color: AppTheme.borderSubtle),
+        ),
+        showCheckmark: false,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppTheme.borderSubtle),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CUSTOMER ORDERS',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Orders & Delivery Status (${_ordersList.length})',
+                          style: GoogleFonts.cormorantGaramond(fontSize: isMobile ? 22 : 24, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.obsidianNoir,
+                      side: const BorderSide(color: AppTheme.borderSubtle),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    icon: const Icon(Icons.refresh, size: 16),
+                    label: Text('REFRESH', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700)),
+                    onPressed: _loadOrders,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    statusChip('all', 'All (${_ordersList.length})'),
+                    const SizedBox(width: 8),
+                    statusChip('pending', 'Pending'),
+                    const SizedBox(width: 8),
+                    statusChip('processing', 'Processing'),
+                    const SizedBox(width: 8),
+                    statusChip('shipped', 'Shipped'),
+                    const SizedBox(width: 8),
+                    statusChip('delivered', 'Delivered'),
+                    const SizedBox(width: 8),
+                    statusChip('cancelled', 'Cancelled'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        if (_isLoadingOrders)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(48),
+              child: CircularProgressIndicator(color: AppTheme.primaryGold),
+            ),
+          )
+        else if (filteredOrders.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(48),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppTheme.borderSubtle),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.receipt_long_outlined, size: 48, color: AppTheme.textMuted),
+                const SizedBox(height: 16),
+                Text(
+                  _ordersList.isEmpty ? 'No Customer Orders Yet' : 'No $_orderStatusFilter orders',
+                  style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Orders placed through the checkout will appear here automatically.',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filteredOrders.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final order = filteredOrders[index];
+              final orderId = order['id'] as String? ?? '';
+              final orderNum = order['order_number'] as String? ?? 'N/A';
+              final customer = order['customer_name'] as String? ?? 'Guest Shopper';
+              final email = order['customer_email'] as String? ?? '';
+              final phone = order['customer_phone'] as String? ?? '';
+              final total = (order['total'] as num?)?.toDouble() ?? 0.0;
+              final status = (order['status'] as String? ?? 'pending').toLowerCase();
+
+              return Container(
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppTheme.borderSubtle),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(orderNum, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 14)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: status == 'delivered'
+                                ? AppTheme.successGreen.withValues(alpha: 0.12)
+                                : AppTheme.primaryGold.withValues(alpha: 0.15),
+                            border: Border.all(
+                              color: status == 'delivered' ? AppTheme.successGreen : AppTheme.primaryGold,
+                            ),
+                          ),
+                          child: Text(
+                            status.toUpperCase(),
+                            style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Customer: $customer${email.isNotEmpty ? ' • $email' : ''}${phone.isNotEmpty ? ' • $phone' : ''}',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 12.5, color: AppTheme.obsidianNoir),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Order Total: ${_formatNaira(total)}',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.primaryGoldDark),
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(height: 1),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Order Status:', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600)),
+                        DropdownButton<String>(
+                          value: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'].contains(status) ? status : 'pending',
+                          items: const [
+                            DropdownMenuItem(value: 'pending', child: Text('Pending')),
+                            DropdownMenuItem(value: 'processing', child: Text('Processing')),
+                            DropdownMenuItem(value: 'shipped', child: Text('Shipped')),
+                            DropdownMenuItem(value: 'delivered', child: Text('Delivered')),
+                            DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')),
+                          ],
+                          onChanged: (newStatus) async {
+                            if (newStatus != null) {
+                              await SupabaseService.updateOrderStatus(orderId, newStatus);
+                              _loadOrders();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // SECTION 3: MATCHING SETS (BAG + SHOE BUNDLES)
+  // ===========================================================================
+  Widget _buildPairingsManagerTab(BuildContext context, bool isMobile, List<Product> products) {
+    final pairingsAsync = ref.watch(pairingsProvider);
+    final pairings = pairingsAsync.value ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppTheme.borderSubtle),
+          ),
+          child: isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'MATCHING BAG + SHOE SETS',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Matching Sets (${pairings.length} Active)',
+                      style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.obsidianNoir,
+                        foregroundColor: AppTheme.primaryGold,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        side: const BorderSide(color: AppTheme.primaryGold),
+                      ),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('CREATE NEW MATCHING SET', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      onPressed: () => _showPairingDialog(context, products),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'MATCHING BAG + SHOE SETS',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Matching Sets (${pairings.length} Active)',
+                          style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.obsidianNoir,
+                        foregroundColor: AppTheme.primaryGold,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        side: const BorderSide(color: AppTheme.primaryGold),
+                      ),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('CREATE NEW SET', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      onPressed: () => _showPairingDialog(context, products),
+                    ),
+                  ],
+                ),
+        ),
+        const SizedBox(height: 16),
+
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: pairings.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final pair = pairings[index];
+            return Container(
+              padding: EdgeInsets.all(isMobile ? 14 : 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: AppTheme.borderSubtle),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (pair.bagProduct != null)
+                        SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: ShopImage(pair.bagProduct!.primaryImage, w: 180, q: 60),
+                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 18),
+                        child: Icon(Icons.add, size: 16, color: AppTheme.primaryGoldDark),
+                      ),
+                      if (pair.shoeProduct != null)
+                        SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: ShopImage(pair.shoeProduct!.primaryImage, w: 180, q: 60),
+                        ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(pair.title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14)),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${pair.bundleDiscountPercent}% OFF • Bundle: ${_formatNaira(pair.discountedBundlePrice)}',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.primaryGoldDark, fontWeight: FontWeight.w700),
+                            ),
+                            if ((pair.description ?? '').isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                pair.description!,
+                                style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: AppTheme.textMuted),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      if (!isMobile) ...[
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, color: AppTheme.obsidianNoir),
+                          tooltip: 'Edit this set',
+                          onPressed: () => _showPairingDialog(context, products, existing: pair),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed),
+                          tooltip: 'Delete this set',
+                          onPressed: () async {
+                            await SupabaseService.deletePairing(pair.id);
+                            ref.invalidate(pairingsProvider);
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (isMobile) ...[
+                    const SizedBox(height: 10),
+                    const Divider(height: 1),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.obsidianNoir,
+                              side: const BorderSide(color: AppTheme.borderSubtle),
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            ),
+                            icon: const Icon(Icons.edit_outlined, size: 16),
+                            label: const Text('EDIT SET', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                            onPressed: () => _showPairingDialog(context, products, existing: pair),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.errorRed,
+                            side: BorderSide(color: AppTheme.errorRed.withValues(alpha: 0.4)),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          ),
+                          icon: const Icon(Icons.delete_outline, size: 16),
+                          label: const Text('DELETE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          onPressed: () async {
+                            await SupabaseService.deletePairing(pair.id);
+                            ref.invalidate(pairingsProvider);
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // SECTION 4: PROMO CODES
+  // ===========================================================================
+  Widget _buildPromoCodesTab(BuildContext context, bool isMobile) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: SupabaseService.getPromoCodes(),
+      builder: (ctx, snap) {
+        final codes = snap.data ?? [];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: EdgeInsets.all(isMobile ? 16 : 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: AppTheme.borderSubtle),
+              ),
+              child: isMobile
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'DISCOUNT CODES',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Promo Codes (${codes.length})',
+                          style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Shoppers type these at checkout (e.g. LUXE10 = 10% off).',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.obsidianNoir,
+                            foregroundColor: AppTheme.primaryGold,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            side: const BorderSide(color: AppTheme.primaryGold),
+                          ),
+                          icon: const Icon(Icons.add, size: 18),
+                          label: const Text('CREATE NEW PROMO CODE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          onPressed: () => _showPromoDialog(ctx, null),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'DISCOUNT CODES',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Promo Codes (${codes.length})',
+                              style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Shoppers type these at checkout. Example: LUXE10 = 10% off.',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
+                            ),
+                          ],
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.obsidianNoir,
+                            foregroundColor: AppTheme.primaryGold,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                            side: const BorderSide(color: AppTheme.primaryGold),
+                          ),
+                          icon: const Icon(Icons.add, size: 18),
+                          label: const Text('NEW CODE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          onPressed: () => _showPromoDialog(ctx, null),
+                        ),
+                      ],
+                    ),
+            ),
+            const SizedBox(height: 16),
+            if (snap.connectionState == ConnectionState.waiting)
+              const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: AppTheme.primaryGold)))
+            else if (codes.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(color: Colors.white, border: Border.all(color: AppTheme.borderSubtle)),
+                child: const Center(child: Text('No promo codes yet. Tap "New Code" to create LUXE10.')),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: codes.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
+                itemBuilder: (c, i) {
+                  final row = codes[i];
+                  final active = (row['is_active'] as bool?) ?? true;
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: active ? AppTheme.borderSubtle : AppTheme.errorRed.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          color: active ? AppTheme.obsidianNoir : AppTheme.surfaceGrey,
+                          child: Text(
+                            '${row['code']}',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                              color: active ? AppTheme.primaryGold : AppTheme.textMuted,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            '${row['discount_percent']}% off • ${active ? 'Active' : 'Paused'}',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppTheme.obsidianNoir),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            await SupabaseService.setPromoActive(row['id'].toString(), !active);
+                            setState(() {});
+                          },
+                          child: Text(active ? 'PAUSE' : 'RESUME'),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed),
+                          tooltip: 'Delete code',
+                          onPressed: () async {
+                            await SupabaseService.deletePromoCode(row['id'].toString());
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ===========================================================================
+  // SECTION 5: WEBSITE TEXT, BANNERS & WHATSAPP (CLEAN SUB-TABS)
+  // ===========================================================================
+  Widget _buildCMSCustomizationTab(BuildContext context, bool isMobile) {
+    Widget subTabBtn(int index, IconData icon, String label) {
+      final selected = _cmsSubTab == index;
+      return Expanded(
+        child: InkWell(
+          onTap: () => setState(() => _cmsSubTab = index),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            decoration: BoxDecoration(
+              color: selected ? AppTheme.obsidianNoir : Colors.white,
+              border: Border.all(color: selected ? AppTheme.obsidianNoir : AppTheme.borderSubtle),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 16, color: selected ? AppTheme.primaryGold : AppTheme.textMuted),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: selected ? Colors.white : AppTheme.obsidianNoir,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Top Header + Save Button
+        Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppTheme.borderSubtle),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isMobile) ...[
+                Text(
+                  'WEBSITE DESIGN & TEXT',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Banners, Store Name & Contact Details',
+                  style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryGold,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  ),
+                  icon: _isSavingCMS
+                      ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.save, size: 18),
+                  label: Text(
+                    _isSavingCMS ? 'SAVING...' : 'PUBLISH TEXT CHANGES',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  ),
+                  onPressed: _isSavingCMS ? null : _saveAllCMSContent,
+                ),
+              ] else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'WEBSITE DESIGN & TEXT',
+                          style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.8, color: AppTheme.primaryGoldDark),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Customize Homepage Banners, Store Name & WhatsApp',
+                          style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryGold,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                      ),
+                      icon: _isSavingCMS
+                          ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Icon(Icons.save, size: 18),
+                      label: Text(
+                        _isSavingCMS ? 'SAVING...' : 'PUBLISH ALL CHANGES',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                      ),
+                      onPressed: _isSavingCMS ? null : _saveAllCMSContent,
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 16),
+              // 3 Clean Sub-tabs so the owner isn't overwhelmed by 20 inputs at once
+              Row(
+                children: [
+                  subTabBtn(0, Icons.burst_mode_outlined, '1. Banners'),
+                  const SizedBox(width: 8),
+                  subTabBtn(1, Icons.campaign_outlined, '2. Brand & Notice'),
+                  const SizedBox(width: 8),
+                  subTabBtn(2, Icons.contact_phone_outlined, '3. Contact & Shipping'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+
+        if (_cmsSubTab == 0) ...[
+          _buildHeroSlidesEditor(context, ref, isMobile),
+        ] else if (_cmsSubTab == 1) ...[
+          _sectionCard(
+            title: 'Top Scrolling Notice Bar',
+            subtitle: 'TV-style ticker bar at the very top of your website',
+            children: [
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Show Announcement Bar', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                subtitle: const Text('Toggle top notice bar on or off across the store', style: TextStyle(fontSize: 11)),
+                value: _announcementActive,
+                activeThumbColor: AppTheme.primaryGold,
+                onChanged: (val) => setState(() => _announcementActive = val),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _announcementTextCtrl,
+                decoration: const InputDecoration(labelText: 'Announcement Text'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _sectionCard(
+            title: 'Shop Name & Tagline',
+            subtitle: 'Shown in the header navigation and browser title',
+            children: [
+              _responsiveFields(isMobile, [
+                TextField(
+                  controller: _headerBrandCtrl,
+                  decoration: const InputDecoration(labelText: 'Shop Name (e.g. LUXE LAGOS)'),
+                ),
+                TextField(
+                  controller: _headerTaglineCtrl,
+                  decoration: const InputDecoration(labelText: 'Brand Subtitle / Tagline'),
+                ),
+              ]),
+            ],
+          ),
+        ] else ...[
+          _sectionCard(
+            title: 'Contact, WhatsApp & Address',
+            subtitle: 'Shown in the website footer and WhatsApp floating chat button',
+            children: [
+              TextField(
+                controller: _footerBioCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'About Your Shop (Short Footer Bio)'),
+              ),
+              const SizedBox(height: 14),
+              _responsiveFields(isMobile, [
+                TextField(
+                  controller: _footerEmailCtrl,
+                  decoration: const InputDecoration(labelText: 'Customer Care Email'),
+                ),
+                TextField(
+                  controller: _footerPhoneCtrl,
+                  decoration: const InputDecoration(labelText: 'Phone Line'),
+                ),
+                TextField(
+                  controller: _footerWhatsappCtrl,
+                  decoration: const InputDecoration(labelText: 'WhatsApp Number (e.g. +2348091234567)'),
+                ),
+              ]),
+              const SizedBox(height: 14),
+              _responsiveFields(isMobile, [
+                TextField(
+                  controller: _footerAddressCtrl,
+                  decoration: const InputDecoration(labelText: 'Boutique Address'),
+                ),
+                TextField(
+                  controller: _footerCopyrightCtrl,
+                  decoration: const InputDecoration(labelText: 'Copyright Line'),
+                ),
+              ]),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _sectionCard(
+            title: 'Currency & Free Delivery Threshold',
+            subtitle: 'Storewide currency symbol and free delivery minimum spend',
+            children: [
+              _responsiveFields(isMobile, [
+                TextField(
+                  controller: _currencySymbolCtrl,
+                  decoration: const InputDecoration(labelText: 'Currency Symbol (e.g. ₦)'),
+                ),
+                TextField(
+                  controller: _freeShippingCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Free Delivery Threshold (Amount in ₦)'),
+                ),
+              ]),
+            ],
+          ),
+        ],
+      ],
     );
   }
 
   // --- SECURITY GATE FOR ADMIN EXCLUSIVITY ---
   Widget _buildSecurityGate(BuildContext context, AppAuthState authState) {
     return Scaffold(
+      backgroundColor: AppTheme.obsidianNoir,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 460),
+            constraints: const BoxConstraints(maxWidth: 440),
             child: Container(
-              padding: const EdgeInsets.all(36),
+              padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: AppTheme.primaryGold, width: 2),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 24, offset: const Offset(0, 8)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 32, offset: const Offset(0, 12)),
                 ],
               ),
               child: Column(
@@ -303,18 +2505,18 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                 children: [
                   Center(
                     child: Container(
-                      width: 60,
-                      height: 60,
+                      width: 56,
+                      height: 56,
                       decoration: const BoxDecoration(
                         color: AppTheme.obsidianNoir,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.lock_person, color: AppTheme.primaryGold, size: 30),
+                      child: const Icon(Icons.lock_person, color: AppTheme.primaryGold, size: 28),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   Text(
-                    'STORE OWNER ACCESS',
+                    'STORE OWNER PORTAL',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -325,21 +2527,21 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Administrator Access Required',
+                    'Admin Sign In',
                     style: GoogleFonts.cormorantGaramond(
-                      fontSize: 26,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.obsidianNoir,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Text(
-                    'This back-office suite is strictly exclusive to store owners. Unverified users cannot view store controls or modify website copy.',
+                    'Sign in to manage products, upload videos, track orders, and update banners.',
                     style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 22),
 
                   if (authState.isAuthenticated && !authState.isAdmin) ...[
                     Container(
@@ -349,7 +2551,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                         border: Border.all(color: AppTheme.errorRed.withValues(alpha: 0.3)),
                       ),
                       child: Text(
-                        'Access Denied: Current account (${authState.user?.email}) is registered as a customer. Please sign in with an Administrator account.',
+                        'Current account (${authState.user?.email}) is a customer account. Please sign in with your Administrator credentials.',
                         style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.errorRed),
                       ),
                     ),
@@ -375,16 +2577,17 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     controller: _adminEmailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                      labelText: 'Administrator Email',
+                      labelText: 'Admin Email',
                       prefixIcon: Icon(Icons.mail_outline, size: 18),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   TextField(
                     controller: _adminPasswordController,
                     obscureText: _obscureAdminPassword,
+                    onSubmitted: (_) => _handleAdminLogin(),
                     decoration: InputDecoration(
-                      labelText: 'Admin Security Password',
+                      labelText: 'Admin Password',
                       prefixIcon: const Icon(Icons.password, size: 18),
                       suffixIcon: IconButton(
                         icon: Icon(_obscureAdminPassword ? Icons.visibility_off : Icons.visibility, size: 18),
@@ -406,11 +2609,11 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     child: _isLoggingIn
                         ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryGold))
                         : Text(
-                            'AUTHENTICATE & UNLOCK CMS',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2.0),
+                            'SIGN IN TO DASHBOARD',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.8),
                           ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
@@ -420,7 +2623,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     ),
                     onPressed: () => context.go('/'),
                     child: Text(
-                      'RETURN TO PUBLIC STORE',
+                      'BACK TO PUBLIC SHOP',
                       style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.obsidianNoir, letterSpacing: 1.2),
                     ),
                   ),
@@ -473,367 +2676,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     }
   }
 
-  /// Business overview strip: revenue, pending orders, products, low stock.
-  /// Answers "how is my shop doing?" at a glance.
-  Widget _buildBusinessOverview(BuildContext context, bool isMobile) {
-    final products = ref.watch(filteredProductsProvider);
-    double revenue = 0;
-    int pending = 0;
-    for (final o in _ordersList) {
-      revenue += ((o['total'] as num?)?.toDouble() ?? 0.0);
-      final st = (o['status']?.toString() ?? 'pending').toLowerCase();
-      if (st == 'pending' || st == 'processing') pending++;
-    }
-    final lowStock = products.where((p) => p.stockQuantity <= 5).length;
-    final productCount = products.length;
-
-    String naira(double v) {
-      final n = v.round().toString();
-      final buf = StringBuffer();
-      for (int i = 0; i < n.length; i++) {
-        if (i > 0 && (n.length - i) % 3 == 0) buf.write(',');
-        buf.write(n[i]);
-      }
-      return '₦$buf';
-    }
-
-    Widget stat(IconData icon, String label, String value, {bool alert = false}) {
-      return Expanded(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: alert ? AppTheme.errorRed.withValues(alpha: 0.5) : AppTheme.borderSubtle,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: 16, color: alert ? AppTheme.errorRed : AppTheme.primaryGoldDark),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: AppTheme.textMuted),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                value,
-                style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.obsidianNoir),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final cards = [
-      stat(Icons.payments_outlined, 'TOTAL SALES', naira(revenue)),
-      stat(Icons.pending_actions_outlined, 'NEEDS ACTION', '$pending orders', alert: pending > 0),
-      stat(Icons.inventory_2_outlined, 'PRODUCTS', '$productCount live'),
-      stat(Icons.warning_amber_outlined, 'LOW STOCK', '$lowStock items', alert: lowStock > 0),
-    ];
-
-    return Container(
-      color: AppTheme.surfaceGrey,
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 64, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'TODAY AT A GLANCE',
-            style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
-          ),
-          const SizedBox(height: 12),
-          if (isMobile)
-            Column(
-              children: [
-                Row(children: [cards[0], const SizedBox(width: 12), cards[1]]),
-                const SizedBox(height: 12),
-                Row(children: [cards[2], const SizedBox(width: 12), cards[3]]),
-              ],
-            )
-          else
-            Row(
-              children: [
-                cards[0], const SizedBox(width: 12),
-                cards[1], const SizedBox(width: 12),
-                cards[2], const SizedBox(width: 12),
-                cards[3],
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-
-  // --- TAB 1: WEBSITE CMS (EVERY TEXT & BUTTON CUSTOMIZABLE) ---
-  Widget _buildCMSCustomizationTab(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'LIVE STORE CONTENT CMS',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Customize Every Button, Header, Hero, and Copy',
-                    style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryGold,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                ),
-                icon: _isSavingCMS
-                    ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.save, size: 18),
-                label: Text(
-                  _isSavingCMS ? 'SAVING...' : 'PUBLISH ALL CHANGES',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                ),
-                onPressed: _isSavingCMS ? null : _saveAllCMSContent,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Divider(height: 1),
-          const SizedBox(height: 24),
-
-          // 1. Announcement Bar
-          _sectionCard(
-            title: 'Top Notice Bar',
-            subtitle: 'Small message at very top — e.g. free delivery news',
-            children: [
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Show Announcement Bar', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                subtitle: const Text('Toggle banner visibility across entire store', style: TextStyle(fontSize: 11)),
-                value: _announcementActive,
-                activeThumbColor: AppTheme.primaryGold,
-                onChanged: (val) => setState(() => _announcementActive = val),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _announcementTextCtrl,
-                decoration: const InputDecoration(labelText: 'Announcement Text'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // 2. Header & Branding
-          _sectionCard(
-            title: 'Shop Name & Tagline',
-            subtitle: 'Your store name shown at top on every page',
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _headerBrandCtrl,
-                      decoration: const InputDecoration(labelText: 'Shop Name (e.g. LUXE LAGOS)'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _headerTaglineCtrl,
-                      decoration: const InputDecoration(labelText: 'Brand Subtitle / Tagline'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // 3. Hero Section
-          _sectionCard(
-            title: 'Top Welcome Banner',
-            subtitle: 'Main photo, headline and shop buttons on homepage',
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _heroBadgeCtrl,
-                      decoration: const InputDecoration(labelText: 'Small Top Text (e.g. LAGOS BESTSELLER)'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _heroImageCtrl,
-                      decoration: const InputDecoration(labelText: 'Hero Background Image URL'),
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _heroTitleCtrl,
-                maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Big Headline (e.g. Pepper Them at Every Owambe)'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _heroSubtitleCtrl,
-                maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Short Description Under Headline'),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _heroCtaTextCtrl,
-                      decoration: const InputDecoration(labelText: 'Main Button Text (e.g. SHOP BAGS)'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _heroCtaUrlCtrl,
-                      decoration: const InputDecoration(labelText: 'Primary Button Link (e.g. /shop)'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _heroSecondaryTextCtrl,
-                      decoration: const InputDecoration(labelText: 'Second Button Text (e.g. SHOP MATCHING SETS)'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _heroSecondaryUrlCtrl,
-                      decoration: const InputDecoration(labelText: 'Secondary Button Link (e.g. /pairings)'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // 3b. Homepage Banners (all slides) - this is what shoppers swipe.
-          _buildHeroSlidesEditor(context, ref),
-          const SizedBox(height: 24),
-
-          // 4. Footer & Contact Details
-          _sectionCard(
-            title: 'Contact & WhatsApp Details',
-            subtitle: 'Phone, WhatsApp, shop address shown at bottom of site',
-            children: [
-              TextField(
-                controller: _footerBioCtrl,
-                maxLines: 2,
-                decoration: const InputDecoration(labelText: 'About Your Shop (short story)'),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _footerEmailCtrl,
-                      decoration: const InputDecoration(labelText: 'Email'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _footerPhoneCtrl,
-                      decoration: const InputDecoration(labelText: 'Phone Line'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _footerWhatsappCtrl,
-                      decoration: const InputDecoration(labelText: 'WhatsApp Number'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      controller: _footerAddressCtrl,
-                      decoration: const InputDecoration(labelText: 'Shop Address'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _footerCopyrightCtrl,
-                      decoration: const InputDecoration(labelText: 'Copyright Line'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // 5. Store Currency & Free Shipping
-          _sectionCard(
-            title: 'Currency & Shipping Threshold',
-            subtitle: 'Storewide currency symbol and VIP free shipping qualification',
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _currencySymbolCtrl,
-                      decoration: const InputDecoration(labelText: 'Currency Symbol (e.g. ₦, \$, £, €)'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _freeShippingCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Free Delivery Threshold (Amount in Currency)'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 40),
-        ],
-      ),
-    );
-  }
-
   Future<void> _saveAllCMSContent() async {
     setState(() => _isSavingCMS = true);
 
@@ -881,8 +2723,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('All website content & copy published successfully to live store!'),
+        const SnackBar(
+          content: Text('Website changes published live!'),
           backgroundColor: AppTheme.obsidianNoir,
           behavior: SnackBarBehavior.floating,
         ),
@@ -890,15 +2732,13 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     }
   }
 
-  /// Banners editor: every slide shoppers swipe, with photo upload.
-  /// Saves instantly (no need for PUBLISH ALL).
-  Widget _buildHeroSlidesEditor(BuildContext context, WidgetRef ref) {
+  Widget _buildHeroSlidesEditor(BuildContext context, WidgetRef ref, bool isMobile) {
     final slides = ref.watch(siteSettingsProvider).hero.slides;
     return _sectionCard(
-      title: 'Homepage Banners (${slides.length} slides)',
-      subtitle: 'These are the photos shoppers swipe on the homepage. Edit any slide or add a new one.',
+      title: 'Homepage Hero Banners (${slides.length} Slides)',
+      subtitle: 'These are the big slideshow banners shoppers swipe at the top of the homepage.',
       children: [
-        for (int i = 0; i < slides.length; i++) ...[
+        for (int i = 0; i < slides.length; i++)
           Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
@@ -908,12 +2748,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
             ),
             child: Row(
               children: [
-                ClipRRect(
-                  child: SizedBox(
-                    width: 72,
-                    height: 72,
-                    child: ShopImage(slides[i].imageUrl, w: 200, q: 60),
-                  ),
+                SizedBox(
+                  width: 68,
+                  height: 68,
+                  child: ShopImage(slides[i].imageUrl, w: 200, q: 60),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -958,22 +2796,22 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
               ],
             ),
           ),
-        ],
-        OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppTheme.obsidianNoir,
-            side: const BorderSide(color: AppTheme.borderSubtle),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.obsidianNoir,
+              side: const BorderSide(color: AppTheme.borderSubtle),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            icon: const Icon(Icons.add, size: 18),
+            label: Text(
+              slides.length >= 6 ? 'MAX 6 SLIDES' : 'ADD NEW HOMEPAGE BANNER',
+              style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            ),
+            onPressed: slides.length >= 6 ? null : () => _showSlideDialog(context, ref),
           ),
-          icon: const Icon(Icons.add, size: 18),
-          label: Text(
-            slides.length >= 6 ? 'MAX 6 SLIDES' : 'ADD NEW BANNER',
-            style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-          ),
-          onPressed: slides.length >= 6
-              ? null
-              : () => _showSlideDialog(context, ref),
         ),
       ],
     );
@@ -996,6 +2834,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setD) {
+          final isDialogMobile = MediaQuery.of(ctx).size.width < 600;
           Future<void> upload() async {
             final messenger = ScaffoldMessenger.of(context);
             final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
@@ -1005,7 +2844,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
               messenger.showSnackBar(const SnackBar(content: Text('Could not read that file.')));
               return;
             }
-            setD(() { pickedBytes = bytes; uploading = true; });
+            setD(() {
+              pickedBytes = bytes;
+              uploading = true;
+            });
             final url = await SupabaseService.uploadProductImage(bytes, res.files.first.name);
             setD(() => uploading = false);
             if (url == null) {
@@ -1019,9 +2861,11 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
           return AlertDialog(
             backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: isDialogMobile ? 12 : 40, vertical: 16),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
             title: Text(isEditing ? 'Edit Banner ${index != null ? index + 1 : ''}' : 'Add New Banner'),
             content: SizedBox(
-              width: 520,
+              width: isDialogMobile ? double.maxFinite : 520,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1029,8 +2873,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     Row(
                       children: [
                         Container(
-                          width: 84,
-                          height: 84,
+                          width: 76,
+                          height: 76,
                           decoration: BoxDecoration(
                             color: AppTheme.surfaceGrey,
                             border: Border.all(color: AppTheme.borderSubtle),
@@ -1054,29 +2898,32 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                             icon: uploading
                                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                                 : const Icon(Icons.upload, size: 18),
-                            label: Text(uploading ? 'UPLOADING...' : 'UPLOAD PHOTO',
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                            label: Text(
+                              uploading ? 'UPLOADING...' : 'UPLOAD PHOTO',
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                            ),
                             onPressed: uploading ? null : upload,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    TextField(controller: imgCtrl, decoration: const InputDecoration(labelText: 'Photo link (auto-filled after upload, or paste)'), onChanged: (_) => setD(() {})),
+                    TextField(
+                      controller: imgCtrl,
+                      decoration: const InputDecoration(labelText: 'Photo link (auto-filled after upload, or paste)'),
+                      onChanged: (_) => setD(() {}),
+                    ),
                     const SizedBox(height: 12),
                     TextField(controller: badgeCtrl, decoration: const InputDecoration(labelText: 'Small top text * (e.g. LAGOS BESTSELLER)')),
                     const SizedBox(height: 12),
-                    TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Big headline * (e.g. Pepper Them at Every Owambe)')),
+                    TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Big headline *')),
                     const SizedBox(height: 12),
                     TextField(controller: subCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Short description under headline')),
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(child: TextField(controller: ctaCtrl, decoration: const InputDecoration(labelText: 'Main button (e.g. SHOP BAGS)'))),
-                        const SizedBox(width: 12),
-                        Expanded(child: TextField(controller: secCtrl, decoration: const InputDecoration(labelText: 'Second button'))),
-                      ],
-                    ),
+                    _responsiveFields(isDialogMobile, [
+                      TextField(controller: ctaCtrl, decoration: const InputDecoration(labelText: 'Main button (e.g. SHOP BAGS)')),
+                      TextField(controller: secCtrl, decoration: const InputDecoration(labelText: 'Second button')),
+                    ]),
                   ],
                 ),
               ),
@@ -1123,136 +2970,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  // --- TAB 2: PRODUCTS MANAGER (FULL CRUD) ---
-  Widget _buildProductsManagerTab(BuildContext context) {
-    final products = ref.watch(filteredProductsProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'PRODUCTS & STOCK',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Manage Bags, Footwear & Details (${products.length} Items)',
-                  style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              alignment: WrapAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.obsidianNoir,
-                    side: const BorderSide(color: AppTheme.borderSubtle),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                  ),
-                  icon: const Icon(Icons.category_outlined, size: 18),
-                  label: Text(
-                    'CATEGORIES',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                  ),
-                  onPressed: () => _showCategoriesDialog(context),
-                ),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.obsidianNoir,
-                    side: const BorderSide(color: AppTheme.borderSubtle),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                  ),
-                  icon: const Icon(Icons.reviews_outlined, size: 18),
-                  label: Text(
-                    'REVIEWS',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                  ),
-                  onPressed: () => _showReviewsDialog(context),
-                ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.obsidianNoir,
-                    foregroundColor: AppTheme.primaryGold,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                    side: const BorderSide(color: AppTheme.primaryGold),
-                  ),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(
-                    'ADD NEW PRODUCT',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                  ),
-                  onPressed: () => _showProductDialog(context, null),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        const Divider(height: 1),
-        const SizedBox(height: 16),
-
-        Expanded(
-          child: ListView.separated(
-            itemCount: products.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final p = products[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                leading: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppTheme.borderSubtle),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: ShopImage(p.primaryImage, w: 150, q: 60),
-                ),
-                title: Text(
-                  p.title,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
-                ),
-                subtitle: Text(
-                  '${p.productType.toUpperCase()} • ${p.subCategory ?? ''} • ₦${p.basePrice.toStringAsFixed(0)} • Stock: ${p.stockQuantity}${p.hasVideo ? ' • ▶ VIDEO' : ''}',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textMuted),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined, size: 18, color: AppTheme.obsidianNoir),
-                      tooltip: 'Edit Creation',
-                      onPressed: () => _showProductDialog(context, p),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 18, color: AppTheme.errorRed),
-                      tooltip: 'Delete Creation',
-                      onPressed: () => _confirmDeleteProduct(context, p),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Categories: bag types shoppers filter by (Tote, Crossbody...).
-  /// Add new ones (e.g. Aso-Oke Clutches), rename, change photo or delete.
-  /// Deleting a category keeps its products (they become uncategorized).
   void _showCategoriesDialog(BuildContext context) {
     final nameCtrl = TextEditingController();
     final descCtrl = TextEditingController();
@@ -1264,13 +2981,14 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setD) {
+          final isDialogMobile = MediaQuery.of(ctx).size.width < 600;
           Future<void> upload(TextEditingController target) async {
             final messenger = ScaffoldMessenger.of(context);
             final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
             if (res == null || res.files.isEmpty) return;
             final bytes = res.files.first.bytes;
             if (bytes == null) return;
-            setD(() { uploading = true; });
+            setD(() => uploading = true);
             final url = await SupabaseService.uploadProductImage(bytes, res.files.first.name);
             setD(() => uploading = false);
             if (url == null) {
@@ -1283,9 +3001,11 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
 
           return AlertDialog(
             backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: isDialogMobile ? 12 : 40, vertical: 16),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
             title: const Text('Manage Categories'),
             content: SizedBox(
-              width: 560,
+              width: isDialogMobile ? double.maxFinite : 560,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1308,13 +3028,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                                 decoration: BoxDecoration(color: AppTheme.surfaceGrey, border: Border.all(color: AppTheme.borderSubtle)),
                                 child: Row(
                                   children: [
-                                    ClipRRect(
-                                      child: SizedBox(
-                                        width: 44, height: 44,
-                                        child: (cat.imageUrl ?? '').isEmpty
-                                            ? const Icon(Icons.category_outlined, color: AppTheme.textMuted)
-                                            : ShopImage(cat.imageUrl!, w: 200, q: 60),
-                                      ),
+                                    SizedBox(
+                                      width: 42,
+                                      height: 42,
+                                      child: (cat.imageUrl ?? '').isEmpty
+                                          ? const Icon(Icons.category_outlined, color: AppTheme.textMuted)
+                                          : ShopImage(cat.imageUrl!, w: 200, q: 60),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -1335,14 +3054,11 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                                         imgCtrl.text = cat.imageUrl ?? '';
                                         newType = cat.type;
                                         setD(() {});
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Editing "${cat.name}" below — change fields then tap SAVE.')),
-                                        );
                                       },
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete_outline, size: 18, color: AppTheme.errorRed),
-                                      tooltip: 'Delete category (products are kept)',
+                                      tooltip: 'Delete category',
                                       onPressed: () async {
                                         final ok = await SupabaseService.deleteCategory(cat.id);
                                         if (!ok && context.mounted) {
@@ -1373,10 +3089,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                         DropdownMenuItem(value: 'shoes', child: Text('Shoes')),
                         DropdownMenuItem(value: 'accessories', child: Text('Accessories')),
                       ],
-                      onChanged: (v) { if (v != null) setD(() => newType = v); },
+                      onChanged: (v) {
+                        if (v != null) setD(() => newType = v);
+                      },
                     ),
                     const SizedBox(height: 12),
-                    TextField(controller: descCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Description (shown on homepage strip)')),
+                    TextField(controller: descCtrl, maxLines: 2, decoration: const InputDecoration(labelText: 'Description')),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -1405,7 +3123,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Type a name first.')));
                     return;
                   }
-                  // If a category with this exact name exists, update it; else create.
                   final cats = await SupabaseService.getCategories();
                   Category? match;
                   for (final c in cats) {
@@ -1423,7 +3140,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   }
                   ref.invalidate(categoriesProvider);
                   ref.invalidate(allProductsProvider);
-                  nameCtrl.clear(); descCtrl.clear(); imgCtrl.clear();
+                  nameCtrl.clear();
+                  descCtrl.clear();
+                  imgCtrl.clear();
                   setD(() {});
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Category saved — live on shop now.')));
@@ -1438,109 +3157,117 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  /// Reviews: pick a product, read what buyers said, delete rude/fake ones.
   void _showReviewsDialog(BuildContext context) {
-    final products = ref.watch(filteredProductsProvider);
+    final products = ref.watch(allProductsProvider).value ?? SupabaseService.fallbackProducts;
     String? selectedId = products.isNotEmpty ? products.first.id : null;
     String selectedTitle = products.isNotEmpty ? products.first.title : '';
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setD) => AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text('Moderate Reviews'),
-          content: SizedBox(
-            width: 560,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedId,
-                    decoration: const InputDecoration(labelText: 'Product *'),
-                    items: products.map((p) => DropdownMenuItem(value: p.id, child: Text(p.title, overflow: TextOverflow.ellipsis))).toList(),
-                    onChanged: (v) {
-                      if (v == null) return;
-                      setD(() {
-                        selectedId = v;
-                        selectedTitle = products.firstWhere((p) => p.id == v).title;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  if (selectedId == null)
-                    const Text('No products yet.')
-                  else
-                    FutureBuilder<List<Review>>(
-                      future: SupabaseService.getReviews(selectedId!),
-                      builder: (c, snap) {
-                        final revs = snap.data ?? [];
-                        if (snap.connectionState == ConnectionState.waiting) {
-                          return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppTheme.primaryGold)));
-                        }
-                        if (revs.isEmpty) {
-                          return Container(
-                            padding: const EdgeInsets.all(24),
-                            color: AppTheme.surfaceGrey,
-                            child: Text('No reviews for "$selectedTitle" yet.', textAlign: TextAlign.center,
-                                style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
-                          );
-                        }
-                        return Column(
-                          children: [
-                            for (final r in revs)
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(color: AppTheme.surfaceGrey, border: Border.all(color: AppTheme.borderSubtle)),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              ...List.generate(r.rating, (_) => const Icon(Icons.star, size: 13, color: AppTheme.primaryGold)),
-                                              const SizedBox(width: 8),
-                                              Expanded(child: Text(r.authorName, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
-                                            ],
-                                          ),
-                                          if (r.headline != null && r.headline!.isNotEmpty) ...[
-                                            const SizedBox(height: 4),
-                                            Text(r.headline!, style: GoogleFonts.cormorantGaramond(fontSize: 15, fontWeight: FontWeight.bold)),
-                                          ],
-                                          const SizedBox(height: 4),
-                                          Text(r.comment, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted, height: 1.5)),
-                                        ],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline, size: 18, color: AppTheme.errorRed),
-                                      tooltip: 'Delete this review',
-                                      onPressed: () async {
-                                        await SupabaseService.deleteReview(r.id);
-                                        setD(() {});
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        );
+        builder: (ctx, setD) {
+          final isDialogMobile = MediaQuery.of(ctx).size.width < 600;
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: EdgeInsets.symmetric(horizontal: isDialogMobile ? 12 : 40, vertical: 16),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            title: const Text('Moderate Reviews'),
+            content: SizedBox(
+              width: isDialogMobile ? double.maxFinite : 560,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Product *'),
+                      items: products.map((p) => DropdownMenuItem(value: p.id, child: Text(p.title, overflow: TextOverflow.ellipsis))).toList(),
+                      onChanged: (v) {
+                        if (v == null) return;
+                        setD(() {
+                          selectedId = v;
+                          selectedTitle = products.firstWhere((p) => p.id == v).title;
+                        });
                       },
                     ),
-                ],
+                    const SizedBox(height: 16),
+                    if (selectedId == null)
+                      const Text('No products yet.')
+                    else
+                      FutureBuilder<List<Review>>(
+                        future: SupabaseService.getReviews(selectedId!),
+                        builder: (c, snap) {
+                          final revs = snap.data ?? [];
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: AppTheme.primaryGold)));
+                          }
+                          if (revs.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(24),
+                              color: AppTheme.surfaceGrey,
+                              child: Text(
+                                'No reviews for "$selectedTitle" yet.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
+                              ),
+                            );
+                          }
+                          return Column(
+                            children: [
+                              for (final r in revs)
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(color: AppTheme.surfaceGrey, border: Border.all(color: AppTheme.borderSubtle)),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                ...List.generate(r.rating, (_) => const Icon(Icons.star, size: 13, color: AppTheme.primaryGold)),
+                                                const SizedBox(width: 8),
+                                                Expanded(child: Text(r.authorName, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                                              ],
+                                            ),
+                                            if (r.headline != null && r.headline!.isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Text(r.headline!, style: GoogleFonts.cormorantGaramond(fontSize: 15, fontWeight: FontWeight.bold)),
+                                            ],
+                                            const SizedBox(height: 4),
+                                            Text(r.comment, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted, height: 1.5)),
+                                          ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline, size: 18, color: AppTheme.errorRed),
+                                        tooltip: 'Delete this review',
+                                        onPressed: () async {
+                                          await SupabaseService.deleteReview(r.id);
+                                          setD(() {});
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('DONE')),
-          ],
-        ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('DONE')),
+            ],
+          );
+        },
       ),
     );
   }
@@ -1549,7 +3276,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     final isEditing = existing != null;
     final titleCtrl = TextEditingController(text: existing?.title ?? '');
     final typeCtrl = existing?.productType ?? 'bag';
-    final subCatCtrl = TextEditingController(text: existing?.subCategory ?? (typeCtrl == 'bag' ? 'Tote' : 'Stiletto'));
+    final subCatCtrl = TextEditingController(text: existing?.subCategory ?? (typeCtrl == 'bag' ? 'Tote' : 'Slides'));
     final basePriceCtrl = TextEditingController(text: existing?.basePrice.toStringAsFixed(0) ?? '150000');
     final salePriceCtrl = TextEditingController(text: existing?.salePrice?.toStringAsFixed(0) ?? '');
     final shortDescCtrl = TextEditingController(text: existing?.shortDescription ?? '');
@@ -1574,9 +3301,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       final f = res.files.first;
       final bytes = f.bytes;
       if (bytes == null) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Could not read that file. Try another photo.')),
-        );
+        messenger.showSnackBar(const SnackBar(content: Text('Could not read that file. Try another photo.')));
         return;
       }
       setDialogState(() {
@@ -1587,15 +3312,11 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       final url = await SupabaseService.uploadProductImage(bytes, f.name);
       setDialogState(() => uploading = false);
       if (url == null) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Upload failed. Check connection or paste an image link instead.')),
-        );
+        messenger.showSnackBar(const SnackBar(content: Text('Upload failed. Check connection or paste an image link instead.')));
         return;
       }
       urlCtrl.text = url;
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Photo uploaded.')),
-      );
+      messenger.showSnackBar(const SnackBar(content: Text('Photo uploaded.')));
     }
 
     Future<void> pickAndUploadVideo(void Function(void Function()) setDialogState, TextEditingController urlCtrl) async {
@@ -1605,9 +3326,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       final f = res.files.first;
       final bytes = f.bytes;
       if (bytes == null) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Could not read that video file. Try an MP4 file.')),
-        );
+        messenger.showSnackBar(const SnackBar(content: Text('Could not read that video file. Try an MP4 file.')));
         return;
       }
       setDialogState(() {
@@ -1617,16 +3336,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       final url = await SupabaseService.uploadProductVideo(bytes, f.name);
       setDialogState(() => uploadingVideo = false);
       if (url == null) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Video upload failed. Paste a video link instead.')),
-        );
+        messenger.showSnackBar(const SnackBar(content: Text('Video upload failed. Paste a video link instead.')));
         return;
       }
       urlCtrl.text = url;
       setDialogState(() {});
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Product video uploaded!')),
-      );
+      messenger.showSnackBar(const SnackBar(content: Text('Product video uploaded!')));
     }
 
     showDialog(
@@ -1634,78 +3349,194 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
+            final isDialogMobile = MediaQuery.of(ctx).size.width < 620;
             return AlertDialog(
               backgroundColor: Colors.white,
+              insetPadding: EdgeInsets.symmetric(horizontal: isDialogMobile ? 10 : 40, vertical: 14),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               title: Text(
-                isEditing ? 'Edit Product: ${existing.title}' : 'Add New Product',
+                isEditing ? 'Edit Product' : 'Add New Product / Video',
                 style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                width: 600,
+                width: isDialogMobile ? double.maxFinite : 600,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // 1. MEDIA UPLOADS AT TOP (Photo + Video)
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceGrey,
+                          border: Border.all(color: AppTheme.borderSubtle),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'STEP 1 • PHOTO & VIDEO MEDIA',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5, color: AppTheme.primaryGoldDark),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 68,
+                                  height: 68,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(color: AppTheme.borderSubtle),
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: pickedBytes != null
+                                      ? Image.memory(pickedBytes!, fit: BoxFit.cover)
+                                      : ShopImage(primaryImgCtrl.text.trim(), w: 200, q: 60),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppTheme.primaryGold,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                        ),
+                                        icon: uploading
+                                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                            : const Icon(Icons.upload, size: 18),
+                                        label: Text(
+                                          uploading ? 'UPLOADING...' : 'UPLOAD PRODUCT PHOTO',
+                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                        ),
+                                        onPressed: uploading ? null : () => pickAndUpload(setDialogState, primaryImgCtrl),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        pickedName ?? 'JPG or PNG photo from your phone or computer.',
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              controller: primaryImgCtrl,
+                              decoration: const InputDecoration(labelText: 'Primary Photo URL (auto-filled after upload)'),
+                              onChanged: (_) => setDialogState(() {}),
+                            ),
+                            const SizedBox(height: 14),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 68,
+                                  height: 68,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.obsidianNoir,
+                                    border: Border.all(color: AppTheme.primaryGold),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Icon(
+                                    videoUrlCtrl.text.trim().isNotEmpty ? Icons.videocam : Icons.videocam_outlined,
+                                    color: AppTheme.primaryGold,
+                                    size: 26,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppTheme.obsidianNoir,
+                                          backgroundColor: Colors.white,
+                                          side: const BorderSide(color: AppTheme.obsidianNoir),
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                        ),
+                                        icon: uploadingVideo
+                                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.obsidianNoir))
+                                            : const Icon(Icons.video_call_outlined, size: 18),
+                                        label: Text(
+                                          uploadingVideo ? 'UPLOADING VIDEO...' : 'UPLOAD PRODUCT VIDEO (MP4)',
+                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                        ),
+                                        onPressed: uploadingVideo ? null : () => pickAndUploadVideo(setDialogState, videoUrlCtrl),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        pickedVideoName ?? 'Optional MP4 video — appears in Live Video Showcase.',
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              controller: videoUrlCtrl,
+                              decoration: const InputDecoration(labelText: 'Video URL (Optional — auto-filled after upload)'),
+                              onChanged: (_) => setDialogState(() {}),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 2. PRODUCT DETAILS & PRICING
+                      Text(
+                        'STEP 2 • NAME, CATEGORY & PRICING',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5, color: AppTheme.primaryGoldDark),
+                      ),
+                      const SizedBox(height: 10),
                       TextField(
                         controller: titleCtrl,
-                        decoration: const InputDecoration(labelText: 'Product Title'),
+                        decoration: const InputDecoration(labelText: 'Product Title *'),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: selectedType,
-                              decoration: const InputDecoration(labelText: 'Product Type'),
-                              items: const [
-                                DropdownMenuItem(value: 'bag', child: Text('Handbag')),
-                                DropdownMenuItem(value: 'shoe', child: Text('Footwear')),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setDialogState(() => selectedType = val);
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: subCatCtrl,
-                              decoration: const InputDecoration(labelText: 'Silhouette (Tote, Crossbody, Mule, etc.)'),
-                            ),
-                          ),
-                        ],
-                      ),
+                      _responsiveFields(isDialogMobile, [
+                        DropdownButtonFormField<String>(
+                          initialValue: selectedType,
+                          decoration: const InputDecoration(labelText: 'Product Type'),
+                          items: const [
+                            DropdownMenuItem(value: 'bag', child: Text('Handbag')),
+                            DropdownMenuItem(value: 'shoe', child: Text('Footwear / Shoe')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setDialogState(() => selectedType = val);
+                          },
+                        ),
+                        TextField(
+                          controller: subCatCtrl,
+                          decoration: const InputDecoration(labelText: 'Style (e.g. Tote, Slides, Heel)'),
+                        ),
+                      ]),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: basePriceCtrl,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Base Price (₦)'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: salePriceCtrl,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Sale Price (Optional, ₦)'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: stockCtrl,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Stock Units'),
-                            ),
-                          ),
-                        ],
-                      ),
+                      _responsiveFields(isDialogMobile, [
+                        TextField(
+                          controller: basePriceCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Regular Price (₦)'),
+                        ),
+                        TextField(
+                          controller: salePriceCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Sale Price (Optional, ₦)'),
+                        ),
+                        TextField(
+                          controller: stockCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Stock Quantity'),
+                        ),
+                      ]),
                       const SizedBox(height: 12),
                       TextField(
                         controller: shortDescCtrl,
@@ -1715,126 +3546,19 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       TextField(
                         controller: descCtrl,
                         maxLines: 3,
-                        decoration: const InputDecoration(labelText: 'Full Editorial Description'),
+                        decoration: const InputDecoration(labelText: 'Full Product Description'),
                       ),
                       const SizedBox(height: 12),
-                      TextField(
-                        controller: materialCtrl,
-                        decoration: const InputDecoration(labelText: 'Artisan Materials & Lining'),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: dimensionsCtrl,
-                        decoration: const InputDecoration(labelText: 'Dimensions (e.g. 36cm x 27cm x 14cm)'),
-                      ),
-                      const SizedBox(height: 12),
-                      // Photo: upload from device (recommended) or paste a link.
-                      Row(
-                        children: [
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: AppTheme.surfaceGrey,
-                              border: Border.all(color: AppTheme.borderSubtle),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: pickedBytes != null
-                                ? Image.memory(pickedBytes!, fit: BoxFit.cover)
-                                : ShopImage(primaryImgCtrl.text.trim(), w: 200, q: 60),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppTheme.primaryGold,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                                  ),
-                                  icon: uploading
-                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                      : const Icon(Icons.upload, size: 18),
-                                  label: Text(
-                                    uploading ? 'UPLOADING...' : 'UPLOAD PHOTO',
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                                  ),
-                                  onPressed: uploading ? null : () => pickAndUpload(setDialogState, primaryImgCtrl),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  pickedName ?? 'JPG/PNG from your phone or laptop. Auto-fills the link below.',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: primaryImgCtrl,
-                        decoration: const InputDecoration(labelText: 'Primary Image URL (auto-filled after upload, or paste link)'),
-                        onChanged: (_) => setDialogState(() {}),
-                      ),
-                      const SizedBox(height: 16),
-                      // Product Video (Optional): upload MP4/MOV or paste link
-                      Row(
-                        children: [
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: AppTheme.obsidianNoir,
-                              border: Border.all(color: AppTheme.primaryGold),
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              videoUrlCtrl.text.trim().isNotEmpty ? Icons.videocam : Icons.videocam_outlined,
-                              color: AppTheme.primaryGold,
-                              size: 28,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                OutlinedButton.icon(
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: AppTheme.obsidianNoir,
-                                    side: const BorderSide(color: AppTheme.obsidianNoir),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                                  ),
-                                  icon: uploadingVideo
-                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.obsidianNoir))
-                                      : const Icon(Icons.video_call_outlined, size: 18),
-                                  label: Text(
-                                    uploadingVideo ? 'UPLOADING VIDEO...' : 'UPLOAD PRODUCT VIDEO (MP4)',
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                                  ),
-                                  onPressed: uploadingVideo ? null : () => pickAndUploadVideo(setDialogState, videoUrlCtrl),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  pickedVideoName ?? 'Optional MP4 video showing the bag or shoe in real life.',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: videoUrlCtrl,
-                        decoration: const InputDecoration(labelText: 'Product Video URL (Optional — auto-filled after upload, or paste MP4 link)'),
-                        onChanged: (_) => setDialogState(() {}),
-                      ),
+                      _responsiveFields(isDialogMobile, [
+                        TextField(
+                          controller: materialCtrl,
+                          decoration: const InputDecoration(labelText: 'Materials & Lining'),
+                        ),
+                        TextField(
+                          controller: dimensionsCtrl,
+                          decoration: const InputDecoration(labelText: 'Dimensions (e.g. 34cm x 26cm x 14cm)'),
+                        ),
+                      ]),
                     ],
                   ),
                 ),
@@ -1847,20 +3571,24 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.obsidianNoir,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppTheme.primaryGold,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
                   onPressed: () async {
                     final basePrice = double.tryParse(basePriceCtrl.text.trim()) ?? 100000.0;
                     final salePrice = salePriceCtrl.text.trim().isNotEmpty ? double.tryParse(salePriceCtrl.text.trim()) : null;
                     final stock = int.tryParse(stockCtrl.text.trim()) ?? 10;
                     final title = titleCtrl.text.trim();
+                    if (title.isEmpty) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Please enter a product title.')));
+                      return;
+                    }
                     final slug = isEditing ? existing.slug : title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
                     final primaryImg = primaryImgCtrl.text.trim();
                     final videoUrl = videoUrlCtrl.text.trim();
                     final mediaList = <String>[
                       if (primaryImg.isNotEmpty) primaryImg,
-                      if (isEditing)
-                        ...existing.photoImages.where((u) => u != primaryImg),
+                      if (isEditing) ...existing.photoImages.where((u) => u != primaryImg),
                       if (videoUrl.isNotEmpty) videoUrl,
                     ];
 
@@ -1892,7 +3620,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     ref.invalidate(allProductsProvider);
                     if (ctx.mounted) Navigator.pop(ctx);
                   },
-                  child: Text(isEditing ? 'UPDATE' : 'CREATE'),
+                  child: Text(isEditing ? 'SAVE CHANGES' : 'CREATE PRODUCT'),
                 ),
               ],
             );
@@ -1907,7 +3635,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Delete ${product.title}?'),
-        content: const Text('Are you sure you want to remove this creation from the catalog? This action cannot be undone.'),
+        content: const Text('Are you sure you want to remove this item from the catalogue? This action cannot be undone.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL')),
           ElevatedButton(
@@ -1924,125 +3652,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  // --- TAB 3: MATCHING SETS ---
-  Widget _buildPairingsManagerTab(BuildContext context) {
-    final pairingsAsync = ref.watch(pairingsProvider);
-    final products = ref.watch(filteredProductsProvider);
-    final pairings = pairingsAsync.value ?? [];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'MATCHING BAG + SHOE SETS',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Matching Sets (${pairings.length} Active)',
-                  style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.obsidianNoir,
-                foregroundColor: AppTheme.primaryGold,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                side: const BorderSide(color: AppTheme.primaryGold),
-              ),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('CREATE NEW SET', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-              onPressed: () => _showPairingDialog(context, products),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        const Divider(height: 1),
-        const SizedBox(height: 16),
-
-        Expanded(
-          child: ListView.separated(
-            itemCount: pairings.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final pair = pairings[index];
-              return Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: AppTheme.borderSubtle),
-                ),
-                child: Row(
-                  children: [
-                    if (pair.bagProduct != null)
-                      ClipRRect(
-                        child: SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: ShopImage(pair.bagProduct!.primaryImage, w: 200, q: 60),
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.add, size: 16, color: AppTheme.primaryGold),
-                    const SizedBox(width: 8),
-                    if (pair.shoeProduct != null)
-                      ClipRRect(
-                        child: SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: ShopImage(pair.shoeProduct!.primaryImage, w: 200, q: 60),
-                        ),
-                      ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(pair.title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14)),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Discount: ${pair.bundleDiscountPercent}% OFF • Combined Set: ₦${pair.discountedBundlePrice.toStringAsFixed(0)}',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.primaryGoldDark, fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(pair.description ?? '', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textMuted)),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined, color: AppTheme.obsidianNoir),
-                      tooltip: 'Edit this set',
-                      onPressed: () => _showPairingDialog(context, products, existing: pair),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed),
-                      tooltip: 'Delete this set',
-                      onPressed: () async {
-                        await SupabaseService.deletePairing(pair.id);
-                        ref.invalidate(pairingsProvider);
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// How matching sets work: pick ONE bag + ONE shoe, give the set a name,
-  /// a short description and a discount (10 or 15). Shoppers see it on
-  /// Matching Sets page and can buy both together cheaper.
-  /// Same dialog creates new sets and edits existing ones.
   void _showPairingDialog(BuildContext context, List<Product> products, {ProductPairing? existing}) {
     final bags = products.where((p) => p.productType == 'bag').toList();
     final shoes = products.where((p) => p.productType == 'shoe').toList();
@@ -2057,7 +3666,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     final isEditing = existing != null;
     String selectedBagId = existing?.bagProductId ?? bags.first.id;
     String selectedShoeId = existing?.shoeProductId ?? shoes.first.id;
-    // Guard against deleted products still referenced by an old set.
     if (!bags.any((b) => b.id == selectedBagId)) selectedBagId = bags.first.id;
     if (!shoes.any((s) => s.id == selectedShoeId)) selectedShoeId = shoes.first.id;
     final titleCtrl = TextEditingController(text: existing?.title ?? 'New Matching Set');
@@ -2069,17 +3677,21 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
+            final isDialogMobile = MediaQuery.of(ctx).size.width < 600;
             return AlertDialog(
               backgroundColor: Colors.white,
+              insetPadding: EdgeInsets.symmetric(horizontal: isDialogMobile ? 12 : 40, vertical: 16),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               title: Text(isEditing ? 'Edit Matching Set' : 'Create Matching Set'),
               content: SizedBox(
-                width: 500,
+                width: isDialogMobile ? double.maxFinite : 500,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       DropdownButtonFormField<String>(
                         initialValue: selectedBagId,
+                        isExpanded: true,
                         decoration: const InputDecoration(labelText: 'Bag in this set *'),
                         items: bags.map((b) => DropdownMenuItem(value: b.id, child: Text(b.title, overflow: TextOverflow.ellipsis))).toList(),
                         onChanged: (val) {
@@ -2089,6 +3701,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         initialValue: selectedShoeId,
+                        isExpanded: true,
                         decoration: const InputDecoration(labelText: 'Shoe in this set *'),
                         items: shoes.map((s) => DropdownMenuItem(value: s.id, child: Text(s.title, overflow: TextOverflow.ellipsis))).toList(),
                         onChanged: (val) {
@@ -2104,7 +3717,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       TextField(
                         controller: descCtrl,
                         maxLines: 2,
-                        decoration: const InputDecoration(labelText: 'Short description (why this match is fine)'),
+                        decoration: const InputDecoration(labelText: 'Short description'),
                       ),
                       const SizedBox(height: 12),
                       TextField(
@@ -2122,9 +3735,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   style: ElevatedButton.styleFrom(backgroundColor: AppTheme.obsidianNoir, foregroundColor: Colors.white),
                   onPressed: () async {
                     if (titleCtrl.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        const SnackBar(content: Text('Please give the set a name.')),
-                      );
+                      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Please give the set a name.')));
                       return;
                     }
                     final discount = (int.tryParse(discountCtrl.text.trim()) ?? 10).clamp(1, 50);
@@ -2148,9 +3759,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       );
                     }
                     if (!ok && ctx.mounted) {
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        const SnackBar(content: Text('Could not save. Check connection and try again.')),
-                      );
+                      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Could not save. Check connection and try again.')));
                       return;
                     }
                     ref.invalidate(pairingsProvider);
@@ -2166,239 +3775,6 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  // --- TAB 4: ORDERS & FULFILLMENT ---
-  Widget _buildOrdersManagerTab(BuildContext context) {
-    if (_isLoadingOrders) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryGold));
-    }
-
-    if (_ordersList.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.receipt_long_outlined, size: 48, color: AppTheme.textMuted),
-            const SizedBox(height: 16),
-            Text('No Client Orders Received Yet', style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Orders placed through the checkout will appear here in real-time.', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted)),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'LIVE CLIENT ORDERS (${_ordersList.length})',
-              style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadOrders,
-              tooltip: 'Refresh Orders',
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: ListView.separated(
-            itemCount: _ordersList.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final order = _ordersList[index];
-              final orderId = order['id'] as String? ?? '';
-              final orderNum = order['order_number'] as String? ?? 'N/A';
-              final customer = order['customer_name'] as String? ?? 'Unknown';
-              final email = order['customer_email'] as String? ?? '';
-              final total = (order['total'] as num?)?.toDouble() ?? 0.0;
-              final status = order['status'] as String? ?? 'pending';
-
-              return Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: AppTheme.borderSubtle),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(orderNum, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: status == 'delivered' ? AppTheme.successGreen.withValues(alpha: 0.1) : AppTheme.primaryGold.withValues(alpha: 0.15),
-                            border: Border.all(color: status == 'delivered' ? AppTheme.successGreen : AppTheme.primaryGold),
-                          ),
-                          child: Text(
-                            status.toUpperCase(),
-                            style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text('Customer: $customer ($email)', style: GoogleFonts.plusJakartaSans(fontSize: 12)),
-                    const SizedBox(height: 4),
-                    Text('Order Total: ₦${total.toStringAsFixed(0)}', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.obsidianNoir)),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        const Text('Update Status: ', style: TextStyle(fontSize: 12)),
-                        const SizedBox(width: 8),
-                        DropdownButton<String>(
-                          value: status,
-                          items: const [
-                            DropdownMenuItem(value: 'pending', child: Text('Pending')),
-                            DropdownMenuItem(value: 'processing', child: Text('Processing')),
-                            DropdownMenuItem(value: 'shipped', child: Text('Shipped')),
-                            DropdownMenuItem(value: 'delivered', child: Text('Delivered')),
-                            DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')),
-                          ],
-                          onChanged: (newStatus) async {
-                            if (newStatus != null) {
-                              await SupabaseService.updateOrderStatus(orderId, newStatus);
-                              _loadOrders();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --- TAB 5: PROMO CODES (admin-managed discounts) ---
-  Widget _buildPromoCodesTab(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: SupabaseService.getPromoCodes(),
-      builder: (ctx, snap) {
-        final codes = snap.data ?? [];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'DISCOUNT CODES',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Promo Codes (${codes.length})',
-                      style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.obsidianNoir,
-                    foregroundColor: AppTheme.primaryGold,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                    side: const BorderSide(color: AppTheme.primaryGold),
-                  ),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('NEW CODE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                  onPressed: () => _showPromoDialog(ctx, null),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Shoppers type these at checkout. Example: LUXE10 = 10% off.',
-              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
-            ),
-            const SizedBox(height: 20),
-            const Divider(height: 1),
-            const SizedBox(height: 16),
-            if (snap.connectionState == ConnectionState.waiting)
-              const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: AppTheme.primaryGold)))
-            else if (codes.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(32),
-                color: Colors.white,
-                child: const Center(child: Text('No codes yet. Create LUXE10 to start.')),
-              )
-            else
-              Expanded(
-                child: ListView.separated(
-                  itemCount: codes.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (c, i) {
-                    final row = codes[i];
-                    final active = (row['is_active'] as bool?) ?? true;
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: active ? AppTheme.borderSubtle : AppTheme.errorRed.withValues(alpha: 0.4)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            color: active ? AppTheme.obsidianNoir : AppTheme.surfaceGrey,
-                            child: Text(
-                              '${row['code']}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.5,
-                                color: active ? AppTheme.primaryGold : AppTheme.textMuted,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              '${row['discount_percent']}% off • ${active ? 'Active' : 'Paused'}',
-                              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textMuted),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              await SupabaseService.setPromoActive(row['id'].toString(), !active);
-                              setState(() {});
-                            },
-                            child: Text(active ? 'PAUSE' : 'RESUME'),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, color: AppTheme.errorRed),
-                            tooltip: 'Delete code',
-                            onPressed: () async {
-                              await SupabaseService.deletePromoCode(row['id'].toString());
-                              setState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showPromoDialog(BuildContext context, Map<String, dynamic>? existing) {
     final codeCtrl = TextEditingController();
     final percentCtrl = TextEditingController(text: '10');
@@ -2406,6 +3782,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         title: const Text('Create Discount Code'),
         content: SizedBox(
           width: 400,
@@ -2452,38 +3829,14 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     );
   }
 
-  // --- TAB 6: SYSTEM HEALTH ---
-  Widget _buildSystemHealthTab(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'STORE SYSTEM STATUS',
-            style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2.0, color: AppTheme.primaryGoldDark),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Cloud Database Diagnostics',
-            style: GoogleFonts.cormorantGaramond(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-
-          _systemMetricTile(Icons.cloud_done, 'Supabase Cloud Database', 'Project Ref: htvcavnqsgyjrbtqefxk • Region: EU Central', AppTheme.successGreen),
-          const SizedBox(height: 12),
-          _systemMetricTile(Icons.mark_email_read, 'Supabase Auth Verification', 'Instant VIP Activation Enabled (mailer_autoconfirm: True)', AppTheme.successGreen),
-          const SizedBox(height: 12),
-          _systemMetricTile(Icons.storage, 'PostgreSQL Storage Engine', 'Tables: products, categories, pairings, orders, site_settings', AppTheme.primaryGold),
-          const SizedBox(height: 12),
-          _systemMetricTile(Icons.security, 'Row Level Security (RLS)', 'Active with public read & authenticated write policies', AppTheme.successGreen),
-        ],
-      ),
-    );
-  }
-
-  Widget _sectionCard({required String title, required String subtitle, required List<Widget> children}) {
+  Widget _sectionCard({
+    required String title,
+    required String subtitle,
+    required List<Widget> children,
+    Widget? trailing,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: AppTheme.borderSubtle),
@@ -2491,37 +3844,24 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 2),
-          Text(subtitle, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textMuted)),
-          const SizedBox(height: 20),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _systemMetricTile(IconData icon, String title, String subtitle, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceGrey,
-        border: Border.all(color: AppTheme.borderSubtle),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13)),
-                const SizedBox(height: 2),
-                Text(subtitle, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textMuted)),
-              ],
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: AppTheme.obsidianNoir)),
+                    const SizedBox(height: 3),
+                    Text(subtitle, style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: AppTheme.textMuted)),
+                  ],
+                ),
+              ),
+              ?trailing,
+            ],
           ),
+          const SizedBox(height: 18),
+          ...children,
         ],
       ),
     );
