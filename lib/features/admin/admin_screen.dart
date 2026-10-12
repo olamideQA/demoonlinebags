@@ -1877,8 +1877,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       'dimensions_cm': dimensionsCtrl.text.trim(),
                       'primary_image': primaryImg,
                       'images': mediaList,
+                      'video_url': videoUrl.isEmpty ? null : videoUrl,
                       'stock_quantity': stock,
                       'currency': 'NGN',
+                      if (!isEditing) 'is_featured': true,
                     };
 
                     if (isEditing) {
