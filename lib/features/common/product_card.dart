@@ -6,7 +6,8 @@ import '../../core/models/models.dart';
 import '../../core/providers/cart_provider.dart';
 import '../../core/providers/wishlist_provider.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/fast_image.dart';
+import '../../core/utils/shop_image.dart';
+import '../../core/utils/shop_video_player.dart';
 
 class ProductCard extends ConsumerStatefulWidget {
   final Product product;
@@ -48,7 +49,7 @@ class _ProductCardState extends ConsumerState<ProductCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Container with Badges & Wishlist Button
+            // Image / Video Container with Badges & Wishlist Button
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
@@ -59,24 +60,20 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                       border: Border.all(color: AppTheme.borderSubtle),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: AnimatedScale(
-                      scale: _isHovered ? 1.04 : 1.0,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                      // FadeInImage: placeholder asset shows instantly, never blank.
-                      // Network image fades in when ready. Permanent fix.
-                      child: FadeInImage(
-                        placeholder: const AssetImage('assets/images/placeholder.jpg'),
-                        image: NetworkImage(fastImg(p.primaryImage, w: 600, q: 60)),
-                        fit: BoxFit.cover,
-                        fadeInDuration: const Duration(milliseconds: 250),
-                        fadeOutDuration: const Duration(milliseconds: 100),
-                        imageErrorBuilder: (context, err, stack) => Image.asset(
-                          'assets/images/placeholder.jpg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
+                    child: p.hasVideo
+                        ? ShopVideoPlayer(
+                            videoUrl: p.effectiveVideoUrl!,
+                            posterUrl: p.primaryImage,
+                            autoPlay: true,
+                            showControls: true,
+                            compactControls: true,
+                          )
+                        : AnimatedScale(
+                            scale: _isHovered ? 1.04 : 1.0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutCubic,
+                            child: ShopImage(p.primaryImage, w: 600, q: 60),
+                          ),
                   ),
 
                   // Status Badges (Top Left)
@@ -86,6 +83,12 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (p.hasVideo)
+                          const _Badge(
+                            text: '▶ VIDEO SHOWCASE',
+                            bgColor: AppTheme.primaryGold,
+                            textColor: AppTheme.obsidianNoir,
+                          ),
                         if (p.isOnSale)
                           _Badge(
                             text: 'SAVE ${p.discountPercent}%',

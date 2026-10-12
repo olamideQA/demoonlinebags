@@ -15,6 +15,7 @@ import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../../core/utils/fast_image.dart';
 import '../../core/utils/shop_image.dart';
+import '../../core/utils/shop_video_player.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final String slug;
@@ -191,12 +192,17 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   }
 
   Widget _buildGallery(Product p, bool isMobile) {
-    final images = p.images.isNotEmpty ? p.images : [p.primaryImage];
-    final currentImage = images[_selectedImageIndex < images.length ? _selectedImageIndex : 0];
+    final photos = p.photoImages.isNotEmpty ? p.photoImages : [p.primaryImage];
+    final hasVideo = p.hasVideo;
+    final totalMedia = (hasVideo ? 1 : 0) + photos.length;
+    final safeIndex = _selectedImageIndex < totalMedia ? _selectedImageIndex : 0;
+    final isShowingVideo = hasVideo && safeIndex == 0;
+    final currentPhotoIndex = hasVideo ? (safeIndex - 1).clamp(0, photos.length - 1) : safeIndex;
+    final currentImage = photos[currentPhotoIndex];
 
     return Column(
       children: [
-        // Large Hero Photo
+        // Large Hero Media (Live Video or Studio Photo)
         AspectRatio(
           aspectRatio: 0.85,
           child: Container(
@@ -205,21 +211,33 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               border: Border.all(color: AppTheme.borderSubtle),
             ),
             clipBehavior: Clip.antiAlias,
-            child: ShopImage(fastImg(currentImage, w: 1000, q: 65)),
+            child: isShowingVideo
+                ? ShopVideoPlayer(
+                    videoUrl: p.effectiveVideoUrl!,
+                    posterUrl: p.primaryImage,
+                    autoPlay: true,
+                    showControls: true,
+                  )
+                : ShopImage(fastImg(currentImage, w: 1000, q: 65)),
           ),
         ),
         const SizedBox(height: 16),
 
-        // Thumbnails Strip
-        if (images.length > 1)
+        // Thumbnails Strip (Video + Photos)
+        if (totalMedia > 1)
           SizedBox(
             height: 80,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: images.length,
+              itemCount: totalMedia,
               separatorBuilder: (ctx, i) => const SizedBox(width: 12),
               itemBuilder: (ctx, index) {
-                final isSelected = index == _selectedImageIndex;
+                final isSelected = index == safeIndex;
+                final isVideoThumb = hasVideo && index == 0;
+                final photoUrl = isVideoThumb
+                    ? p.primaryImage
+                    : photos[hasVideo ? index - 1 : index];
+
                 return InkWell(
                   onTap: () => setState(() => _selectedImageIndex = index),
                   child: Container(
@@ -231,7 +249,33 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: ShopImage(fastImg(images[index], w: 200, q: 60)),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ShopImage(fastImg(photoUrl, w: 200, q: 60)),
+                        if (isVideoThumb)
+                          Container(
+                            color: Colors.black.withValues(alpha: 0.45),
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.play_circle_fill, color: AppTheme.primaryGold, size: 24),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'VIDEO',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 );
               },

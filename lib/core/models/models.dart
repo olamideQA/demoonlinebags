@@ -114,6 +114,7 @@ class Product {
   final String? description;
   final List<String> images;
   final String primaryImage;
+  final String? videoUrl;
   final String? material;
   final String? dimensionsCm;
   final double? strapDropCm;
@@ -146,6 +147,7 @@ class Product {
     this.description,
     required this.images,
     required this.primaryImage,
+    this.videoUrl,
     this.material,
     this.dimensionsCm,
     this.strapDropCm,
@@ -163,6 +165,35 @@ class Product {
     this.tags = const [],
     this.variants = const [],
   });
+
+  static bool _isVideoFile(String? url) {
+    if (url == null || url.trim().isEmpty) return false;
+    final clean = url.split('?').first.toLowerCase();
+    return clean.endsWith('.mp4') ||
+        clean.endsWith('.webm') ||
+        clean.endsWith('.mov') ||
+        clean.endsWith('.m4v');
+  }
+
+  String? get effectiveVideoUrl {
+    if (videoUrl != null && videoUrl!.trim().isNotEmpty) {
+      return videoUrl!.trim();
+    }
+    for (final img in images) {
+      if (_isVideoFile(img)) return img.trim();
+    }
+    return null;
+  }
+
+  bool get hasVideo => effectiveVideoUrl != null;
+
+  List<String> get photoImages {
+    final photos = images.where((u) => !_isVideoFile(u)).toList();
+    if (photos.isEmpty && !_isVideoFile(primaryImage)) {
+      return [primaryImage];
+    }
+    return photos;
+  }
 
   bool get isOnSale => salePrice != null && salePrice! < basePrice;
   
@@ -184,12 +215,19 @@ class Product {
   }
 
   factory Product.fromJson(Map<String, dynamic> json, {List<ProductVariant>? variants}) {
-    List<String> imgList = [];
+    List<String> rawList = [];
     if (json['images'] is List) {
-      imgList = (json['images'] as List).map((e) => e.toString()).toList();
+      rawList = (json['images'] as List).map((e) => e.toString()).toList();
     }
-    final primary = json['primary_image'] as String? ?? 
-        (imgList.isNotEmpty ? imgList.first : 'https://images.unsplash.com/photo-1584917865442-de89df76afd3');
+    String? explicitVideo = json['video_url'] as String?;
+    if (explicitVideo == null || explicitVideo.trim().isEmpty) {
+      explicitVideo = rawList.where((u) => _isVideoFile(u)).firstOrNull;
+    }
+    final imgList = rawList.where((u) => !_isVideoFile(u)).toList();
+    final primaryRaw = json['primary_image'] as String?;
+    final primary = (primaryRaw != null && !_isVideoFile(primaryRaw))
+        ? primaryRaw
+        : (imgList.isNotEmpty ? imgList.first : 'assets/images/placeholder.jpg');
 
     List<String> tagsList = [];
     if (json['tags'] is List) {
@@ -211,6 +249,7 @@ class Product {
       description: json['description'] as String?,
       images: imgList.isNotEmpty ? imgList : [primary],
       primaryImage: primary,
+      videoUrl: explicitVideo,
       material: json['material'] as String?,
       dimensionsCm: json['dimensions_cm'] as String?,
       strapDropCm: (json['strap_drop_cm'] as num?)?.toDouble(),
@@ -246,6 +285,7 @@ class Product {
       description: description,
       images: images,
       primaryImage: primaryImage,
+      videoUrl: videoUrl,
       material: material,
       dimensionsCm: dimensionsCm,
       strapDropCm: strapDropCm,

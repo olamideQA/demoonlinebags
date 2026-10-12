@@ -13,6 +13,7 @@ import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../common/product_card.dart';
+import '../common/video_catalogue_showcase.dart';
 import '../../core/utils/fast_image.dart';
 import '../../core/utils/shop_image.dart';
 import 'widgets/hero_carousel.dart';
@@ -46,6 +47,9 @@ class HomeScreen extends ConsumerWidget {
 
                 // 2. Category Highlights
                 _buildCategorySpotlights(context, ref, categoriesAsync, isMobile),
+
+                // 2b. Live Video Catalogue Showcase
+                const VideoCatalogueShowcase(),
 
                 // 3. Featured Handbags Section
                 _buildHandbagsSection(context, ref, bagProducts, isMobile),

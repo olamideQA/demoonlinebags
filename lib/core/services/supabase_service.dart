@@ -79,6 +79,83 @@ class SupabaseService {
   ];
 
   static final List<Product> fallbackProducts = [
+    // 0A. Client Video Showcase 1: The Mossdoom Pistachio Suede Everyday Tote
+    const Product(
+      id: 'd0000012-0012-4012-8012-000000000012',
+      title: 'The Mossdoom Pistachio Suede Everyday Tote',
+      slug: 'the-mossdoom-pistachio-suede-everyday-tote',
+      categoryId: 'c1111111-1111-1111-1111-111111111111',
+      productType: 'bag',
+      subCategory: 'Tote',
+      basePrice: 145000.0,
+      salePrice: 128000.0,
+      currency: 'NGN',
+      shortDescription: 'Soft pistachio suede tote with cream trim & plush heart charm. Fits iPad, umbrella, sunglasses & all daily essentials.',
+      description: 'As seen in our live video — The Mossdoom Pistachio Suede Tote is the ultimate everyday luxury bag for work, uni, brunch and travel. Crafted with velvety pistachio suede and contrast cream piping, it features a magnetic snap top plus a full zippered middle compartment so your iPad, phone, purse, mini fan and umbrella stay neatly organized all day.',
+      images: [
+        'assets/images/products/pistachio_tote_1.jpg',
+        'assets/images/products/pistachio_tote_2.jpg',
+        'assets/images/products/pistachio_tote_3.jpg',
+      ],
+      primaryImage: 'assets/images/products/pistachio_tote_1.jpg',
+      videoUrl: 'assets/videos/pistachio_suede_tote.mp4',
+      material: 'Velvety Pistachio Suede with Cream Calfskin Trim & Branded Satin Lining',
+      dimensionsCm: '35cm x 26cm x 13cm',
+      strapDropCm: 25.0,
+      closureType: 'Magnetic snap closure with full-length central zippered compartment',
+      compartmentsInfo: 'Fits iPad / tablet, umbrella, water bottle, sunglasses, perfume & wallet with inner zip divider',
+      careInstructions: 'Brush gently with soft suede brush. Store in supplied dust bag.',
+      isFeatured: true,
+      isBestseller: true,
+      isNewArrival: true,
+      stockQuantity: 14,
+      rating: 5.0,
+      reviewCount: 42,
+      tags: ['video', 'bestseller', 'tote', 'new-arrival', 'everyday-bag'],
+      variants: [
+        ProductVariant(id: 'vv12-1', productId: 'd0000012-0012-4012-8012-000000000012', variantType: 'color', name: 'Pistachio Matcha', colorHex: '#9CB071'),
+        ProductVariant(id: 'vv12-2', productId: 'd0000012-0012-4012-8012-000000000012', variantType: 'color', name: 'Cream Ivory', colorHex: '#F5F5DC'),
+        ProductVariant(id: 'vv12-3', productId: 'd0000012-0012-4012-8012-000000000012', variantType: 'color', name: 'Mocha Taupe', colorHex: '#8B7355'),
+      ],
+    ),
+    // 0B. Client Video Showcase 2: The Alabaster Structured Dual-Strap Tote
+    const Product(
+      id: 'd0000013-0013-4013-8013-000000000013',
+      title: 'The Alabaster Structured Dual-Strap Tote',
+      slug: 'the-alabaster-structured-dual-strap-tote',
+      categoryId: 'c1111111-1111-1111-1111-111111111111',
+      productType: 'bag',
+      subCategory: 'Tote',
+      basePrice: 155000.0,
+      salePrice: 139500.0,
+      currency: 'NGN',
+      shortDescription: 'Clean structured alabaster ivory tote with short hand straps & long shoulder straps. Enjoy 10% off your first order.',
+      description: 'Featured in our live studio video — The Alabaster Structured Tote combines architectural minimalism with everyday strength. Built with heavy-duty structured canvas and smooth ivory leather trim, it features both short top handles and long comfortable shoulder straps. Stands firm on any table without slouching.',
+      images: [
+        'assets/images/products/ivory_tote_2.jpg',
+        'assets/images/products/ivory_tote_1.jpg',
+      ],
+      primaryImage: 'assets/images/products/ivory_tote_2.jpg',
+      videoUrl: 'assets/videos/ivory_canvas_tote.mp4',
+      material: 'Heavyweight Structured Canvas with Smooth Alabaster Leather Straps',
+      dimensionsCm: '33cm x 28cm x 15cm',
+      strapDropCm: 26.0,
+      closureType: 'Top magnetic clasp with structured wide-mouth opening',
+      compartmentsInfo: 'Spacious main compartment for 13"-14" laptop, notebooks, makeup pouch & inner slip pockets',
+      careInstructions: 'Spot clean with mild soap and damp cloth. Keep away from dark denim transfer.',
+      isFeatured: true,
+      isBestseller: true,
+      isNewArrival: true,
+      stockQuantity: 10,
+      rating: 4.98,
+      reviewCount: 29,
+      tags: ['video', 'bestseller', 'tote', 'new-arrival', '10-percent-off'],
+      variants: [
+        ProductVariant(id: 'vv13-1', productId: 'd0000013-0013-4013-8013-000000000013', variantType: 'color', name: 'Alabaster Ivory', colorHex: '#F7F5F0'),
+        ProductVariant(id: 'vv13-2', productId: 'd0000013-0013-4013-8013-000000000013', variantType: 'color', name: 'Warm Sand', colorHex: '#D8CFC2'),
+        ProductVariant(id: 'vv13-3', productId: 'd0000013-0013-4013-8013-000000000013', variantType: 'color', name: 'Obsidian Black', colorHex: '#1A1A1A'),
+      ],
+    ),
     // 1. The Sovereign Tote
     const Product(
       id: 'd1111111-1111-1111-1111-111111111111',
@@ -450,12 +527,20 @@ class SupabaseService {
       if (response.isEmpty) {
         return _filterLocalProducts(categorySlug, productType);
       }
-      return (response as List).map((row) {
+      final dbProducts = (response as List).map((row) {
         final variants = (row['product_variants'] as List?)
             ?.map((v) => ProductVariant.fromJson(v as Map<String, dynamic>))
             .toList();
         return Product.fromJson(row as Map<String, dynamic>, variants: variants);
       }).toList();
+
+      // Ensure our client video products are always present at the top of the catalogue
+      final fallbackVideos = _filterLocalProducts(categorySlug, productType)
+          .where((p) => p.hasVideo)
+          .toList();
+      final existingSlugs = dbProducts.map((p) => p.slug).toSet();
+      final missingVideos = fallbackVideos.where((v) => !existingSlugs.contains(v.slug)).toList();
+      return [...missingVideos, ...dbProducts];
     } catch (_) {
       return _filterLocalProducts(categorySlug, productType);
     }
@@ -820,6 +905,26 @@ class SupabaseService {
         path,
         bytes,
         fileOptions: FileOptions(contentType: 'image/$safeExt', upsert: true),
+      );
+      return client.storage.from('products').getPublicUrl(path);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Uploads a product video (.mp4, .mov, .webm) to Supabase Storage `products` bucket.
+  /// Returns the public URL, or null on failure.
+  static Future<String?> uploadProductVideo(Uint8List bytes, String filename) async {
+    final client = _client;
+    if (client == null) return null;
+    try {
+      final ext = filename.contains('.') ? filename.split('.').last.toLowerCase() : 'mp4';
+      final safeExt = ['mp4', 'webm', 'mov', 'm4v'].contains(ext) ? ext : 'mp4';
+      final path = 'products/video_${DateTime.now().millisecondsSinceEpoch}.$safeExt';
+      await client.storage.from('products').uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: 'video/$safeExt', upsert: true),
       );
       return client.storage.from('products').getPublicUrl(path);
     } catch (_) {

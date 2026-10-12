@@ -99,7 +99,11 @@ final filteredProductsProvider = Provider<List<Product>>((ref) {
           break;
         case 'featured':
         default:
-          filtered.sort((a, b) => (b.isFeatured ? 1 : 0).compareTo(a.isFeatured ? 1 : 0));
+          filtered.sort((a, b) {
+            final scoreB = (b.hasVideo ? 2 : 0) + (b.isFeatured ? 1 : 0);
+            final scoreA = (a.hasVideo ? 2 : 0) + (a.isFeatured ? 1 : 0);
+            return scoreB.compareTo(scoreA);
+          });
           break;
       }
 

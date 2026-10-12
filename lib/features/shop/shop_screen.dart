@@ -9,6 +9,7 @@ import '../common/luxury_bottom_nav.dart';
 import '../common/luxury_footer.dart';
 import '../common/luxury_header.dart';
 import '../common/product_card.dart';
+import '../common/video_catalogue_showcase.dart';
 
 class ShopScreen extends ConsumerWidget {
   const ShopScreen({super.key});
@@ -260,6 +261,9 @@ class ShopScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+
+                if (selectedType != 'shoe')
+                  const VideoCatalogueShowcase(isCompactHeader: true),
 
                 // Products Count Header
                 Padding(

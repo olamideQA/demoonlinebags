@@ -494,7 +494,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
         if (i > 0 && (n.length - i) % 3 == 0) buf.write(',');
         buf.write(n[i]);
       }
-      return '₦${buf}';
+      return '₦$buf';
     }
 
     Widget stat(IconData icon, String label, String value, {bool alert = false}) {
@@ -1110,7 +1110,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   await ref.read(siteSettingsProvider.notifier).updateHeroSlides(slides);
                   setState(() {});
                   if (ctx.mounted) Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Banner saved — live on homepage now.')));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Banner saved — live on homepage now.')));
+                  }
                 },
                 child: Text(isEditing ? 'SAVE BANNER' : 'ADD BANNER'),
               ),
@@ -1213,18 +1215,16 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   height: 56,
                   decoration: BoxDecoration(
                     border: Border.all(color: AppTheme.borderSubtle),
-                    image: DecorationImage(
-                      image: NetworkImage(p.primaryImage),
-                      fit: BoxFit.cover,
-                    ),
                   ),
+                  clipBehavior: Clip.antiAlias,
+                  child: ShopImage(p.primaryImage, w: 150, q: 60),
                 ),
                 title: Text(
                   p.title,
                   style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
                 ),
                 subtitle: Text(
-                  '${p.productType.toUpperCase()} • ${p.subCategory ?? ''} • ₦${p.basePrice.toStringAsFixed(0)} • Stock: ${p.stockQuantity}',
+                  '${p.productType.toUpperCase()} • ${p.subCategory ?? ''} • ₦${p.basePrice.toStringAsFixed(0)} • Stock: ${p.stockQuantity}${p.hasVideo ? ' • ▶ VIDEO' : ''}',
                   style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textMuted),
                 ),
                 trailing: Row(
@@ -1425,7 +1425,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                   ref.invalidate(allProductsProvider);
                   nameCtrl.clear(); descCtrl.clear(); imgCtrl.clear();
                   setD(() {});
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Category saved — live on shop now.')));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Category saved — live on shop now.')));
+                  }
                 },
                 child: const Text('SAVE CATEGORY'),
               ),
@@ -1554,13 +1556,16 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
     final descCtrl = TextEditingController(text: existing?.description ?? '');
     final materialCtrl = TextEditingController(text: existing?.material ?? 'Full-Grain Italian Calfskin');
     final dimensionsCtrl = TextEditingController(text: existing?.dimensionsCm ?? '');
-    final primaryImgCtrl = TextEditingController(text: existing?.primaryImage ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1000&q=80');
+    final primaryImgCtrl = TextEditingController(text: existing?.primaryImage ?? 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?fm=jpg&fit=crop&w=1000&q=80');
+    final videoUrlCtrl = TextEditingController(text: existing?.effectiveVideoUrl ?? '');
     final stockCtrl = TextEditingController(text: existing?.stockQuantity.toString() ?? '10');
 
     String selectedType = typeCtrl;
     Uint8List? pickedBytes;
     String? pickedName;
     bool uploading = false;
+    String? pickedVideoName;
+    bool uploadingVideo = false;
 
     Future<void> pickAndUpload(void Function(void Function()) setDialogState, TextEditingController urlCtrl) async {
       final messenger = ScaffoldMessenger.of(context);
@@ -1590,6 +1595,37 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
       urlCtrl.text = url;
       messenger.showSnackBar(
         const SnackBar(content: Text('Photo uploaded.')),
+      );
+    }
+
+    Future<void> pickAndUploadVideo(void Function(void Function()) setDialogState, TextEditingController urlCtrl) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final res = await FilePicker.platform.pickFiles(type: FileType.video, withData: true);
+      if (res == null || res.files.isEmpty) return;
+      final f = res.files.first;
+      final bytes = f.bytes;
+      if (bytes == null) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Could not read that video file. Try an MP4 file.')),
+        );
+        return;
+      }
+      setDialogState(() {
+        pickedVideoName = f.name;
+        uploadingVideo = true;
+      });
+      final url = await SupabaseService.uploadProductVideo(bytes, f.name);
+      setDialogState(() => uploadingVideo = false);
+      if (url == null) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Video upload failed. Paste a video link instead.')),
+        );
+        return;
+      }
+      urlCtrl.text = url;
+      setDialogState(() {});
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Product video uploaded!')),
       );
     }
 
@@ -1744,6 +1780,61 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                         decoration: const InputDecoration(labelText: 'Primary Image URL (auto-filled after upload, or paste link)'),
                         onChanged: (_) => setDialogState(() {}),
                       ),
+                      const SizedBox(height: 16),
+                      // Product Video (Optional): upload MP4/MOV or paste link
+                      Row(
+                        children: [
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: AppTheme.obsidianNoir,
+                              border: Border.all(color: AppTheme.primaryGold),
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              videoUrlCtrl.text.trim().isNotEmpty ? Icons.videocam : Icons.videocam_outlined,
+                              color: AppTheme.primaryGold,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppTheme.obsidianNoir,
+                                    side: const BorderSide(color: AppTheme.obsidianNoir),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                  ),
+                                  icon: uploadingVideo
+                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.obsidianNoir))
+                                      : const Icon(Icons.video_call_outlined, size: 18),
+                                  label: Text(
+                                    uploadingVideo ? 'UPLOADING VIDEO...' : 'UPLOAD PRODUCT VIDEO (MP4)',
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                  ),
+                                  onPressed: uploadingVideo ? null : () => pickAndUploadVideo(setDialogState, videoUrlCtrl),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  pickedVideoName ?? 'Optional MP4 video showing the bag or shoe in real life.',
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: videoUrlCtrl,
+                        decoration: const InputDecoration(labelText: 'Product Video URL (Optional — auto-filled after upload, or paste MP4 link)'),
+                        onChanged: (_) => setDialogState(() {}),
+                      ),
                     ],
                   ),
                 ),
@@ -1764,6 +1855,14 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                     final stock = int.tryParse(stockCtrl.text.trim()) ?? 10;
                     final title = titleCtrl.text.trim();
                     final slug = isEditing ? existing.slug : title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
+                    final primaryImg = primaryImgCtrl.text.trim();
+                    final videoUrl = videoUrlCtrl.text.trim();
+                    final mediaList = <String>[
+                      if (primaryImg.isNotEmpty) primaryImg,
+                      if (isEditing)
+                        ...existing.photoImages.where((u) => u != primaryImg),
+                      if (videoUrl.isNotEmpty) videoUrl,
+                    ];
 
                     final data = {
                       'title': title,
@@ -1776,8 +1875,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> with SingleTickerProv
                       'description': descCtrl.text.trim(),
                       'material': materialCtrl.text.trim(),
                       'dimensions_cm': dimensionsCtrl.text.trim(),
-                      'primary_image': primaryImgCtrl.text.trim(),
-                      'images': [primaryImgCtrl.text.trim()],
+                      'primary_image': primaryImg,
+                      'images': mediaList,
                       'stock_quantity': stock,
                       'currency': 'NGN',
                     };
