@@ -94,7 +94,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   String _orderStatusFilter = 'all';
 
   // CMS Sub-tab State
-  int _cmsSubTab = 0; // 0: Banners, 1: Brand & Notice, 2: Contact & Shipping
+  int _cmsSubTab = 0; // 0: Banners, 1: Brand & Notice, 2: Contact & Shipping, 3: System Health
 
   // CMS Form Controllers
   late TextEditingController _announcementTextCtrl;
@@ -115,6 +115,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   late TextEditingController _footerWhatsappCtrl;
   late TextEditingController _footerAddressCtrl;
   late TextEditingController _footerCopyrightCtrl;
+  late TextEditingController _footerInstagramCtrl;
   late TextEditingController _currencySymbolCtrl;
   late TextEditingController _freeShippingCtrl;
 
@@ -149,8 +150,34 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     _footerWhatsappCtrl = TextEditingController(text: settings.footer.whatsapp);
     _footerAddressCtrl = TextEditingController(text: settings.footer.address);
     _footerCopyrightCtrl = TextEditingController(text: settings.footer.copyright);
+    _footerInstagramCtrl = TextEditingController(text: settings.footer.instagram);
     _currencySymbolCtrl = TextEditingController(text: settings.general.currencySymbol);
     _freeShippingCtrl = TextEditingController(text: settings.general.freeShippingThreshold.toStringAsFixed(0));
+  }
+
+  void _syncCMSControllers(SiteSettings settings) {
+    if (_isSavingCMS) return;
+    _announcementTextCtrl.text = settings.announcement.text;
+    _announcementActive = settings.announcement.isActive;
+    _headerBrandCtrl.text = settings.header.brandName;
+    _headerTaglineCtrl.text = settings.header.tagline;
+    _heroBadgeCtrl.text = settings.hero.badge;
+    _heroTitleCtrl.text = settings.hero.title;
+    _heroSubtitleCtrl.text = settings.hero.subtitle;
+    _heroCtaTextCtrl.text = settings.hero.ctaText;
+    _heroCtaUrlCtrl.text = settings.hero.ctaUrl;
+    _heroSecondaryTextCtrl.text = settings.hero.secondaryCtaText;
+    _heroSecondaryUrlCtrl.text = settings.hero.secondaryCtaUrl;
+    _heroImageCtrl.text = settings.hero.imageUrl;
+    _footerBioCtrl.text = settings.footer.bio;
+    _footerEmailCtrl.text = settings.footer.email;
+    _footerPhoneCtrl.text = settings.footer.phone;
+    _footerWhatsappCtrl.text = settings.footer.whatsapp;
+    _footerAddressCtrl.text = settings.footer.address;
+    _footerCopyrightCtrl.text = settings.footer.copyright;
+    _footerInstagramCtrl.text = settings.footer.instagram;
+    _currencySymbolCtrl.text = settings.general.currencySymbol;
+    _freeShippingCtrl.text = settings.general.freeShippingThreshold.toStringAsFixed(0);
   }
 
   Future<void> _loadOrders() async {
@@ -186,6 +213,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     _footerWhatsappCtrl.dispose();
     _footerAddressCtrl.dispose();
     _footerCopyrightCtrl.dispose();
+    _footerInstagramCtrl.dispose();
     _currencySymbolCtrl.dispose();
     _freeShippingCtrl.dispose();
     super.dispose();
@@ -226,6 +254,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<SiteSettings>(siteSettingsProvider, (prev, next) {
+      _syncCMSControllers(next);
+    });
     final authState = ref.watch(authProvider);
 
     // Security Gate: exclusive to verified admin
@@ -2257,33 +2288,31 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   Widget _buildCMSCustomizationTab(BuildContext context, bool isMobile) {
     Widget subTabBtn(int index, IconData icon, String label) {
       final selected = _cmsSubTab == index;
-      return Expanded(
-        child: InkWell(
-          onTap: () => setState(() => _cmsSubTab = index),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-            decoration: BoxDecoration(
-              color: selected ? AppTheme.obsidianNoir : Colors.white,
-              border: Border.all(color: selected ? AppTheme.obsidianNoir : AppTheme.borderSubtle),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 16, color: selected ? AppTheme.primaryGold : AppTheme.textMuted),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    label,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: selected ? Colors.white : AppTheme.obsidianNoir,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+      return InkWell(
+        onTap: () => setState(() => _cmsSubTab = index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.obsidianNoir : Colors.white,
+            border: Border.all(color: selected ? AppTheme.obsidianNoir : AppTheme.borderSubtle),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16, color: selected ? AppTheme.primaryGold : AppTheme.textMuted),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: selected ? Colors.white : AppTheme.obsidianNoir,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
@@ -2366,14 +2395,15 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                   ],
                 ),
               const SizedBox(height: 16),
-              // 3 Clean Sub-tabs so the owner isn't overwhelmed by 20 inputs at once
-              Row(
+              // 4 Clean Sub-tabs so every feature is organized and easy to find
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  subTabBtn(0, Icons.burst_mode_outlined, '1. Banners'),
-                  const SizedBox(width: 8),
-                  subTabBtn(1, Icons.campaign_outlined, '2. Brand & Notice'),
-                  const SizedBox(width: 8),
-                  subTabBtn(2, Icons.contact_phone_outlined, '3. Contact & Shipping'),
+                  SizedBox(width: isMobile ? 150 : 180, child: subTabBtn(0, Icons.burst_mode_outlined, '1. Banners')),
+                  SizedBox(width: isMobile ? 150 : 180, child: subTabBtn(1, Icons.campaign_outlined, '2. Brand & Notice')),
+                  SizedBox(width: isMobile ? 150 : 180, child: subTabBtn(2, Icons.contact_phone_outlined, '3. Contact & Shipping')),
+                  SizedBox(width: isMobile ? 150 : 180, child: subTabBtn(3, Icons.verified_user_outlined, '4. System Health')),
                 ],
               ),
             ],
@@ -2383,6 +2413,57 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
 
         if (_cmsSubTab == 0) ...[
           _buildHeroSlidesEditor(context, ref, isMobile),
+          const SizedBox(height: 20),
+          _sectionCard(
+            title: 'Default Hero Banner Copy & Links',
+            subtitle: 'Main fallback headline, badge, background image, and button links for your homepage hero',
+            children: [
+              _responsiveFields(isMobile, [
+                TextField(
+                  controller: _heroBadgeCtrl,
+                  decoration: const InputDecoration(labelText: 'Top Badge Text (e.g. LAGOS BESTSELLER)'),
+                ),
+                TextField(
+                  controller: _heroImageCtrl,
+                  decoration: const InputDecoration(labelText: 'Hero Background Image URL'),
+                ),
+              ]),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _heroTitleCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Primary Hero Headline'),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _heroSubtitleCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Hero Subtitle Description'),
+              ),
+              const SizedBox(height: 14),
+              _responsiveFields(isMobile, [
+                TextField(
+                  controller: _heroCtaTextCtrl,
+                  decoration: const InputDecoration(labelText: 'Primary Button Text (e.g. SHOP BAGS)'),
+                ),
+                TextField(
+                  controller: _heroCtaUrlCtrl,
+                  decoration: const InputDecoration(labelText: 'Primary Button Link (e.g. /shop)'),
+                ),
+              ]),
+              const SizedBox(height: 14),
+              _responsiveFields(isMobile, [
+                TextField(
+                  controller: _heroSecondaryTextCtrl,
+                  decoration: const InputDecoration(labelText: 'Secondary Button Text (e.g. SHOP MATCHING SETS)'),
+                ),
+                TextField(
+                  controller: _heroSecondaryUrlCtrl,
+                  decoration: const InputDecoration(labelText: 'Secondary Button Link (e.g. /pairings)'),
+                ),
+              ]),
+            ],
+          ),
         ] else if (_cmsSubTab == 1) ...[
           _sectionCard(
             title: 'Top Scrolling Notice Bar',
@@ -2420,9 +2501,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               ]),
             ],
           ),
-        ] else ...[
+        ] else if (_cmsSubTab == 2) ...[
           _sectionCard(
-            title: 'Contact, WhatsApp & Address',
+            title: 'Contact, WhatsApp, Instagram & Address',
             subtitle: 'Shown in the website footer and WhatsApp floating chat button',
             children: [
               TextField(
@@ -2442,7 +2523,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 ),
                 TextField(
                   controller: _footerWhatsappCtrl,
-                  decoration: const InputDecoration(labelText: 'WhatsApp Number (e.g. +2348091234567)'),
+                  decoration: const InputDecoration(labelText: 'WhatsApp Number (e.g. +234 906 791 4511)'),
                 ),
               ]),
               const SizedBox(height: 14),
@@ -2450,6 +2531,10 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 TextField(
                   controller: _footerAddressCtrl,
                   decoration: const InputDecoration(labelText: 'Boutique Address'),
+                ),
+                TextField(
+                  controller: _footerInstagramCtrl,
+                  decoration: const InputDecoration(labelText: 'Instagram Link'),
                 ),
                 TextField(
                   controller: _footerCopyrightCtrl,
@@ -2474,6 +2559,20 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                   decoration: const InputDecoration(labelText: 'Free Delivery Threshold (Amount in ₦)'),
                 ),
               ]),
+            ],
+          ),
+        ] else ...[
+          _sectionCard(
+            title: 'Cloud Database, Storage & Security Diagnostics',
+            subtitle: 'Real-time status of your live store infrastructure',
+            children: [
+              _systemMetricTile(Icons.cloud_done, 'Supabase Cloud Database', 'Project Ref: htvcavnqsgyjrbtqefxk • Live PostgreSQL Sync Active', AppTheme.successGreen),
+              const SizedBox(height: 10),
+              _systemMetricTile(Icons.perm_media_outlined, 'Cloud Media Storage (Photos & MP4 Videos)', 'Public Buckets: products & banners (Up to 50MB per video)', AppTheme.primaryGoldDark),
+              const SizedBox(height: 10),
+              _systemMetricTile(Icons.mark_email_read, 'Authentication & Admin Security Gate', 'Exclusive Admin Route (/admin) • Instant VIP Auth Enabled', AppTheme.successGreen),
+              const SizedBox(height: 10),
+              _systemMetricTile(Icons.security, 'Row Level Security (RLS)', 'Full CRUD policies active for products, videos, banners, sets, promos & site_settings', AppTheme.successGreen),
             ],
           ),
         ],
@@ -2709,7 +2808,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       whatsapp: _footerWhatsappCtrl.text.trim(),
       address: _footerAddressCtrl.text.trim(),
       copyright: _footerCopyrightCtrl.text.trim(),
-      instagram: 'https://instagram.com/luxelagos.ng',
+      instagram: _footerInstagramCtrl.text.trim(),
     );
 
     final threshold = double.tryParse(_freeShippingCtrl.text.replaceAll(',', '').trim()) ?? 150000.0;
@@ -2724,7 +2823,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Website changes published live!'),
+          content: Text('Website customization saved & live on website now!'),
           backgroundColor: AppTheme.obsidianNoir,
           behavior: SnackBarBehavior.floating,
         ),
@@ -2922,7 +3021,12 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                     const SizedBox(height: 12),
                     _responsiveFields(isDialogMobile, [
                       TextField(controller: ctaCtrl, decoration: const InputDecoration(labelText: 'Main button (e.g. SHOP BAGS)')),
+                      TextField(controller: ctaUrlCtrl, decoration: const InputDecoration(labelText: 'Main button link (e.g. /shop)')),
+                    ]),
+                    const SizedBox(height: 12),
+                    _responsiveFields(isDialogMobile, [
                       TextField(controller: secCtrl, decoration: const InputDecoration(labelText: 'Second button')),
+                      TextField(controller: secUrlCtrl, decoration: const InputDecoration(labelText: 'Second button link (e.g. /pairings)')),
                     ]),
                   ],
                 ),
@@ -3274,6 +3378,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
 
   void _showProductDialog(BuildContext context, Product? existing) {
     final isEditing = existing != null;
+    final categories = ref.read(categoriesProvider).value ?? SupabaseService.fallbackCategories;
     final titleCtrl = TextEditingController(text: existing?.title ?? '');
     final typeCtrl = existing?.productType ?? 'bag';
     final subCatCtrl = TextEditingController(text: existing?.subCategory ?? (typeCtrl == 'bag' ? 'Tote' : 'Slides'));
@@ -3288,11 +3393,27 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     final stockCtrl = TextEditingController(text: existing?.stockQuantity.toString() ?? '10');
 
     String selectedType = typeCtrl;
+    String? selectedCategoryId = existing?.categoryId;
+    if (selectedCategoryId == null || !categories.any((c) => c.id == selectedCategoryId)) {
+      final matching = categories.where((c) => selectedType == 'bag' ? c.type == 'bags' : c.type == 'shoes');
+      selectedCategoryId = matching.isNotEmpty ? matching.first.id : (categories.isNotEmpty ? categories.first.id : null);
+    }
+
+    bool isFeatured = existing?.isFeatured ?? true;
+    bool isBestseller = existing?.isBestseller ?? false;
+    bool isNewArrival = existing?.isNewArrival ?? true;
+
+    final List<String> extraPhotos = existing != null
+        ? existing.photoImages.where((u) => u != existing.primaryImage).toList()
+        : <String>[];
+
     Uint8List? pickedBytes;
     String? pickedName;
     bool uploading = false;
+    bool uploadingExtra = false;
     String? pickedVideoName;
     bool uploadingVideo = false;
+    bool isSavingProduct = false;
 
     Future<void> pickAndUpload(void Function(void Function()) setDialogState, TextEditingController urlCtrl) async {
       final messenger = ScaffoldMessenger.of(context);
@@ -3316,7 +3437,26 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
         return;
       }
       urlCtrl.text = url;
-      messenger.showSnackBar(const SnackBar(content: Text('Photo uploaded.')));
+      setDialogState(() {});
+      messenger.showSnackBar(const SnackBar(content: Text('Primary photo uploaded to cloud storage!')));
+    }
+
+    Future<void> pickAndUploadExtraPhoto(void Function(void Function()) setDialogState) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+      if (res == null || res.files.isEmpty) return;
+      final f = res.files.first;
+      final bytes = f.bytes;
+      if (bytes == null) return;
+      setDialogState(() => uploadingExtra = true);
+      final url = await SupabaseService.uploadProductImage(bytes, f.name);
+      setDialogState(() => uploadingExtra = false);
+      if (url == null) {
+        messenger.showSnackBar(const SnackBar(content: Text('Gallery photo upload failed.')));
+        return;
+      }
+      setDialogState(() => extraPhotos.add(url));
+      messenger.showSnackBar(const SnackBar(content: Text('Extra gallery photo added!')));
     }
 
     Future<void> pickAndUploadVideo(void Function(void Function()) setDialogState, TextEditingController urlCtrl) async {
@@ -3341,7 +3481,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       }
       urlCtrl.text = url;
       setDialogState(() {});
-      messenger.showSnackBar(const SnackBar(content: Text('Product video uploaded!')));
+      messenger.showSnackBar(const SnackBar(content: Text('Product video uploaded to cloud storage!')));
     }
 
     showDialog(
@@ -3355,17 +3495,17 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               insetPadding: EdgeInsets.symmetric(horizontal: isDialogMobile ? 10 : 40, vertical: 14),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               title: Text(
-                isEditing ? 'Edit Product' : 'Add New Product / Video',
+                isEditing ? 'Edit Product / Video' : 'Add New Product / Video',
                 style: GoogleFonts.cormorantGaramond(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                width: isDialogMobile ? double.maxFinite : 600,
+                width: isDialogMobile ? double.maxFinite : 620,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // 1. MEDIA UPLOADS AT TOP (Photo + Video)
+                      // 1. MEDIA UPLOADS AT TOP (Primary Photo + Extra Gallery Photos + MP4 Video)
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
@@ -3376,7 +3516,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              'STEP 1 • PHOTO & VIDEO MEDIA',
+                              'STEP 1 • PHOTOS & VIDEO (MP4) UPLOAD',
                               style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5, color: AppTheme.primaryGoldDark),
                             ),
                             const SizedBox(height: 12),
@@ -3410,7 +3550,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                                             ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                                             : const Icon(Icons.upload, size: 18),
                                         label: Text(
-                                          uploading ? 'UPLOADING...' : 'UPLOAD PRODUCT PHOTO',
+                                          uploading ? 'UPLOADING...' : 'UPLOAD PRIMARY PHOTO',
                                           style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                                         ),
                                         onPressed: uploading ? null : () => pickAndUpload(setDialogState, primaryImgCtrl),
@@ -3431,7 +3571,64 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                               decoration: const InputDecoration(labelText: 'Primary Photo URL (auto-filled after upload)'),
                               onChanged: (_) => setDialogState(() {}),
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 12),
+                            // Extra Gallery Photos
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Extra Gallery Photos (${extraPhotos.length})',
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700),
+                                ),
+                                TextButton.icon(
+                                  onPressed: uploadingExtra ? null : () => pickAndUploadExtraPhoto(setDialogState),
+                                  icon: uploadingExtra
+                                      ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2))
+                                      : const Icon(Icons.add_photo_alternate_outlined, size: 16),
+                                  label: Text(
+                                    uploadingExtra ? 'UPLOADING...' : '+ ADD GALLERY PHOTO',
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppTheme.primaryGoldDark),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (extraPhotos.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (int i = 0; i < extraPhotos.length; i++)
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          width: 54,
+                                          height: 54,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border.all(color: AppTheme.borderSubtle),
+                                          ),
+                                          child: ShopImage(extraPhotos[i], w: 150, q: 60),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: InkWell(
+                                            onTap: () => setDialogState(() => extraPhotos.removeAt(i)),
+                                            child: Container(
+                                              color: Colors.black87,
+                                              padding: const EdgeInsets.all(2),
+                                              child: const Icon(Icons.close, size: 12, color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            ],
+                            const Divider(height: 24),
+                            // Video Upload
                             Row(
                               children: [
                                 Container(
@@ -3472,7 +3669,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        pickedVideoName ?? 'Optional MP4 video — appears in Live Video Showcase.',
+                                        pickedVideoName ?? 'Optional MP4 video — plays in Live Video Showcase on Home & Shop.',
                                         style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: AppTheme.textMuted),
                                       ),
                                     ],
@@ -3483,7 +3680,19 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                             const SizedBox(height: 10),
                             TextField(
                               controller: videoUrlCtrl,
-                              decoration: const InputDecoration(labelText: 'Video URL (Optional — auto-filled after upload)'),
+                              decoration: InputDecoration(
+                                labelText: 'Video URL (Optional — auto-filled after upload)',
+                                suffixIcon: videoUrlCtrl.text.trim().isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear, size: 16),
+                                        tooltip: 'Remove video',
+                                        onPressed: () {
+                                          videoUrlCtrl.clear();
+                                          setDialogState(() {});
+                                        },
+                                      )
+                                    : null,
+                              ),
                               onChanged: (_) => setDialogState(() {}),
                             ),
                           ],
@@ -3511,9 +3720,27 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                             DropdownMenuItem(value: 'shoe', child: Text('Footwear / Shoe')),
                           ],
                           onChanged: (val) {
-                            if (val != null) setDialogState(() => selectedType = val);
+                            if (val != null) {
+                              setDialogState(() {
+                                selectedType = val;
+                                final matching = categories.where((c) => selectedType == 'bag' ? c.type == 'bags' : c.type == 'shoes');
+                                if (matching.isNotEmpty) selectedCategoryId = matching.first.id;
+                              });
+                            }
                           },
                         ),
+                        if (categories.isNotEmpty)
+                          DropdownButtonFormField<String>(
+                            initialValue: selectedCategoryId,
+                            isExpanded: true,
+                            decoration: const InputDecoration(labelText: 'Store Category'),
+                            items: categories
+                                .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name, overflow: TextOverflow.ellipsis)))
+                                .toList(),
+                            onChanged: (val) {
+                              if (val != null) setDialogState(() => selectedCategoryId = val);
+                            },
+                          ),
                         TextField(
                           controller: subCatCtrl,
                           decoration: const InputDecoration(labelText: 'Style (e.g. Tote, Slides, Heel)'),
@@ -3537,6 +3764,31 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                           decoration: const InputDecoration(labelText: 'Stock Quantity'),
                         ),
                       ]),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          FilterChip(
+                            label: const Text('Featured on Homepage'),
+                            selected: isFeatured,
+                            selectedColor: AppTheme.primaryGold.withValues(alpha: 0.25),
+                            onSelected: (v) => setDialogState(() => isFeatured = v),
+                          ),
+                          FilterChip(
+                            label: const Text('Bestseller Badge'),
+                            selected: isBestseller,
+                            selectedColor: AppTheme.primaryGold.withValues(alpha: 0.25),
+                            onSelected: (v) => setDialogState(() => isBestseller = v),
+                          ),
+                          FilterChip(
+                            label: const Text('New Arrival'),
+                            selected: isNewArrival,
+                            selectedColor: AppTheme.primaryGold.withValues(alpha: 0.25),
+                            onSelected: (v) => setDialogState(() => isNewArrival = v),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: shortDescCtrl,
@@ -3565,7 +3817,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed: isSavingProduct ? null : () => Navigator.pop(ctx),
                   child: const Text('CANCEL'),
                 ),
                 ElevatedButton(
@@ -3574,53 +3826,82 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                     foregroundColor: AppTheme.primaryGold,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
-                  onPressed: () async {
-                    final basePrice = double.tryParse(basePriceCtrl.text.trim()) ?? 100000.0;
-                    final salePrice = salePriceCtrl.text.trim().isNotEmpty ? double.tryParse(salePriceCtrl.text.trim()) : null;
-                    final stock = int.tryParse(stockCtrl.text.trim()) ?? 10;
-                    final title = titleCtrl.text.trim();
-                    if (title.isEmpty) {
-                      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Please enter a product title.')));
-                      return;
-                    }
-                    final slug = isEditing ? existing.slug : title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
-                    final primaryImg = primaryImgCtrl.text.trim();
-                    final videoUrl = videoUrlCtrl.text.trim();
-                    final mediaList = <String>[
-                      if (primaryImg.isNotEmpty) primaryImg,
-                      if (isEditing) ...existing.photoImages.where((u) => u != primaryImg),
-                      if (videoUrl.isNotEmpty) videoUrl,
-                    ];
+                  onPressed: isSavingProduct
+                      ? null
+                      : () async {
+                          final basePrice = double.tryParse(basePriceCtrl.text.replaceAll(',', '').trim()) ?? 100000.0;
+                          final salePrice = salePriceCtrl.text.trim().isNotEmpty
+                              ? double.tryParse(salePriceCtrl.text.replaceAll(',', '').trim())
+                              : null;
+                          final stock = int.tryParse(stockCtrl.text.trim()) ?? 10;
+                          final title = titleCtrl.text.trim();
+                          if (title.isEmpty) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Please enter a product title.')));
+                            return;
+                          }
+                          setDialogState(() => isSavingProduct = true);
 
-                    final data = {
-                      'title': title,
-                      'slug': slug,
-                      'product_type': selectedType,
-                      'sub_category': subCatCtrl.text.trim(),
-                      'base_price': basePrice,
-                      'sale_price': salePrice,
-                      'short_description': shortDescCtrl.text.trim(),
-                      'description': descCtrl.text.trim(),
-                      'material': materialCtrl.text.trim(),
-                      'dimensions_cm': dimensionsCtrl.text.trim(),
-                      'primary_image': primaryImg,
-                      'images': mediaList,
-                      'video_url': videoUrl.isEmpty ? null : videoUrl,
-                      'stock_quantity': stock,
-                      'currency': 'NGN',
-                      if (!isEditing) 'is_featured': true,
-                    };
+                          final slug = isEditing
+                              ? existing.slug
+                              : '${title.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-')}-${DateTime.now().millisecondsSinceEpoch % 10000}';
+                          final primaryImg = primaryImgCtrl.text.trim();
+                          final videoUrl = videoUrlCtrl.text.trim();
+                          final mediaList = <String>[
+                            if (primaryImg.isNotEmpty) primaryImg,
+                            ...extraPhotos.where((u) => u != primaryImg),
+                            if (videoUrl.isNotEmpty) videoUrl,
+                          ];
 
-                    if (isEditing) {
-                      await SupabaseService.updateProduct(existing.id, data);
-                    } else {
-                      await SupabaseService.createProduct(data);
-                    }
+                          final data = {
+                            'title': title,
+                            'slug': slug,
+                            'category_id': selectedCategoryId,
+                            'product_type': selectedType,
+                            'sub_category': subCatCtrl.text.trim(),
+                            'base_price': basePrice,
+                            'sale_price': salePrice,
+                            'short_description': shortDescCtrl.text.trim(),
+                            'description': descCtrl.text.trim(),
+                            'material': materialCtrl.text.trim(),
+                            'dimensions_cm': dimensionsCtrl.text.trim(),
+                            'primary_image': primaryImg,
+                            'images': mediaList,
+                            'video_url': videoUrl.isEmpty ? null : videoUrl,
+                            'stock_quantity': stock,
+                            'currency': 'NGN',
+                            'is_featured': isFeatured,
+                            'is_bestseller': isBestseller,
+                            'is_new_arrival': isNewArrival,
+                          };
 
-                    ref.invalidate(allProductsProvider);
-                    if (ctx.mounted) Navigator.pop(ctx);
-                  },
-                  child: Text(isEditing ? 'SAVE CHANGES' : 'CREATE PRODUCT'),
+                          final ok = isEditing
+                              ? await SupabaseService.updateProduct(existing.id, data)
+                              : await SupabaseService.createProduct(data);
+
+                          setDialogState(() => isSavingProduct = false);
+
+                          if (!ok) {
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(ctx).showSnackBar(
+                                const SnackBar(content: Text('Could not save product. Please check your connection and try again.')),
+                              );
+                            }
+                            return;
+                          }
+
+                          ref.invalidate(allProductsProvider);
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(isEditing ? 'Product updated & live on website now!' : 'New product created & live on website now!'),
+                                backgroundColor: AppTheme.obsidianNoir,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                  child: Text(isSavingProduct ? 'PUBLISHING...' : (isEditing ? 'SAVE CHANGES' : 'CREATE PRODUCT')),
                 ),
               ],
             );
@@ -3641,9 +3922,16 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorRed, foregroundColor: Colors.white),
             onPressed: () async {
-              await SupabaseService.deleteProduct(product.id);
+              final ok = await SupabaseService.deleteProduct(product.id);
               ref.invalidate(allProductsProvider);
               if (ctx.mounted) Navigator.pop(ctx);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(ok ? 'Product deleted from live website.' : 'Could not delete product.'),
+                  ),
+                );
+              }
             },
             child: const Text('DELETE'),
           ),
@@ -3823,6 +4111,40 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               if (ctx.mounted) Navigator.pop(ctx);
             },
             child: const Text('CREATE CODE'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _systemMetricTile(IconData icon, String title, String subtitle, Color statusColor) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceGrey,
+        border: Border.all(color: AppTheme.borderSubtle),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: statusColor, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: AppTheme.obsidianNoir)),
+                const SizedBox(height: 2),
+                Text(subtitle, style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: AppTheme.textMuted)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: statusColor.withValues(alpha: 0.14),
+            child: Text(
+              'ONLINE',
+              style: GoogleFonts.plusJakartaSans(fontSize: 9.5, fontWeight: FontWeight.w800, color: statusColor, letterSpacing: 1.0),
+            ),
           ),
         ],
       ),

@@ -144,16 +144,23 @@ class SiteSettingsNotifier extends Notifier<SiteSettings> {
     await _saveToSupabase('general', updated.toJson());
   }
 
-  Future<void> _saveToSupabase(String key, Map<String, dynamic> value) async {
+  Future<void> reload() => _loadFromSupabase();
+
+  Future<bool> _saveToSupabase(String key, Map<String, dynamic> value) async {
     try {
       final client = Supabase.instance.client;
-      await client.from('site_settings').upsert({
-        'key': key,
-        'value': value,
-        'updated_at': DateTime.now().toIso8601String(),
-      });
+      await client.from('site_settings').upsert(
+        {
+          'key': key,
+          'value': value,
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        onConflict: 'key',
+      );
+      return true;
     } catch (e) {
       debugPrint('Failed to persist setting $key to Supabase: $e');
+      return false;
     }
   }
 }

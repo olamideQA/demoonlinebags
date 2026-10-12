@@ -23,7 +23,11 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final products = ref.watch(filteredProductsProvider);
+    final allProductsAsync = ref.watch(allProductsProvider);
+    final products = allProductsAsync.maybeWhen(
+      data: (items) => items,
+      orElse: () => ref.watch(filteredProductsProvider),
+    );
     final pairingsAsync = ref.watch(pairingsProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
     final isMobile = MediaQuery.of(context).size.width < 900;

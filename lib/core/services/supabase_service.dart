@@ -612,13 +612,7 @@ class SupabaseService {
         return Product.fromJson(row as Map<String, dynamic>, variants: variants);
       }).toList();
 
-      // Ensure our client video products are always present at the top of the catalogue
-      final fallbackVideos = _filterLocalProducts(categorySlug, productType)
-          .where((p) => p.hasVideo)
-          .toList();
-      final existingSlugs = dbProducts.map((p) => p.slug).toSet();
-      final missingVideos = fallbackVideos.where((v) => !existingSlugs.contains(v.slug)).toList();
-      return [...missingVideos, ...dbProducts];
+      return dbProducts;
     } catch (_) {
       return _filterLocalProducts(categorySlug, productType);
     }
