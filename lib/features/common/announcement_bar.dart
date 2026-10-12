@@ -56,7 +56,7 @@ class _AnnouncementBarState extends ConsumerState<AnnouncementBar> {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final settings = ref.watch(siteSettingsProvider).announcement;
 
     if (!settings.isActive || settings.text.trim().isEmpty) {
